@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   StyleSheet,
   TouchableOpacity,
@@ -8,6 +8,7 @@ import {
   Platform,
   KeyboardAvoidingView,
   useWindowDimensions,
+  Alert,
 } from "react-native";
 import { router } from "expo-router";
 
@@ -18,17 +19,32 @@ import { FormInput } from "@/components/auth/FormInput";
 import { PrimaryButton } from "@/components/auth/PrimaryButton";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 import { AuthFooter } from "@/components/auth/AuthFooter";
+import { useLogin, LoginProvider } from "../../contexts/LoginContext";
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  return (
+    <LoginProvider>
+      <LoginScreenContent />
+    </LoginProvider>
+  );
+}
+
+function LoginScreenContent() {
+  const { email, setEmail, password, setPassword, login, isLoading, error } =
+    useLogin();
 
   const { width } = useWindowDimensions();
   const isLargeScreen = width > 768;
 
-  const handleLogin = () => {
-    // Implement actual login logic here
-    if (email && password) {
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please enter both email and password.");
+      return;
+    }
+
+    const result = await login();
+    if (result.success) {
+      router.replace("/(tabs)");
     }
   };
 
@@ -88,8 +104,14 @@ export default function LoginScreen() {
                 <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
               </TouchableOpacity>
 
+              {/* Error Message */}
+              {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
               {/* Sign In Button */}
-              <PrimaryButton title="Secure Sign In" onPress={handleLogin} />
+              <PrimaryButton
+                title={isLoading ? "Signing In..." : "Secure Sign In"}
+                onPress={handleLogin}
+              />
 
               {/* Social Buttons */}
               <SocialLoginButtons />
@@ -135,5 +157,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#0da6f2",
     fontWeight: "500",
+  },
+  errorText: {
+    color: "#ef4444",
+    fontSize: 14,
+    textAlign: "center",
   },
 });

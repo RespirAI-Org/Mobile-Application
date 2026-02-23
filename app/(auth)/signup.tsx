@@ -6,6 +6,7 @@ import {
   Platform,
   KeyboardAvoidingView,
   useWindowDimensions,
+  Alert,
 } from "react-native";
 import { router } from "expo-router";
 
@@ -16,8 +17,9 @@ import { FormInput } from "@/components/auth/FormInput";
 import { PrimaryButton } from "@/components/auth/PrimaryButton";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 import { AuthFooter } from "@/components/auth/AuthFooter";
+import { SignupProvider, useSignup } from "@/contexts/SignupContext";
 
-export default function SignupScreen() {
+function SignupScreenContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -25,13 +27,29 @@ export default function SignupScreen() {
   const { width } = useWindowDimensions();
   const isLargeScreen = width > 768;
 
-  const handleSignup = () => {
-    // Implement actual signup logic here
-    if (email && password && confirmPassword && password === confirmPassword) {
+  const { signup, isLoading, clearError } = useSignup();
+
+  const handleSignup = async () => {
+    if (!email || !password || !confirmPassword) {
+      Alert.alert("Error", "Please fill in all fields.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match.");
+      return;
+    }
+
+    const result = await signup(email, password, confirmPassword);
+    if (result.success) {
+      Alert.alert("Success", "Account created successfully.");
+      router.replace("/(auth)/login");
+    } else {
+      Alert.alert("Error", result.error || "Failed to create account.");
     }
   };
 
   const handleTabPress = (tab: "signin" | "signup") => {
+    clearError();
     if (tab === "signin") {
       router.replace("/(auth)/login");
     }
@@ -93,7 +111,10 @@ export default function SignupScreen() {
               />
 
               {/* Sign Up Button */}
-              <PrimaryButton title="Sign Up" onPress={handleSignup} />
+              <PrimaryButton
+                title={isLoading ? "Signing Up..." : "Sign Up"}
+                onPress={handleSignup}
+              />
 
               {/* Social Buttons */}
               <SocialLoginButtons
@@ -109,6 +130,14 @@ export default function SignupScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
     </ThemedView>
+  );
+}
+
+export default function SignupScreen() {
+  return (
+    <SignupProvider>
+      <SignupScreenContent />
+    </SignupProvider>
   );
 }
 

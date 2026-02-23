@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { authService } from '../services/authService';
+import React, { createContext, useContext, useState, ReactNode } from "react";
+import { authService } from "../services/authService";
 
 interface LoginContextType {
   email: string;
@@ -15,8 +15,8 @@ interface LoginContextType {
 const LoginContext = createContext<LoginContextType | undefined>(undefined);
 
 export function LoginProvider({ children }: { children: ReactNode }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,11 +27,12 @@ export function LoginProvider({ children }: { children: ReactNode }) {
     try {
       const result = await authService.login(email, password);
       if (!result.success) {
-        setError(result.error || 'Failed to sign in');
+        setError(result.error || "Failed to sign in");
       }
       return result;
+      // Catching the non-API errors
     } catch (err: any) {
-      const errorMessage = err.message || 'An unexpected error occurred';
+      const errorMessage = err.message || "An unexpected error occurred";
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
@@ -62,7 +63,7 @@ export function LoginProvider({ children }: { children: ReactNode }) {
 export function useLogin() {
   const context = useContext(LoginContext);
   if (context === undefined) {
-    throw new Error('useLogin must be used within a LoginProvider');
+    throw new Error("useLogin must be used within a LoginProvider");
   }
   return context;
 }

@@ -7,7 +7,7 @@ interface SignupContextType {
   signup: (
     email: string,
     password: string,
-    passwordConfirm: string
+    passwordConfirm: string,
   ) => Promise<{ success: boolean; user?: any; error?: string }>;
   clearError: () => void;
 }
@@ -21,7 +21,7 @@ export const SignupProvider = ({ children }: { children: ReactNode }) => {
   const signup = async (
     email: string,
     password: string,
-    passwordConfirm: string
+    passwordConfirm: string,
   ) => {
     setIsLoading(true);
     setError(null);
@@ -30,7 +30,7 @@ export const SignupProvider = ({ children }: { children: ReactNode }) => {
       const response = await authService.signup(
         email,
         password,
-        passwordConfirm
+        passwordConfirm,
       );
 
       if (!response.success) {
@@ -38,6 +38,7 @@ export const SignupProvider = ({ children }: { children: ReactNode }) => {
       }
 
       return response;
+      // Catching the non-API errors
     } catch (err: any) {
       const errorMessage = err.message || "An unexpected error occurred.";
       setError(errorMessage);
