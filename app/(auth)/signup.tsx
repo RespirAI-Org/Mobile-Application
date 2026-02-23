@@ -33,7 +33,7 @@ export default function SignupScreen() {
 
   const handleTabPress = (tab: "signin" | "signup") => {
     if (tab === "signin") {
-      router.push("/(auth)/login");
+      router.replace("/(auth)/login");
     }
   };
 
