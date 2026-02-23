@@ -2,18 +2,20 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
 interface AuthFooterProps {
+  prefixText?: string;
   onPrivacyPolicyPress?: () => void;
   onTermsOfServicePress?: () => void;
 }
 
 export function AuthFooter({
+  prefixText = "By continuing, you agree to our",
   onPrivacyPolicyPress,
   onTermsOfServicePress,
 }: AuthFooterProps) {
   return (
     <View style={styles.footer}>
       <Text style={styles.footerText}>
-        By continuing, you agree to our{" "}
+        {prefixText}{" "}
         <Text style={styles.linkText} onPress={onPrivacyPolicyPress}>
           Medical Privacy Policy
         </Text>{" "}

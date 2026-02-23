@@ -1,140 +1,139 @@
-import React, { useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, View, Alert } from 'react-native';
-import { router } from 'expo-router';
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  Platform,
+  KeyboardAvoidingView,
+  useWindowDimensions,
+} from "react-native";
+import { router } from "expo-router";
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { useThemeColor } from '@/hooks/use-theme-color';
+import { ThemedView } from "@/components/themed-view";
+import { AuthHeader } from "@/components/auth/AuthHeader";
+import { AuthTabSwitcher } from "@/components/auth/AuthTabSwitcher";
+import { FormInput } from "@/components/auth/FormInput";
+import { PrimaryButton } from "@/components/auth/PrimaryButton";
+import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
+import { AuthFooter } from "@/components/auth/AuthFooter";
 
 export default function SignupScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  
-  const textColor = useThemeColor({}, 'text');
-  const placeholderColor = useThemeColor({ light: '#9BA1A6', dark: '#9BA1A6' }, 'text');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const { width } = useWindowDimensions();
+  const isLargeScreen = width > 768;
 
   const handleSignup = () => {
-    // Here you would implement your actual signup logic
-    if (!email || !password || !confirmPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
-      return;
+    // Implement actual signup logic here
+    if (email && password && confirmPassword && password === confirmPassword) {
     }
-    
-    if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
-      return;
-    }
+  };
 
-    router.replace('/(tabs)');
+  const handleTabPress = (tab: "signin" | "signup") => {
+    if (tab === "signin") {
+      router.push("/(auth)/login");
+    }
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <View style={styles.header}>
-        <ThemedText type="title">Create Account</ThemedText>
-        <ThemedText style={styles.subtitle}>Sign up to get started</ThemedText>
-      </View>
+    <ThemedView style={styles.mainContainer}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          <View
+            style={[styles.container, isLargeScreen && styles.containerLarge]}
+          >
+            {/* Header Section */}
+            <AuthHeader
+              title="Create New Account"
+              subtitle={`Join now to analyze patient heart & lung\nsounds securely.`}
+            />
 
-      <View style={styles.form}>
-        <View style={styles.inputContainer}>
-          <ThemedText style={styles.label}>Email</ThemedText>
-          <TextInput
-            style={[styles.input, { color: textColor, borderColor: placeholderColor }]}
-            placeholder="Enter your email"
-            placeholderTextColor={placeholderColor}
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
-        </View>
+            {/* Tab Switcher */}
+            <AuthTabSwitcher activeTab="signup" onTabPress={handleTabPress} />
 
-        <View style={styles.inputContainer}>
-          <ThemedText style={styles.label}>Password</ThemedText>
-          <TextInput
-            style={[styles.input, { color: textColor, borderColor: placeholderColor }]}
-            placeholder="Enter your password"
-            placeholderTextColor={placeholderColor}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-        </View>
+            {/* Form Section */}
+            <View style={styles.form}>
+              {/* Email Input */}
+              <FormInput
+                label="Email"
+                iconName="mail-outline"
+                placeholder="doctor@hospital.com"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
 
-        <View style={styles.inputContainer}>
-          <ThemedText style={styles.label}>Confirm Password</ThemedText>
-          <TextInput
-            style={[styles.input, { color: textColor, borderColor: placeholderColor }]}
-            placeholder="Confirm your password"
-            placeholderTextColor={placeholderColor}
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry
-          />
-        </View>
+              {/* Password Input */}
+              <FormInput
+                label="Password"
+                iconName="lock-outline"
+                placeholder="••••••••"
+                value={password}
+                onChangeText={setPassword}
+                isPassword
+              />
 
-        <TouchableOpacity style={styles.button} onPress={handleSignup}>
-          <ThemedText style={styles.buttonText}>Sign Up</ThemedText>
-        </TouchableOpacity>
+              {/* Confirm Password Input */}
+              <FormInput
+                label="Confirm Password"
+                iconName="history"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                isPassword
+              />
 
-        <View style={styles.footer}>
-          <ThemedText>Already have an account? </ThemedText>
-          <TouchableOpacity onPress={() => router.back()}>
-            <ThemedText type="link">Sign In</ThemedText>
-          </TouchableOpacity>
-        </View>
-      </View>
+              {/* Sign Up Button */}
+              <PrimaryButton title="Sign Up" onPress={handleSignup} />
+
+              {/* Social Buttons */}
+              <SocialLoginButtons
+                dividerText="OR REGISTER WITH"
+                googleButtonText="Sign up with Google"
+                zaloButtonText="Sign up with Zalo"
+              />
+
+              {/* Footer */}
+              <AuthFooter prefixText="By registering, you agree to our" />
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  mainContainer: {
     flex: 1,
-    padding: 20,
-    justifyContent: 'center',
+    backgroundColor: "#f6f6f8",
   },
-  header: {
-    marginBottom: 40,
-    alignItems: 'center',
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: 50,
+    paddingBottom: 30,
   },
-  subtitle: {
-    marginTop: 10,
-    opacity: 0.7,
+  container: {
+    width: "100%",
+    paddingHorizontal: 24,
+    alignItems: "center",
+  },
+  containerLarge: {
+    maxWidth: 480,
   },
   form: {
+    width: "100%",
     gap: 20,
-  },
-  inputContainer: {
-    gap: 8,
-  },
-  label: {
-    fontWeight: '600',
-  },
-  input: {
-    height: 50,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    fontSize: 16,
-  },
-  button: {
-    backgroundColor: '#0a7ea4',
-    height: 50,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 20,
   },
 });
