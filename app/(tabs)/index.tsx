@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import {
   View,
   Text,
@@ -10,7 +10,17 @@ import {
   Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import {
+  Bell,
+  ArrowRight,
+  Bluetooth,
+  Repeat2,
+  MessageCircleMore,
+  Video,
+  History,
+  Pill,
+  LucideIcon,
+} from "lucide-react-native";
 
 const { width } = Dimensions.get("window");
 
@@ -26,9 +36,7 @@ export default function HomeScreen() {
           <View style={styles.headerLeft}>
             <View style={styles.profileImageContainer}>
               <Image
-                source={{
-                  uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&q=80",
-                }}
+                source={require("@/assets/images/Patient-ava.jpeg")}
                 style={styles.profileImage}
               />
             </View>
@@ -38,7 +46,7 @@ export default function HomeScreen() {
             </View>
           </View>
           <TouchableOpacity style={styles.notificationButton}>
-            <Ionicons name="notifications-outline" size={24} color="#0f172a" />
+            <Bell size={24} color="#0f172a" />
           </TouchableOpacity>
         </View>
 
@@ -47,9 +55,7 @@ export default function HomeScreen() {
           <View style={styles.statusImageContainer}>
             {/* Using a placeholder gradient-like image or dark medical background */}
             <Image
-              source={{
-                uri: "https://images.unsplash.com/photo-1551076805-e1869033e561?q=80&w=2832&auto=format&fit=crop",
-              }}
+              source={require("@/assets/images/Patient-dashboard-background.webp")}
               style={styles.statusCardBackground}
             />
             {/* Gradient Simulation Overlay */}
@@ -73,7 +79,7 @@ export default function HomeScreen() {
 
             <TouchableOpacity style={styles.viewReportButton}>
               <Text style={styles.viewReportText}>View Full Report</Text>
-              <Ionicons name="arrow-forward" size={18} color="#1961f0" />
+              <ArrowRight size={18} color="#1961f0" />
             </TouchableOpacity>
           </View>
         </View>
@@ -87,7 +93,7 @@ export default function HomeScreen() {
             </Text>
           </View>
           <View style={styles.deviceIconContainer}>
-            <Ionicons name="bluetooth" size={24} color="#ffffff" />
+            <Bluetooth size={24} color="#ffffff" />
           </View>
         </View>
 
@@ -97,9 +103,7 @@ export default function HomeScreen() {
           <View style={styles.noteCard}>
             <View style={styles.doctorHeader}>
               <Image
-                source={{
-                  uri: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&q=80",
-                }}
+                source={require("@/assets/images/Doctor-ava.jpeg")}
                 style={styles.doctorImage}
               />
               <View>
@@ -118,8 +122,7 @@ export default function HomeScreen() {
             </View>
             <TouchableOpacity style={styles.replyButton}>
               <Text style={styles.replyButtonText}>Reply to Doctor</Text>
-              <Ionicons
-                name="arrow-undo"
+              <Repeat2
                 size={16}
                 color="#1961f0"
                 style={{ transform: [{ scaleX: 1 }] }}
@@ -133,25 +136,25 @@ export default function HomeScreen() {
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.quickActionsGrid}>
             <QuickActionButton
-              icon="chatbubble-ellipses"
+              Icon={MessageCircleMore}
               label="Message"
               color="#eff6ff"
               iconColor="#3b82f6"
             />
             <QuickActionButton
-              icon="videocam"
+              Icon={Video}
               label="Video Call"
               color="#faf5ff"
               iconColor="#a855f7"
             />
             <QuickActionButton
-              icon="time"
+              Icon={History}
               label="History"
               color="#fff7ed"
               iconColor="#f97316"
             />
             <QuickActionButton
-              icon="medkit"
+              Icon={Pill}
               label="Medication"
               color="#f0fdfa"
               iconColor="#14b8a6"
@@ -167,12 +170,12 @@ export default function HomeScreen() {
 }
 
 function QuickActionButton({
-  icon,
+  Icon,
   label,
   color,
   iconColor,
 }: {
-  icon: keyof typeof Ionicons.glyphMap;
+  Icon: LucideIcon;
   label: string;
   color: string;
   iconColor: string;
@@ -180,7 +183,7 @@ function QuickActionButton({
   return (
     <TouchableOpacity style={styles.actionButton}>
       <View style={[styles.actionIconContainer, { backgroundColor: color }]}>
-        <Ionicons name={icon} size={24} color={iconColor} />
+        <Icon size={24} color={iconColor} />
       </View>
       <Text style={styles.actionLabel}>{label}</Text>
     </TouchableOpacity>

@@ -1,7 +1,13 @@
 import { Tabs } from "expo-router";
 import React from "react";
 import { Platform, View, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import {
+  House,
+  Activity,
+  MessageCircleMore,
+  Settings,
+  ScanLine,
+} from "lucide-react-native";
 import { HapticTab } from "@/components/haptic-tab";
 
 export default function TabLayout() {
@@ -37,13 +43,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "home" : "home-outline"}
-              size={24}
-              color={color}
-            />
-          ),
+          tabBarIcon: ({ color, focused }) => <House size={24} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -51,11 +51,7 @@ export default function TabLayout() {
         options={{
           title: "Diagnosis",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "stats-chart" : "stats-chart-outline"}
-              size={24}
-              color={color}
-            />
+            <Activity size={24} color={color} />
           ),
         }}
       />
@@ -66,7 +62,7 @@ export default function TabLayout() {
           tabBarLabel: () => null,
           tabBarIcon: ({ focused }) => (
             <View style={styles.scanButton}>
-              <Ionicons name="scan-outline" size={28} color="#ffffff" />
+              <ScanLine size={28} color="#ffffff" />
             </View>
           ),
         }}
@@ -76,11 +72,7 @@ export default function TabLayout() {
         options={{
           title: "Messages",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "chatbubble" : "chatbubble-outline"}
-              size={24}
-              color={color}
-            />
+            <MessageCircleMore size={24} color={color} />
           ),
         }}
       />
@@ -89,11 +81,7 @@ export default function TabLayout() {
         options={{
           title: "Settings",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "settings" : "settings-outline"}
-              size={24}
-              color={color}
-            />
+            <Settings size={24} color={color} />
           ),
         }}
       />
