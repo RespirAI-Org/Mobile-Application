@@ -1,0 +1,1010 @@
+.home-patient {
+    position: relative;
+    width: 448px;
+    height: 1336px;
+    background-color: #f8f9fc;
+}
+
+.home-patient .main {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 24px 16px 96px;
+    position: absolute;
+    top: 98px;
+    left: 0;
+    overflow: scroll;
+}
+
+.home-patient .main::-webkit-scrollbar {
+    width: 0;
+    display: none;
+}
+
+.home-patient .section {
+    flex-direction: column;
+    background-color: #ffffff;
+    border: 1px solid;
+    border-color: #f1f5f9;
+    box-shadow: 0px 1px 2px #0000000d;
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+    align-self: stretch;
+    width: 100%;
+    flex: 0 0 auto;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.home-patient .background {
+    position: relative;
+    width: 414px;
+    height: 128px;
+    z-index: 1;
+    background-image: url(./img/background.png);
+    background-size: cover;
+    background-position: 50% 50%;
+}
+
+.home-patient .gradient {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.6) 0%,
+        rgba(0, 0, 0, 0) 100%
+    );
+}
+
+.home-patient .container {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 4px 0px 0px;
+    position: absolute;
+    left: 16px;
+    bottom: 12px;
+}
+
+.home-patient .background-border {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    position: relative;
+    flex: 0 0 auto;
+    background-color: #dcfce7;
+    border-radius: 9999px;
+    border: 1px solid;
+    border-color: #bbf7d0;
+    box-shadow: 0px 1px 2px #0000000d;
+}
+
+.home-patient .margin {
+    display: flex;
+    flex-direction: column;
+    width: 12px;
+    height: 6px;
+    align-items: flex-start;
+    padding: 0px 6px 0px 0px;
+    position: relative;
+}
+
+.home-patient .div {
+    position: relative;
+    width: 6px;
+    height: 6px;
+    background-color: #22c55e;
+    border-radius: 9999px;
+}
+
+.home-patient .text-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    font-family: "Inter-SemiBold", Helvetica;
+    font-weight: 600;
+    color: #166534;
+    font-size: 12px;
+    letter-spacing: 0;
+    line-height: 16px;
+    white-space: nowrap;
+}
+
+.home-patient .container-2 {
+    display: flex;
+    flex-direction: column;
+    width: 414px;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+    position: relative;
+    flex: 0 0 auto;
+    z-index: 0;
+}
+
+.home-patient .container-wrapper {
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+    align-self: stretch;
+    width: 100%;
+    flex: 0 0 auto;
+}
+
+.home-patient .container-3 {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.home-patient .div-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+    align-self: stretch;
+    width: 100%;
+    flex: 0 0 auto;
+}
+
+.home-patient .text-wrapper-2 {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    margin-top: -1px;
+    font-family: "Inter-Bold", Helvetica;
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 20px;
+    letter-spacing: 0;
+    line-height: 28px;
+    white-space: nowrap;
+}
+
+.home-patient .p {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    margin-top: -1px;
+    font-family: "Inter-Regular", Helvetica;
+    font-weight: 400;
+    color: #64748b;
+    font-size: 14px;
+    letter-spacing: 0;
+    line-height: 20px;
+    white-space: nowrap;
+}
+
+.home-patient .horizontal-divider {
+    position: relative;
+    align-self: stretch;
+    width: 100%;
+    height: 1px;
+    background-color: #f1f5f9;
+}
+
+.home-patient .button {
+    all: unset;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 0px;
+    position: relative;
+    align-self: stretch;
+    width: 100%;
+    flex: 0 0 auto;
+    background-color: #f8fafc;
+    border-radius: 16px;
+}
+
+.home-patient .container-4 {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.home-patient .text-wrapper-3 {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    margin-top: -1px;
+    font-family: "Inter-Bold", Helvetica;
+    font-weight: 700;
+    color: #1961f0;
+    font-size: 14px;
+    text-align: center;
+    letter-spacing: 0;
+    line-height: 20px;
+    white-space: nowrap;
+}
+
+.home-patient .icon-wrapper {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 3px 0px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.home-patient .icon {
+    position: relative;
+    width: 18px;
+    height: 22px;
+}
+
+.home-patient .vector {
+    position: absolute;
+    width: 83.33%;
+    height: 77.27%;
+    top: 22.73%;
+    left: 16.67%;
+}
+
+.home-patient .section-button {
+    justify-content: center;
+    background-color: #10b981;
+    box-shadow:
+        0px 4px 6px -4px #10b9814c,
+        0px 10px 15px -3px #10b9814c;
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+    align-self: stretch;
+    width: 100%;
+    flex: 0 0 auto;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.home-patient .container-5 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    position: relative;
+    flex: 1;
+    flex-grow: 1;
+}
+
+.home-patient .text-wrapper-4 {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    margin-top: -1px;
+    font-family: "Inter-Bold", Helvetica;
+    font-weight: 700;
+    color: #ffffff;
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 0;
+    line-height: 28px;
+    white-space: nowrap;
+}
+
+.home-patient .text-wrapper-5 {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    margin-top: -1px;
+    font-family: "Inter-Medium", Helvetica;
+    font-weight: 500;
+    color: #ecfdf5;
+    font-size: 14px;
+    text-align: center;
+    letter-spacing: 0;
+    line-height: 20px;
+    white-space: nowrap;
+}
+
+.home-patient .overlay-overlayblur {
+    display: flex;
+    width: 48px;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-color: #ffffff33;
+    border-radius: 9999px;
+    backdrop-filter: blur(2px) brightness(100%);
+    -webkit-backdrop-filter: blur(2px) brightness(100%);
+}
+
+.home-patient .container-6 {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 2px 0px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.home-patient .vector-wrapper {
+    position: relative;
+    width: 24.02px;
+    height: 28px;
+}
+
+.home-patient .img {
+    position: absolute;
+    width: 84.4%;
+    height: 84.72%;
+    top: 15.28%;
+    left: 15.6%;
+}
+
+.home-patient .gradient-2 {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: linear-gradient(
+        174deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0) 100%
+    );
+}
+
+.home-patient .section-2 {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0px 0px;
+    position: relative;
+    align-self: stretch;
+    width: 100%;
+    flex: 0 0 auto;
+}
+
+.home-patient .heading {
+    padding: 0px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+    align-self: stretch;
+    width: 100%;
+    flex: 0 0 auto;
+}
+
+.home-patient .text-wrapper-6 {
+    position: relative;
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    margin-top: -1px;
+    font-family: "Inter-Bold", Helvetica;
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 18px;
+    letter-spacing: 0;
+    line-height: 28px;
+}
+
+.home-patient .background-border-2 {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 20px;
+    position: relative;
+    align-self: stretch;
+    width: 100%;
+    flex: 0 0 auto;
+    background-color: #ffffff;
+    border-radius: 16px;
+    border: 1px solid;
+    border-color: #f1f5f9;
+    box-shadow: 0px 1px 2px #0000000d;
+}
+
+.home-patient .container-7 {
+    display: flex;
+    width: 374px;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.home-patient .image {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+}
+
+.home-patient .container-8 {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+    flex: 1;
+    flex-grow: 1;
+}
+
+.home-patient .text-wrapper-7 {
+    position: relative;
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    margin-top: -1px;
+    font-family: "Inter-Bold", Helvetica;
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 14px;
+    letter-spacing: 0;
+    line-height: 20px;
+}
+
+.home-patient .text-wrapper-8 {
+    position: relative;
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    margin-top: -1px;
+    font-family: "Inter-Regular", Helvetica;
+    font-weight: 400;
+    color: #64748b;
+    font-size: 12px;
+    letter-spacing: 0;
+    line-height: 16px;
+}
+
+.home-patient .background-2 {
+    display: flex;
+    flex-direction: column;
+    width: 374px;
+    align-items: flex-start;
+    padding: 15.12px 16px 16px;
+    position: relative;
+    flex: 0 0 auto;
+    background-color: #f8fafc;
+    border-radius: 0px 16px 16px 16px;
+}
+
+.home-patient .your-heart-sounds-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px 0px 0.88px;
+    position: relative;
+    align-self: stretch;
+    width: 100%;
+    flex: 0 0 auto;
+}
+
+.home-patient .your-heart-sounds {
+    position: relative;
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+    margin-top: -1px;
+    font-family: "Inter-Regular", Helvetica;
+    font-weight: 400;
+    color: #475569;
+    font-size: 14px;
+    letter-spacing: 0;
+    line-height: 22.8px;
+}
+
+.home-patient .button-2 {
+    all: unset;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.home-patient .text-wrapper-9 {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    font-family: "Inter-SemiBold", Helvetica;
+    font-weight: 600;
+    color: #1961f0;
+    font-size: 14px;
+    text-align: center;
+    letter-spacing: 0;
+    line-height: 20px;
+    white-space: nowrap;
+}
+
+.home-patient .img-wrapper {
+    position: relative;
+    width: 16px;
+    height: 20px;
+}
+
+.home-patient .vector-2 {
+    position: absolute;
+    width: 87.5%;
+    height: 73.33%;
+    top: 26.67%;
+    left: 12.5%;
+}
+
+.home-patient .container-9 {
+    position: relative;
+    align-self: stretch;
+    width: 100%;
+    height: 272px;
+}
+
+.home-patient .button-3 {
+    display: inline-flex;
+    flex-direction: column;
+    height: 128px;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 68.17px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: #ffffff;
+    border-radius: 16px;
+    border: 1px solid;
+    border-color: #f1f5f9;
+    box-shadow: 0px 1px 2px #0000000d;
+}
+
+.home-patient .background-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 48px;
+    height: 60px;
+    align-items: flex-start;
+    padding: 0px 0px 12px;
+    position: relative;
+}
+
+.home-patient .background-3 {
+    display: flex;
+    width: 48px;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-color: #eff6ff;
+    border-radius: 9999px;
+}
+
+.home-patient .vector-3 {
+    position: absolute;
+    width: 90.48%;
+    height: 84.72%;
+    top: 15.28%;
+    left: 9.52%;
+}
+
+.home-patient .text-wrapper-10 {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    margin-top: -1px;
+    font-family: "Inter-SemiBold", Helvetica;
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 14px;
+    text-align: center;
+    letter-spacing: 0;
+    line-height: 20px;
+    white-space: nowrap;
+}
+
+.home-patient .button-4 {
+    display: inline-flex;
+    flex-direction: column;
+    height: 128px;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 64.7px 16px 64.69px;
+    position: absolute;
+    top: 0;
+    left: 216px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    border: 1px solid;
+    border-color: #f1f5f9;
+    box-shadow: 0px 1px 2px #0000000d;
+}
+
+.home-patient .background-4 {
+    display: flex;
+    width: 48px;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-color: #faf5ff;
+    border-radius: 9999px;
+}
+
+.home-patient .vector-4 {
+    position: absolute;
+    width: 90.48%;
+    height: 77.78%;
+    top: 22.22%;
+    left: 9.52%;
+}
+
+.home-patient .button-5 {
+    display: inline-flex;
+    flex-direction: column;
+    height: 128px;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 74.44px 16px 74.42px;
+    position: absolute;
+    top: 144px;
+    left: 0;
+    background-color: #ffffff;
+    border-radius: 16px;
+    border: 1px solid;
+    border-color: #f1f5f9;
+    box-shadow: 0px 1px 2px #0000000d;
+}
+
+.home-patient .background-5 {
+    display: flex;
+    width: 48px;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-color: #fff7ed;
+    border-radius: 9999px;
+}
+
+.home-patient .vector-5 {
+    position: absolute;
+    width: 86.43%;
+    height: 81.25%;
+    top: 18.75%;
+    left: 13.57%;
+}
+
+.home-patient .button-6 {
+    display: inline-flex;
+    flex-direction: column;
+    height: 128px;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 61.18px 16px 61.19px;
+    position: absolute;
+    top: 144px;
+    left: 216px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    border: 1px solid;
+    border-color: #f1f5f9;
+    box-shadow: 0px 1px 2px #0000000d;
+}
+
+.home-patient .background-6 {
+    display: flex;
+    width: 48px;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-color: #f0fdfa;
+    border-radius: 9999px;
+}
+
+.home-patient .header {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    padding: 47px 24px 8px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: #f8f9fcf2;
+    backdrop-filter: blur(2px) brightness(100%);
+    -webkit-backdrop-filter: blur(2px) brightness(100%);
+}
+
+.home-patient .container-10 {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.home-patient .image-border-shadow {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    margin-bottom: -1.5px;
+    margin-left: -2px;
+    object-fit: cover;
+}
+
+.home-patient .container-11 {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.home-patient .text-wrapper-11 {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    margin-top: -1px;
+    font-family: "Inter-Bold", Helvetica;
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 18px;
+    letter-spacing: 0;
+    line-height: 22.5px;
+    white-space: nowrap;
+}
+
+.home-patient .text-wrapper-12 {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    margin-top: -1px;
+    font-family: "Inter-Medium", Helvetica;
+    font-weight: 500;
+    color: #64748b;
+    font-size: 14px;
+    letter-spacing: 0;
+    line-height: 20px;
+    white-space: nowrap;
+}
+
+.home-patient .button-7 {
+    display: flex;
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-color: #ffffff;
+    border-radius: 9999px;
+    box-shadow: 0px 1px 2px #0000000d;
+}
+
+.home-patient .vector-6 {
+    position: absolute;
+    width: 82.38%;
+    height: 84.72%;
+    top: 15.28%;
+    left: 17.62%;
+}
+
+.home-patient .nav {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 70px;
+    align-items: flex-start;
+    position: absolute;
+    top: 1266px;
+    left: 0;
+    background-color: #ffffff;
+    border-top-width: 1px;
+    border-top-style: solid;
+    border-color: #f1f5f9;
+}
+
+.home-patient .container-12 {
+    position: relative;
+    align-self: stretch;
+    width: 100%;
+    height: 64px;
+}
+
+.home-patient .button-8 {
+    all: unset;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    width: 48px;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    position: absolute;
+    top: calc(50% - 26px);
+    left: 24px;
+}
+
+.home-patient .icon-2 {
+    position: relative;
+    width: 26.02px;
+    height: 32px;
+}
+
+.home-patient .vector-7 {
+    position: absolute;
+    width: 83.33%;
+    height: 80.49%;
+    top: 19.51%;
+    left: 16.67%;
+}
+
+.home-patient .text-wrapper-13 {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    margin-top: -1px;
+    font-family: "Inter-Medium", Helvetica;
+    font-weight: 500;
+    color: #0da6f2;
+    font-size: 10px;
+    text-align: center;
+    letter-spacing: 0;
+    line-height: 15px;
+    white-space: nowrap;
+}
+
+.home-patient .button-9 {
+    all: unset;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    width: 48px;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    position: absolute;
+    top: calc(50% - 26px);
+    left: 110px;
+}
+
+.home-patient .vector-8 {
+    position: absolute;
+    width: 91.67%;
+    height: 77.1%;
+    top: 22.9%;
+    left: 8.33%;
+}
+
+.home-patient .text-wrapper-14 {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    margin-top: -1px;
+    font-family: "Inter-Medium", Helvetica;
+    font-weight: 500;
+    color: #94a3b8;
+    font-size: 10px;
+    text-align: center;
+    letter-spacing: 0;
+    line-height: 15px;
+    white-space: nowrap;
+}
+
+.home-patient .button-10 {
+    all: unset;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    width: 48px;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    position: absolute;
+    top: calc(50% - 26px);
+    left: 290px;
+}
+
+.home-patient .vector-9 {
+    position: absolute;
+    width: 91.67%;
+    height: 83.88%;
+    top: 16.12%;
+    left: 8.33%;
+}
+
+.home-patient .container-13 {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    flex: 0 0 auto;
+    margin-left: -0.5px;
+    margin-right: -0.5px;
+}
+
+.home-patient .button-11 {
+    all: unset;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    width: 48px;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    position: absolute;
+    top: calc(50% - 26px);
+    left: 376px;
+}
+
+.home-patient .vector-10 {
+    position: absolute;
+    width: 91.87%;
+    height: 83.88%;
+    top: 16.12%;
+    left: 8.13%;
+}
+
+.home-patient .button-wrapper {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: absolute;
+    top: calc(50% - 48px);
+    left: 196px;
+}
+
+.home-patient .button-12 {
+    display: flex;
+    width: 56px;
+    height: 56px;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-color: #0da6f2;
+    border-radius: 9999px;
+    overflow: hidden;
+    box-shadow:
+        0px 4px 6px -4px #3b82f666,
+        0px 10px 15px -3px #3b82f666;
+}
+
+.home-patient .icon-3 {
+    position: relative;
+    width: 28.02px;
+    height: 34px;
+}
+
+.home-patient .vector-11 {
+    position: absolute;
+    width: 91.67%;
+    height: 84.34%;
+    top: 15.66%;
+    left: 8.33%;
+}
