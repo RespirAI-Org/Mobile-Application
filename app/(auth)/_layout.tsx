@@ -8,11 +8,11 @@ export default function AuthLayout() {
       <SignupProvider>
         <Stack screenOptions={{ animation: "none" }}>
           <Stack.Screen
-            name="login"
+            name="Login"
             options={{ title: "Sign In", headerShown: false }}
           />
           <Stack.Screen
-            name="signup"
+            name="Signup"
             options={{ title: "Create Account", headerShown: false }}
           />
         </Stack>

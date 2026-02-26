@@ -50,7 +50,7 @@ function LoginScreenContent() {
 
   const handleTabPress = (tab: "signin" | "signup") => {
     if (tab === "signup") {
-      router.replace("/(auth)/signup");
+      router.replace("/(auth)/Signup");
     }
   };
 

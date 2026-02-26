@@ -11,7 +11,6 @@ const store = new AsyncAuthStore({
 
 // Update this to your deployed PocketBase URL if necessary
 export const PB_URL = process.env.EXPO_PUBLIC_POCKETBASE_URL;
-console.log(PB_URL);
 
 // Instantiate the PocketBase client with the custom auth store
-export const pb = new PocketBase(PB_URL);
+export const pb = new PocketBase(PB_URL, store);
