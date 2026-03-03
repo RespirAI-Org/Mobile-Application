@@ -9,6 +9,7 @@ import {
   Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import {
   SquarePen,
   Search,
@@ -94,6 +95,8 @@ const getStatusColor = (status: DiagnosisStatus) => {
 };
 
 export default function DiagnosisScreen() {
+  const router = useRouter();
+
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.header}>
@@ -132,7 +135,11 @@ export default function DiagnosisScreen() {
             const ResultIcon = colors.icon;
 
             return (
-              <View key={item.id} style={styles.card}>
+              <TouchableOpacity
+                key={item.id}
+                style={styles.card}
+                onPress={() => router.push("/diagnosis-details")}
+              >
                 <View style={styles.cardHeader}>
                   <View style={styles.cardHeaderLeft}>
                     <View
@@ -188,7 +195,7 @@ export default function DiagnosisScreen() {
                     />
                   </View>
                 </View>
-              </View>
+              </TouchableOpacity>
             );
           })}
         </View>
