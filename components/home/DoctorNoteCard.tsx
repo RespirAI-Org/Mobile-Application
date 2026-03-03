@@ -6,7 +6,7 @@ import { Colors } from "@/constants/colors";
 export default function DoctorNoteCard() {
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Doctor's Note</Text>
+      <Text style={styles.sectionTitle}>{"Doctor's Note"}</Text>
       <View style={styles.noteCard}>
         <View style={styles.doctorHeader}>
           <Image

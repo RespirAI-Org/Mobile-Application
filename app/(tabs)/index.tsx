@@ -15,23 +15,11 @@ export default function HomeScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
         <HomeScreenHeader />
-
-        {/* Status Card */}
         <StatusCard />
-
-        {/* Stethoscope Card */}
         <DeviceConnectionCard />
-
-        {/* Doctor's Note */}
         <DoctorNoteCard />
-
-        {/* Quick Actions */}
         <QuickActions />
-
-        {/* Padding for bottom nav */}
-        <View style={{ height: 20 }} />
       </ScrollView>
     </SafeAreaView>
   );
