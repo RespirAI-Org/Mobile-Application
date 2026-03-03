@@ -138,7 +138,7 @@ export default function DiagnosisScreen() {
               <TouchableOpacity
                 key={item.id}
                 style={styles.card}
-                onPress={() => router.push("/diagnosis-details")}
+                onPress={() => router.push("./diagnosis-details")}
               >
                 <View style={styles.cardHeader}>
                   <View style={styles.cardHeaderLeft}>
