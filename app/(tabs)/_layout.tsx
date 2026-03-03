@@ -1,6 +1,7 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { Platform, View, StyleSheet } from "react-native";
+import { Platform, View, StyleSheet, TouchableOpacity } from "react-native";
+
 import {
   House,
   Activity,
@@ -8,7 +9,6 @@ import {
   Settings,
   ScanLine,
 } from "lucide-react-native";
-import { HapticTab } from "@/components/haptic-tab";
 
 export default function TabLayout() {
   return (
@@ -27,7 +27,7 @@ export default function TabLayout() {
           elevation: 0,
           shadowOpacity: 0,
         },
-        tabBarButton: HapticTab,
+        tabBarButton: (props) => <TouchableOpacity {...(props as any)} />,
         tabBarLabelStyle: {
           fontSize: 10,
           fontFamily: Platform.select({

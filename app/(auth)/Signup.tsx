@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 
-import { ThemedView } from "@/components/themed-view";
 import { AuthHeader } from "@/components/auth/AuthHeader";
 import { AuthTabSwitcher } from "@/components/auth/AuthTabSwitcher";
 import { FormInput } from "@/components/auth/FormInput";
@@ -56,7 +55,7 @@ function SignupScreenContent() {
   };
 
   return (
-    <ThemedView style={styles.mainContainer}>
+    <View style={styles.mainContainer}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
@@ -129,7 +128,7 @@ function SignupScreenContent() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </ThemedView>
+    </View>
   );
 }
 
