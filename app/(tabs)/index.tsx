@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -21,6 +21,7 @@ import {
   Pill,
   LucideIcon,
 } from "lucide-react-native";
+import { Colors } from "@/constants/colors";
 
 const { width } = Dimensions.get("window");
 
@@ -46,7 +47,7 @@ export default function HomeScreen() {
             </View>
           </View>
           <TouchableOpacity style={styles.notificationButton}>
-            <Bell size={24} color="#0f172a" />
+            <Bell size={20} color={Colors.typography["0"]} />
           </TouchableOpacity>
         </View>
 
@@ -79,7 +80,7 @@ export default function HomeScreen() {
 
             <TouchableOpacity style={styles.viewReportButton}>
               <Text style={styles.viewReportText}>View Full Report</Text>
-              <ArrowRight size={18} color="#1961f0" />
+              <ArrowRight size={18} color={Colors.info["200"]} />
             </TouchableOpacity>
           </View>
         </View>
@@ -93,7 +94,7 @@ export default function HomeScreen() {
             </Text>
           </View>
           <View style={styles.deviceIconContainer}>
-            <Bluetooth size={24} color="#ffffff" />
+            <Bluetooth size={24} color={Colors.typography.white} />
           </View>
         </View>
 
@@ -124,7 +125,7 @@ export default function HomeScreen() {
               <Text style={styles.replyButtonText}>Reply to Doctor</Text>
               <Repeat2
                 size={16}
-                color="#1961f0"
+                color={Colors.info["200"]}
                 style={{ transform: [{ scaleX: 1 }] }}
               />
             </TouchableOpacity>
@@ -138,26 +139,26 @@ export default function HomeScreen() {
             <QuickActionButton
               Icon={MessageCircleMore}
               label="Message"
-              color="#eff6ff"
-              iconColor="#3b82f6"
+              color={Colors.info["950"]}
+              iconColor={Colors.info["500"]}
             />
             <QuickActionButton
               Icon={Video}
               label="Video Call"
-              color="#faf5ff"
-              iconColor="#a855f7"
+              color={Colors.error["950"]}
+              iconColor={Colors.error["500"]}
             />
             <QuickActionButton
               Icon={History}
               label="History"
-              color="#fff7ed"
-              iconColor="#f97316"
+              color={Colors.warning["900"]}
+              iconColor={Colors.warning["500"]}
             />
             <QuickActionButton
               Icon={Pill}
               label="Medication"
-              color="#f0fdfa"
-              iconColor="#14b8a6"
+              color={Colors.success["950"]}
+              iconColor={Colors.success["500"]}
             />
           </View>
         </View>
@@ -193,7 +194,7 @@ function QuickActionButton({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fc",
+    backgroundColor: Colors.background.light,
   },
   scrollContent: {
     paddingHorizontal: 24,
@@ -218,8 +219,8 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     overflow: "hidden",
     borderWidth: 2,
-    borderColor: "#ffffff",
-    shadowColor: "#000",
+    borderColor: Colors.background["950"],
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -231,25 +232,25 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   greetingText: {
-    fontSize: 14,
-    color: "#64748b",
-    fontWeight: "500",
+    fontSize: 18,
+    color: Colors.typography["0"],
+    fontWeight: "700",
     fontFamily: Platform.OS === "ios" ? "System" : "Roboto",
   },
   userName: {
-    fontSize: 18,
-    color: "#0f172a",
-    fontWeight: "700",
+    fontSize: 14,
+    color: Colors.typography["200"],
+    fontWeight: "500",
     fontFamily: Platform.OS === "ios" ? "System" : "Roboto",
   },
   notificationButton: {
     width: 40,
     height: 40,
-    backgroundColor: "#ffffff",
+    backgroundColor: Colors.background["950"],
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
@@ -260,9 +261,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
     marginBottom: 24,
-    backgroundColor: "#ffffff",
+    backgroundColor: Colors.background["950"],
     borderWidth: 1,
-    borderColor: "#f1f5f9",
+    borderColor: Colors.background["950"],
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -289,12 +290,10 @@ const styles = StyleSheet.create({
     left: 16,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#dcfce7",
+    backgroundColor: Colors.success["950"],
     paddingHorizontal: 10,
     paddingVertical: 2,
     borderRadius: 9999,
-    borderWidth: 1,
-    borderColor: "#bbf7d0",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -305,11 +304,11 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#22c55e",
+    backgroundColor: Colors.success["500"],
     marginRight: 6,
   },
   statusText: {
-    color: "#166534",
+    color: Colors.success["200"],
     fontSize: 12,
     fontWeight: "600",
   },
@@ -323,16 +322,16 @@ const styles = StyleSheet.create({
   statusTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#0f172a",
+    color: Colors.typography["0"],
   },
   statusSubtitle: {
     fontSize: 14,
-    color: "#64748b",
+    color: Colors.typography["300"],
     fontWeight: "400",
   },
   divider: {
     height: 1,
-    backgroundColor: "#f1f5f9",
+    backgroundColor: Colors.outline["800"],
     marginBottom: 12,
     width: "100%",
   },
@@ -344,20 +343,21 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   viewReportText: {
-    color: "#1961f0",
+    color: Colors.info["200"],
     fontSize: 14,
     fontWeight: "700",
   },
   // Device Card
   deviceCard: {
-    backgroundColor: "#10b981",
+    backgroundColor: "#10B981",
+    // backgroundColor: Colors.success["600"],
     borderRadius: 16,
     padding: 20,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 24,
-    shadowColor: "#10b981",
+    shadowColor: Colors.success["500"],
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -367,13 +367,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   deviceTitle: {
-    color: "#ffffff",
+    color: Colors.typography.white,
     fontSize: 18,
     fontWeight: "700",
     marginBottom: 4,
   },
   deviceSubtitle: {
-    color: "#ecfdf5",
+    color: Colors.success["950"],
     fontSize: 14,
     fontWeight: "500",
   },
@@ -384,7 +384,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
-    backdropFilter: "blur(4px)", // Won't work on RN directly but keeping intent
   },
   // Generic Section
   section: {
@@ -393,17 +392,17 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#0f172a",
+    color: Colors.typography["0"],
     marginBottom: 12,
   },
   // Note Card
   noteCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: Colors.background["950"],
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#f1f5f9",
+    borderColor: Colors.outline["900"],
     padding: 20,
-    shadowColor: "#000",
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
@@ -423,22 +422,21 @@ const styles = StyleSheet.create({
   doctorName: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#0f172a",
+    color: Colors.typography["0"],
   },
   doctorRole: {
     fontSize: 12,
-    color: "#64748b",
+    color: Colors.typography["200"],
     fontWeight: "400",
   },
   noteContent: {
-    backgroundColor: "#f8fafc",
+    backgroundColor: Colors.background["900"],
     borderRadius: 16,
-    borderTopLeftRadius: 0,
     padding: 16,
     marginBottom: 16,
   },
   noteText: {
-    color: "#475569",
+    color: Colors.typography["100"],
     fontSize: 14,
     lineHeight: 22,
     fontWeight: "400",
@@ -450,7 +448,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   replyButtonText: {
-    color: "#1961f0",
+    color: Colors.info["200"],
     fontSize: 14,
     fontWeight: "600",
   },
@@ -463,15 +461,15 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     width: "47%", // roughly (100% - gap) / 2
-    backgroundColor: "#ffffff",
+    backgroundColor: Colors.background["950"],
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#f1f5f9",
+    borderColor: Colors.background["950"],
     padding: 16,
     alignItems: "center",
     justifyContent: "center",
     height: 128,
-    shadowColor: "#000",
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
@@ -488,6 +486,6 @@ const styles = StyleSheet.create({
   actionLabel: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#0f172a",
+    color: Colors.typography["0"],
   },
 });
