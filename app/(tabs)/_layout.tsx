@@ -1,6 +1,7 @@
 import { Tabs } from "expo-router";
 import React from "react";
 import { Platform, View, StyleSheet, TouchableOpacity } from "react-native";
+import { Colors } from "@/constants/colors";
 
 import {
   House,
@@ -15,15 +16,15 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#0da6f2",
-        tabBarInactiveTintColor: "#94a3b8",
+        tabBarActiveTintColor: Colors.info["400"],
+        tabBarInactiveTintColor: Colors.background["400"],
         tabBarStyle: {
           height: Platform.OS === "ios" ? 88 : 70,
           paddingBottom: Platform.OS === "ios" ? 28 : 10,
           paddingTop: 10,
-          backgroundColor: "#ffffff",
+          backgroundColor: Colors.background["950"],
           borderTopWidth: 1,
-          borderTopColor: "#f1f5f9",
+          borderTopColor: Colors.outline["900"],
           elevation: 0,
           shadowOpacity: 0,
         },
@@ -68,7 +69,7 @@ export default function TabLayout() {
           tabBarLabel: () => null,
           tabBarIcon: ({ focused }) => (
             <View style={styles.scanButton}>
-              <ScanLine size={28} color="#ffffff" />
+              <ScanLine size={28} color={Colors.background["950"]} />
             </View>
           ),
         }}
@@ -100,16 +101,16 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#0da6f2",
+    backgroundColor: Colors.info["400"],
     justifyContent: "center",
     alignItems: "center",
     marginTop: -24,
-    shadowColor: "#3b82f6",
+    shadowColor: Colors.info["400"],
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
     borderWidth: 4,
-    borderColor: "#ffffff",
+    borderColor: Colors.background["950"],
   },
 });

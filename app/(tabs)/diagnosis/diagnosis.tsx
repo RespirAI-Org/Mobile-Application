@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   AlertTriangle,
 } from "lucide-react-native";
+import { Colors } from "@/constants/colors";
 
 type DiagnosisStatus = "Abnormal" | "Normal" | "Review";
 
@@ -69,26 +70,26 @@ const getStatusColor = (status: DiagnosisStatus) => {
   switch (status) {
     case "Abnormal":
       return {
-        text: "#b91c1c",
-        bg: "#fef2f2",
-        border: "#fee2e2",
-        bar: "#ef4444",
+        text: Colors.error["400"],
+        bg: Colors.error["950"],
+        border: Colors.error["900"],
+        bar: Colors.error["500"],
         icon: AlertCircle,
       };
     case "Normal":
       return {
-        text: "#047857",
-        bg: "#ecfdf5",
-        border: "#d1fae5",
-        bar: "#10b981",
+        text: Colors.success["400"],
+        bg: Colors.success["950"],
+        border: Colors.success["900"],
+        bar: Colors.success["500"],
         icon: CheckCircle2,
       };
     case "Review":
       return {
-        text: "#b45309",
-        bg: "#fffbeb",
-        border: "#fef3c7",
-        bar: "#f59e0b",
+        text: Colors.warning["400"],
+        bg: Colors.warning["950"],
+        border: Colors.warning["900"],
+        bar: Colors.warning["500"],
         icon: AlertTriangle,
       };
   }
@@ -102,7 +103,7 @@ export default function DiagnosisScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Diagnosis History</Text>
         <TouchableOpacity style={styles.headerButton}>
-          <SquarePen size={20} color="#0d121c" />
+          <SquarePen size={20} color={Colors.typography["0"]} />
         </TouchableOpacity>
       </View>
 

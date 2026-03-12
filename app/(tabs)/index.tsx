@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, ScrollView, View } from "react-native";
+import { StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
 import HomeScreenHeader from "@/components/home/HomeScreenHeader";
