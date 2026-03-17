@@ -43,7 +43,11 @@ function LoginScreenContent() {
 
     const result = await login();
     if (result.success) {
-      router.replace("/(doctor)/(tabs)");
+      if (result.user?.isDoctor) {
+        router.replace("/(doctor)/(tabs)");
+      } else {
+        router.replace("/(patient)/(tabs)");
+      }
     }
   };
 

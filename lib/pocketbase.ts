@@ -9,7 +9,6 @@ const store = new AsyncAuthStore({
   clear: async () => AsyncStorage.removeItem("pb_auth"),
 });
 
-// Update this to your deployed PocketBase URL if necessary
 export const PB_URL = process.env.EXPO_PUBLIC_POCKETBASE_URL;
 
 // Instantiate the PocketBase client with the custom auth store

@@ -8,7 +8,7 @@ interface LoginContextType {
   setPassword: (password: string) => void;
   isLoading: boolean;
   error: string | null;
-  login: () => Promise<{ success: boolean; error?: string }>;
+  login: () => Promise<{ success: boolean; user?: any; error?: string }>;
   clearError: () => void;
 }
 

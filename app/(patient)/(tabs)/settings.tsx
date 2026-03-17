@@ -9,8 +9,15 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { authService } from "../../../services/authService";
 
 export default function SettingsScreen() {
+  const handleLogout = () => {
+    authService.logout();
+    router.replace("/(auth)/Login");
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -95,7 +102,7 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.logoutButton}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.logoutButtonText}>Log Out</Text>
         </TouchableOpacity>
 
