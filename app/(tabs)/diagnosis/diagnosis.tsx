@@ -19,6 +19,8 @@ import {
   AlertTriangle,
 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
+import { Gap } from "@/constants/gap";
+import { Radius } from "@/constants/radius";
 
 type DiagnosisStatus = "Abnormal" | "Normal" | "Review";
 
@@ -207,6 +209,7 @@ export default function DiagnosisScreen() {
 
 const styles = StyleSheet.create({
   container: {
+    paddingHorizontal: Gap.mediumSmall,
     flex: 1,
     backgroundColor: "#ffffff",
   },
@@ -214,8 +217,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: Gap.small,
     backgroundColor: "#ffffff",
   },
   headerTitle: {
@@ -230,7 +232,7 @@ const styles = StyleSheet.create({
   headerButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: Radius.medium,
     backgroundColor: "#f8f9fc",
     alignItems: "center",
     justifyContent: "center",
@@ -240,19 +242,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#f6f6f8",
   },
   contentContainer: {
-    paddingBottom: 24,
+    paddingBottom: Gap.large,
   },
   searchContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingVertical: Gap.extraSmall,
     backgroundColor: "#f6f6f8",
   },
   searchInputContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#ffffff",
-    borderRadius: 12,
-    paddingHorizontal: 16,
+    borderRadius: Radius.small,
+    paddingHorizontal: Gap.small,
     height: 48,
     borderWidth: 1,
     borderColor: "#e2e8f0",
@@ -269,7 +270,7 @@ const styles = StyleSheet.create({
     }),
   },
   searchIcon: {
-    marginRight: 12,
+    marginRight: Gap.extraSmall,
   },
   searchInput: {
     flex: 1,
@@ -281,9 +282,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    marginTop: 20,
-    marginBottom: 12,
+    marginVertical: Gap.extraSmall,
   },
   sectionTitle: {
     fontSize: 14,
@@ -297,13 +296,12 @@ const styles = StyleSheet.create({
     color: "#1961f0",
   },
   listContainer: {
-    paddingHorizontal: 20,
-    gap: 16,
+    gap: Gap.small,
   },
   card: {
     backgroundColor: "#ffffff",
     borderRadius: 12,
-    padding: 20,
+    padding: Gap.mediumSmall,
     borderWidth: 1,
     borderColor: "#e2e8f0",
     ...Platform.select({
@@ -350,9 +348,9 @@ const styles = StyleSheet.create({
     color: "#64748b",
   },
   statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 9999,
+    paddingHorizontal: Gap.xxSmall,
+    paddingVertical: Gap.xxxSmall,
+    borderRadius: Radius.round,
     borderWidth: 1,
     borderColor: "transparent", // Added to match style structure but keep transparent usually unless specified
   },
@@ -362,11 +360,11 @@ const styles = StyleSheet.create({
   },
   resultContainer: {
     backgroundColor: "#f8fafc",
-    borderRadius: 8,
-    padding: 12,
+    borderRadius: Radius.extraSmall,
+    padding: Gap.extraSmall,
     borderWidth: 1,
     borderColor: "#f1f5f9",
-    gap: 8,
+    gap: Gap.xxSmall,
   },
   resultRow: {
     flexDirection: "row",
@@ -376,7 +374,7 @@ const styles = StyleSheet.create({
   resultInfo: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: Gap.xxSmall,
   },
   resultText: {
     fontSize: 14,
@@ -391,12 +389,12 @@ const styles = StyleSheet.create({
   progressBarBackground: {
     height: 8,
     backgroundColor: "#e2e8f0",
-    borderRadius: 4,
+    borderRadius: Radius.round,
     overflow: "hidden",
-    marginTop: 4,
+    marginTop: Gap.xxxSmall,
   },
   progressBarFill: {
     height: "100%",
-    borderRadius: 4,
+    borderRadius: Radius.round,
   },
 });

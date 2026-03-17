@@ -1,0 +1,2858 @@
+{
+  "metadata": {
+    "exportedAt": "2026-03-17T05:57:46.722Z",
+    "componentName": "Settings",
+    "totalElements": 134,
+    "nestingDepth": 11,
+    "plugin": "Figma to JSON Exporter"
+  },
+  "designTokens": {
+    "colors": {
+      "color-rgb(255, 255, 255)": "rgb(255, 255, 255)",
+      "color-rgb(13, 18, 28)": "rgb(13, 18, 28)",
+      "color-rgb(34, 197, 94)": "rgb(34, 197, 94)",
+      "color-rgb(17, 24, 39)": "rgb(17, 24, 39)",
+      "color-rgb(25, 97, 240)": "rgb(25, 97, 240)",
+      "color-rgb(107, 114, 128)": "rgb(107, 114, 128)",
+      "color-rgb(13, 166, 242)": "rgb(13, 166, 242)",
+      "color-rgb(156, 163, 175)": "rgb(156, 163, 175)",
+      "color-rgb(235, 77, 61)": "rgb(235, 77, 61)",
+      "color-rgb(50, 173, 230)": "rgb(50, 173, 230)",
+      "color-rgb(240, 253, 244)": "rgb(240, 253, 244)",
+      "color-rgb(22, 163, 74)": "rgb(22, 163, 74)",
+      "color-rgb(142, 142, 147)": "rgb(142, 142, 147)",
+      "color-rgb(88, 86, 214)": "rgb(88, 86, 214)",
+      "color-rgb(254, 226, 226)": "rgb(254, 226, 226)",
+      "color-rgb(255, 59, 48)": "rgb(255, 59, 48)",
+      "color-rgb(148, 163, 184)": "rgb(148, 163, 184)"
+    },
+    "fonts": {
+      "inter": {
+        "family": "Inter",
+        "sizes": {
+          "size-24": "24px",
+          "size-20": "20px",
+          "size-12": "12px",
+          "size-14": "14px",
+          "size-15": "15px",
+          "size-17": "17px",
+          "size-10": "10px"
+        },
+        "weights": {
+          "weight-700": "700",
+          "weight-600": "600",
+          "weight-400": "400",
+          "weight-500": "500"
+        }
+      }
+    },
+    "spacing": {
+      "padding-bottom-306": "306px",
+      "padding-top-24": "24px",
+      "padding-right-16": "16px",
+      "padding-bottom-8": "8px",
+      "padding-left-16": "16px",
+      "padding-top-32": "32px",
+      "padding-bottom-32": "32px",
+      "padding-top-16": "16px",
+      "gap-4": "4px",
+      "padding-top-4": "4px",
+      "padding-top-2": "2px",
+      "padding-right-10": "10px",
+      "padding-bottom-2": "2px",
+      "padding-left-10": "10px",
+      "gap-16": "16px",
+      "padding-bottom-4": "4px",
+      "gap-2": "2px",
+      "gap-8": "8px",
+      "padding-right-8": "8px",
+      "padding-left-8": "8px",
+      "padding-bottom-16": "16px",
+      "gap-1": "1px"
+    },
+    "effects": {
+      "shadow-6-4": {
+        "x": 0,
+        "y": 4,
+        "blur": 6,
+        "color": "rgba(59, 130, 246, 0.4000000059604645)"
+      },
+      "shadow-15-10": {
+        "x": 0,
+        "y": 10,
+        "blur": 15,
+        "color": "rgba(59, 130, 246, 0.4000000059604645)"
+      },
+      "shadow-2-1": {
+        "x": 0,
+        "y": 1,
+        "blur": 2,
+        "color": "rgba(0, 0, 0, 0.05000000074505806)"
+      }
+    }
+  },
+  "structure": {
+    "name": "settings",
+    "type": "FRAME",
+    "size": {
+      "w": 448,
+      "h": 1024
+    },
+    "styles": {
+      "bg": "rgb(255, 255, 255)",
+      "layout": {
+        "direction": "row",
+        "gap": 0,
+        "align": {
+          "main": "start",
+          "cross": "start"
+        }
+      }
+    },
+    "children": [
+      {
+        "name": "1920w-light",
+        "type": "FRAME",
+        "size": {
+          "w": 448,
+          "h": 934
+        },
+        "styles": {
+          "bg": "rgb(255, 255, 255)",
+          "layout": {
+            "direction": "column",
+            "gap": 0,
+            "align": {
+              "main": "start",
+              "cross": "center"
+            },
+            "padding": [
+              0,
+              0,
+              306,
+              0
+            ]
+          }
+        },
+        "children": [
+          {
+            "name": "header",
+            "type": "FRAME",
+            "size": {
+              "w": 448,
+              "h": 88
+            },
+            "styles": {
+              "bg": "rgb(255, 255, 255)",
+              "layout": {
+                "direction": "row",
+                "gap": 0,
+                "align": {
+                  "main": "center",
+                  "cross": "center"
+                },
+                "padding": [
+                  24,
+                  16,
+                  8,
+                  16
+                ]
+              }
+            },
+            "children": [
+              {
+                "name": "heading-2",
+                "type": "FRAME",
+                "size": {
+                  "w": 416,
+                  "h": 30
+                },
+                "styles": {
+                  "layout": {
+                    "direction": "column",
+                    "gap": 0,
+                    "align": {
+                      "main": "center",
+                      "cross": "center"
+                    }
+                  }
+                },
+                "children": [
+                  {
+                    "name": "settings",
+                    "type": "TEXT",
+                    "size": {
+                      "w": 416,
+                      "h": 30
+                    },
+                    "content": "Settings",
+                    "styles": {
+                      "bg": "rgb(13, 18, 28)",
+                      "text": {
+                        "family": "Inter",
+                        "size": 24,
+                        "weight": "700",
+                        "align": "center"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "container",
+            "type": "FRAME",
+            "size": {
+              "w": 448,
+              "h": 830
+            },
+            "styles": {
+              "layout": {
+                "direction": "column",
+                "gap": 0,
+                "align": {
+                  "main": "start",
+                  "cross": "start"
+                },
+                "padding": [
+                  0,
+                  16,
+                  0,
+                  16
+                ]
+              }
+            },
+            "children": [
+              {
+                "name": "profile-header",
+                "type": "FRAME",
+                "size": {
+                  "w": 416,
+                  "h": 257
+                },
+                "styles": {
+                  "layout": {
+                    "direction": "column",
+                    "gap": 0,
+                    "align": {
+                      "main": "start",
+                      "cross": "center"
+                    },
+                    "padding": [
+                      32,
+                      0,
+                      32,
+                      0
+                    ]
+                  }
+                },
+                "children": [
+                  {
+                    "name": "container",
+                    "type": "FRAME",
+                    "size": {
+                      "w": 96,
+                      "h": 96
+                    },
+                    "styles": {
+                      "layout": {
+                        "direction": "column",
+                        "gap": 0,
+                        "align": {
+                          "main": "start",
+                          "cross": "start"
+                        }
+                      }
+                    },
+                    "children": [
+                      {
+                        "name": "image-border-shadow",
+                        "type": "FRAME",
+                        "size": {
+                          "w": 96,
+                          "h": 96
+                        },
+                        "styles": {
+                          "border": {
+                            "width": 4,
+                            "color": "rgb(255, 255, 255)"
+                          },
+                          "radius": 9999,
+                          "shadow": {
+                            "x": 0,
+                            "y": 4,
+                            "blur": 6,
+                            "color": "rgba(0, 0, 0, 0.10000000149011612)"
+                          },
+                          "layout": {
+                            "direction": "row",
+                            "gap": 0,
+                            "align": {
+                              "main": "start",
+                              "cross": "start"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "name": "background-border",
+                        "type": "RECTANGLE",
+                        "size": {
+                          "w": 20,
+                          "h": 20
+                        },
+                        "styles": {
+                          "bg": "rgb(34, 197, 94)",
+                          "border": {
+                            "width": 2,
+                            "color": "rgb(255, 255, 255)"
+                          },
+                          "radius": 9999
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "name": "margin",
+                    "type": "FRAME",
+                    "size": {
+                      "w": 174,
+                      "h": 97
+                    },
+                    "styles": {
+                      "layout": {
+                        "direction": "column",
+                        "gap": 0,
+                        "align": {
+                          "main": "start",
+                          "cross": "start"
+                        },
+                        "padding": [
+                          16,
+                          0,
+                          0,
+                          0
+                        ]
+                      }
+                    },
+                    "children": [
+                      {
+                        "name": "container",
+                        "type": "FRAME",
+                        "size": {
+                          "w": 174,
+                          "h": 81
+                        },
+                        "styles": {
+                          "layout": {
+                            "direction": "column",
+                            "gap": 4,
+                            "align": {
+                              "main": "center",
+                              "cross": "center"
+                            }
+                          }
+                        },
+                        "children": [
+                          {
+                            "name": "heading-3",
+                            "type": "FRAME",
+                            "size": {
+                              "w": 140,
+                              "h": 25
+                            },
+                            "styles": {
+                              "layout": {
+                                "direction": "column",
+                                "gap": 0,
+                                "align": {
+                                  "main": "start",
+                                  "cross": "center"
+                                }
+                              }
+                            },
+                            "children": [
+                              {
+                                "name": "dr--sarah-miller",
+                                "type": "TEXT",
+                                "size": {
+                                  "w": 140,
+                                  "h": 25
+                                },
+                                "content": "Dr. Sarah Miller",
+                                "styles": {
+                                  "bg": "rgb(17, 24, 39)",
+                                  "text": {
+                                    "family": "Inter",
+                                    "size": 20,
+                                    "weight": "700",
+                                    "align": "center"
+                                  }
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "name": "margin",
+                            "type": "FRAME",
+                            "size": {
+                              "w": 69,
+                              "h": 24
+                            },
+                            "styles": {
+                              "layout": {
+                                "direction": "column",
+                                "gap": 0,
+                                "align": {
+                                  "main": "start",
+                                  "cross": "start"
+                                },
+                                "padding": [
+                                  4,
+                                  0,
+                                  0,
+                                  0
+                                ]
+                              }
+                            },
+                            "children": [
+                              {
+                                "name": "overlay",
+                                "type": "FRAME",
+                                "size": {
+                                  "w": 69,
+                                  "h": 20
+                                },
+                                "styles": {
+                                  "bg": "rgb(25, 97, 240)",
+                                  "radius": 9999,
+                                  "layout": {
+                                    "direction": "column",
+                                    "gap": 0,
+                                    "align": {
+                                      "main": "start",
+                                      "cross": "start"
+                                    },
+                                    "padding": [
+                                      2,
+                                      10,
+                                      2,
+                                      10
+                                    ]
+                                  }
+                                },
+                                "children": [
+                                  {
+                                    "name": "provider",
+                                    "type": "TEXT",
+                                    "size": {
+                                      "w": 49,
+                                      "h": 16
+                                    },
+                                    "content": "Provider",
+                                    "styles": {
+                                      "bg": "rgb(25, 97, 240)",
+                                      "text": {
+                                        "family": "Inter",
+                                        "size": 12,
+                                        "weight": "600",
+                                        "align": "left"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "name": "margin",
+                            "type": "FRAME",
+                            "size": {
+                              "w": 174,
+                              "h": 24
+                            },
+                            "styles": {
+                              "layout": {
+                                "direction": "column",
+                                "gap": 0,
+                                "align": {
+                                  "main": "start",
+                                  "cross": "start"
+                                },
+                                "padding": [
+                                  4,
+                                  0,
+                                  0,
+                                  0
+                                ]
+                              }
+                            },
+                            "children": [
+                              {
+                                "name": "sarah-miller-hospital-com",
+                                "type": "TEXT",
+                                "size": {
+                                  "w": 174,
+                                  "h": 20
+                                },
+                                "content": "sarah.miller@hospital.com",
+                                "styles": {
+                                  "bg": "rgb(107, 114, 128)",
+                                  "text": {
+                                    "family": "Inter",
+                                    "size": 14,
+                                    "weight": "400",
+                                    "align": "left"
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "section--general",
+                "type": "FRAME",
+                "size": {
+                  "w": 416,
+                  "h": 155
+                },
+                "styles": {
+                  "layout": {
+                    "direction": "column",
+                    "gap": 0,
+                    "align": {
+                      "main": "center",
+                      "cross": "center"
+                    }
+                  }
+                },
+                "children": [
+                  {
+                    "name": "heading-3",
+                    "type": "FRAME",
+                    "size": {
+                      "w": 416,
+                      "h": 24
+                    },
+                    "styles": {
+                      "layout": {
+                        "direction": "column",
+                        "gap": 0,
+                        "align": {
+                          "main": "center",
+                          "cross": "start"
+                        },
+                        "padding": [
+                          0,
+                          16,
+                          8,
+                          0
+                        ]
+                      }
+                    },
+                    "children": [
+                      {
+                        "name": "general",
+                        "type": "TEXT",
+                        "size": {
+                          "w": 60,
+                          "h": 16
+                        },
+                        "content": "General",
+                        "styles": {
+                          "bg": "rgb(107, 114, 128)",
+                          "text": {
+                            "family": "Inter",
+                            "size": 12,
+                            "weight": "600",
+                            "align": "left"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "name": "background-border-shadow",
+                    "type": "FRAME",
+                    "size": {
+                      "w": 416,
+                      "h": 131
+                    },
+                    "styles": {
+                      "bg": "rgb(255, 255, 255)",
+                      "border": {
+                        "width": 1,
+                        "color": "rgb(243, 244, 246)"
+                      },
+                      "radius": 12,
+                      "shadow": {
+                        "x": 0,
+                        "y": 1,
+                        "blur": 2,
+                        "color": "rgba(0, 0, 0, 0.05000000074505806)"
+                      },
+                      "layout": {
+                        "direction": "column",
+                        "gap": 0,
+                        "align": {
+                          "main": "start",
+                          "cross": "start"
+                        }
+                      }
+                    },
+                    "children": [
+                      {
+                        "name": "button---account-info",
+                        "type": "FRAME",
+                        "size": {
+                          "w": 415,
+                          "h": 65
+                        },
+                        "styles": {
+                          "border": {
+                            "width": 1,
+                            "color": "rgb(243, 244, 246)"
+                          },
+                          "layout": {
+                            "direction": "row",
+                            "gap": 0,
+                            "align": {
+                              "main": "start",
+                              "cross": "start"
+                            }
+                          }
+                        },
+                        "children": [
+                          {
+                            "name": "container",
+                            "type": "FRAME",
+                            "size": {
+                              "w": 140,
+                              "h": 32
+                            },
+                            "styles": {
+                              "layout": {
+                                "direction": "row",
+                                "gap": 16,
+                                "align": {
+                                  "main": "start",
+                                  "cross": "center"
+                                }
+                              }
+                            },
+                            "children": [
+                              {
+                                "name": "background-shadow",
+                                "type": "FRAME",
+                                "size": {
+                                  "w": 32,
+                                  "h": 32
+                                },
+                                "styles": {
+                                  "bg": "rgb(13, 166, 242)",
+                                  "radius": 8,
+                                  "shadow": {
+                                    "x": 0,
+                                    "y": 1,
+                                    "blur": 2,
+                                    "color": "rgba(0, 0, 0, 0.05000000074505806)"
+                                  },
+                                  "layout": {
+                                    "direction": "row",
+                                    "gap": 0,
+                                    "align": {
+                                      "main": "center",
+                                      "cross": "center"
+                                    }
+                                  }
+                                },
+                                "children": [
+                                  {
+                                    "name": "container",
+                                    "type": "FRAME",
+                                    "size": {
+                                      "w": 20,
+                                      "h": 24
+                                    },
+                                    "styles": {
+                                      "layout": {
+                                        "direction": "column",
+                                        "gap": 0,
+                                        "align": {
+                                          "main": "start",
+                                          "cross": "start"
+                                        }
+                                      }
+                                    },
+                                    "children": [
+                                      {
+                                        "name": "icon",
+                                        "type": "FRAME",
+                                        "size": {
+                                          "w": 20,
+                                          "h": 24
+                                        },
+                                        "styles": {
+                                          "layout": {
+                                            "direction": "row",
+                                            "gap": 0,
+                                            "align": {
+                                              "main": "start",
+                                              "cross": "start"
+                                            }
+                                          }
+                                        },
+                                        "children": [
+                                          {
+                                            "name": "vector",
+                                            "type": "VECTOR",
+                                            "size": {
+                                              "w": 13,
+                                              "h": 13
+                                            },
+                                            "styles": {
+                                              "bg": "rgb(255, 255, 255)"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "name": "container",
+                                "type": "FRAME",
+                                "size": {
+                                  "w": 92,
+                                  "h": 23
+                                },
+                                "styles": {
+                                  "layout": {
+                                    "direction": "row",
+                                    "gap": 0,
+                                    "align": {
+                                      "main": "start",
+                                      "cross": "start"
+                                    }
+                                  }
+                                },
+                                "children": [
+                                  {
+                                    "name": "account-info",
+                                    "type": "TEXT",
+                                    "size": {
+                                      "w": 92,
+                                      "h": 23
+                                    },
+                                    "content": "Account Info",
+                                    "styles": {
+                                      "bg": "rgb(17, 24, 39)",
+                                      "text": {
+                                        "family": "Inter",
+                                        "size": 15,
+                                        "weight": "500",
+                                        "align": "center"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "name": "container",
+                            "type": "FRAME",
+                            "size": {
+                              "w": 20,
+                              "h": 28
+                            },
+                            "styles": {
+                              "layout": {
+                                "direction": "column",
+                                "gap": 0,
+                                "align": {
+                                  "main": "start",
+                                  "cross": "center"
+                                },
+                                "padding": [
+                                  0,
+                                  0,
+                                  4,
+                                  0
+                                ]
+                              }
+                            },
+                            "children": [
+                              {
+                                "name": "container",
+                                "type": "FRAME",
+                                "size": {
+                                  "w": 20,
+                                  "h": 24
+                                },
+                                "styles": {
+                                  "layout": {
+                                    "direction": "row",
+                                    "gap": 0,
+                                    "align": {
+                                      "main": "start",
+                                      "cross": "start"
+                                    }
+                                  }
+                                },
+                                "children": [
+                                  {
+                                    "name": "icon",
+                                    "type": "FRAME",
+                                    "size": {
+                                      "w": 20,
+                                      "h": 24
+                                    },
+                                    "styles": {
+                                      "layout": {
+                                        "direction": "row",
+                                        "gap": 0,
+                                        "align": {
+                                          "main": "start",
+                                          "cross": "start"
+                                        }
+                                      }
+                                    },
+                                    "children": [
+                                      {
+                                        "name": "vector",
+                                        "type": "VECTOR",
+                                        "size": {
+                                          "w": 6,
+                                          "h": 10
+                                        },
+                                        "styles": {
+                                          "bg": "rgb(156, 163, 175)"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "name": "button---notification-settings",
+                        "type": "FRAME",
+                        "size": {
+                          "w": 415,
+                          "h": 64
+                        },
+                        "styles": {
+                          "layout": {
+                            "direction": "row",
+                            "gap": 0,
+                            "align": {
+                              "main": "start",
+                              "cross": "start"
+                            }
+                          }
+                        },
+                        "children": [
+                          {
+                            "name": "container",
+                            "type": "FRAME",
+                            "size": {
+                              "w": 139,
+                              "h": 32
+                            },
+                            "styles": {
+                              "layout": {
+                                "direction": "row",
+                                "gap": 16,
+                                "align": {
+                                  "main": "start",
+                                  "cross": "center"
+                                }
+                              }
+                            },
+                            "children": [
+                              {
+                                "name": "background-shadow",
+                                "type": "FRAME",
+                                "size": {
+                                  "w": 32,
+                                  "h": 32
+                                },
+                                "styles": {
+                                  "bg": "rgb(235, 77, 61)",
+                                  "radius": 8,
+                                  "shadow": {
+                                    "x": 0,
+                                    "y": 1,
+                                    "blur": 2,
+                                    "color": "rgba(0, 0, 0, 0.05000000074505806)"
+                                  },
+                                  "layout": {
+                                    "direction": "row",
+                                    "gap": 0,
+                                    "align": {
+                                      "main": "center",
+                                      "cross": "center"
+                                    }
+                                  }
+                                },
+                                "children": [
+                                  {
+                                    "name": "container",
+                                    "type": "FRAME",
+                                    "size": {
+                                      "w": 20,
+                                      "h": 24
+                                    },
+                                    "styles": {
+                                      "layout": {
+                                        "direction": "column",
+                                        "gap": 0,
+                                        "align": {
+                                          "main": "start",
+                                          "cross": "start"
+                                        }
+                                      }
+                                    },
+                                    "children": [
+                                      {
+                                        "name": "icon",
+                                        "type": "FRAME",
+                                        "size": {
+                                          "w": 20,
+                                          "h": 24
+                                        },
+                                        "styles": {
+                                          "layout": {
+                                            "direction": "row",
+                                            "gap": 0,
+                                            "align": {
+                                              "main": "start",
+                                              "cross": "start"
+                                            }
+                                          }
+                                        },
+                                        "children": [
+                                          {
+                                            "name": "vector",
+                                            "type": "VECTOR",
+                                            "size": {
+                                              "w": 13,
+                                              "h": 17
+                                            },
+                                            "styles": {
+                                              "bg": "rgb(255, 255, 255)"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "name": "container",
+                                "type": "FRAME",
+                                "size": {
+                                  "w": 91,
+                                  "h": 23
+                                },
+                                "styles": {
+                                  "layout": {
+                                    "direction": "row",
+                                    "gap": 0,
+                                    "align": {
+                                      "main": "start",
+                                      "cross": "start"
+                                    }
+                                  }
+                                },
+                                "children": [
+                                  {
+                                    "name": "notifications",
+                                    "type": "TEXT",
+                                    "size": {
+                                      "w": 92,
+                                      "h": 23
+                                    },
+                                    "content": "Notifications",
+                                    "styles": {
+                                      "bg": "rgb(17, 24, 39)",
+                                      "text": {
+                                        "family": "Inter",
+                                        "size": 15,
+                                        "weight": "500",
+                                        "align": "center"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "name": "container",
+                            "type": "FRAME",
+                            "size": {
+                              "w": 20,
+                              "h": 28
+                            },
+                            "styles": {
+                              "layout": {
+                                "direction": "column",
+                                "gap": 0,
+                                "align": {
+                                  "main": "start",
+                                  "cross": "center"
+                                },
+                                "padding": [
+                                  0,
+                                  0,
+                                  4,
+                                  0
+                                ]
+                              }
+                            },
+                            "children": [
+                              {
+                                "name": "container",
+                                "type": "FRAME",
+                                "size": {
+                                  "w": 20,
+                                  "h": 24
+                                },
+                                "styles": {
+                                  "layout": {
+                                    "direction": "row",
+                                    "gap": 0,
+                                    "align": {
+                                      "main": "start",
+                                      "cross": "start"
+                                    }
+                                  }
+                                },
+                                "children": [
+                                  {
+                                    "name": "icon",
+                                    "type": "FRAME",
+                                    "size": {
+                                      "w": 20,
+                                      "h": 24
+                                    },
+                                    "styles": {
+                                      "layout": {
+                                        "direction": "row",
+                                        "gap": 0,
+                                        "align": {
+                                          "main": "start",
+                                          "cross": "start"
+                                        }
+                                      }
+                                    },
+                                    "children": [
+                                      {
+                                        "name": "vector",
+                                        "type": "VECTOR",
+                                        "size": {
+                                          "w": 6,
+                                          "h": 10
+                                        },
+                                        "styles": {
+                                          "bg": "rgb(156, 163, 175)"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "section--hardware",
+                "type": "FRAME",
+                "size": {
+                  "w": 416,
+                  "h": 115
+                },
+                "styles": {
+                  "layout": {
+                    "direction": "column",
+                    "gap": 0,
+                    "align": {
+                      "main": "start",
+                      "cross": "end"
+                    },
+                    "padding": [
+                      24,
+                      0,
+                      0,
+                      0
+                    ]
+                  }
+                },
+                "children": [
+                  {
+                    "name": "heading-3",
+                    "type": "FRAME",
+                    "size": {
+                      "w": 416,
+                      "h": 24
+                    },
+                    "styles": {
+                      "layout": {
+                        "direction": "column",
+                        "gap": 0,
+                        "align": {
+                          "main": "center",
+                          "cross": "start"
+                        },
+                        "padding": [
+                          0,
+                          16,
+                          8,
+                          0
+                        ]
+                      }
+                    },
+                    "children": [
+                      {
+                        "name": "hardware",
+                        "type": "TEXT",
+                        "size": {
+                          "w": 74,
+                          "h": 16
+                        },
+                        "content": "Hardware",
+                        "styles": {
+                          "bg": "rgb(107, 114, 128)",
+                          "text": {
+                            "family": "Inter",
+                            "size": 12,
+                            "weight": "600",
+                            "align": "left"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "name": "background-border-shadow",
+                    "type": "FRAME",
+                    "size": {
+                      "w": 416,
+                      "h": 67
+                    },
+                    "styles": {
+                      "bg": "rgb(255, 255, 255)",
+                      "border": {
+                        "width": 1,
+                        "color": "rgb(243, 244, 246)"
+                      },
+                      "radius": 12,
+                      "shadow": {
+                        "x": 0,
+                        "y": 1,
+                        "blur": 2,
+                        "color": "rgba(0, 0, 0, 0.05000000074505806)"
+                      },
+                      "layout": {
+                        "direction": "column",
+                        "gap": 0,
+                        "align": {
+                          "main": "center",
+                          "cross": "start"
+                        }
+                      }
+                    },
+                    "children": [
+                      {
+                        "name": "button---device-management",
+                        "type": "FRAME",
+                        "size": {
+                          "w": 415,
+                          "h": 65
+                        },
+                        "styles": {
+                          "layout": {
+                            "direction": "row",
+                            "gap": 0,
+                            "align": {
+                              "main": "start",
+                              "cross": "start"
+                            }
+                          }
+                        },
+                        "children": [
+                          {
+                            "name": "container",
+                            "type": "FRAME",
+                            "size": {
+                              "w": 257,
+                              "h": 33
+                            },
+                            "styles": {
+                              "layout": {
+                                "direction": "row",
+                                "gap": 16,
+                                "align": {
+                                  "main": "start",
+                                  "cross": "center"
+                                }
+                              }
+                            },
+                            "children": [
+                              {
+                                "name": "background-shadow",
+                                "type": "FRAME",
+                                "size": {
+                                  "w": 32,
+                                  "h": 32
+                                },
+                                "styles": {
+                                  "bg": "rgb(50, 173, 230)",
+                                  "radius": 8,
+                                  "shadow": {
+                                    "x": 0,
+                                    "y": 1,
+                                    "blur": 2,
+                                    "color": "rgba(0, 0, 0, 0.05000000074505806)"
+                                  },
+                                  "layout": {
+                                    "direction": "row",
+                                    "gap": 0,
+                                    "align": {
+                                      "main": "center",
+                                      "cross": "center"
+                                    }
+                                  }
+                                },
+                                "children": [
+                                  {
+                                    "name": "container",
+                                    "type": "FRAME",
+                                    "size": {
+                                      "w": 20,
+                                      "h": 24
+                                    },
+                                    "styles": {
+                                      "layout": {
+                                        "direction": "column",
+                                        "gap": 0,
+                                        "align": {
+                                          "main": "start",
+                                          "cross": "start"
+                                        }
+                                      }
+                                    },
+                                    "children": [
+                                      {
+                                        "name": "icon",
+                                        "type": "FRAME",
+                                        "size": {
+                                          "w": 20,
+                                          "h": 24
+                                        },
+                                        "styles": {
+                                          "layout": {
+                                            "direction": "row",
+                                            "gap": 0,
+                                            "align": {
+                                              "main": "start",
+                                              "cross": "start"
+                                            }
+                                          }
+                                        },
+                                        "children": [
+                                          {
+                                            "name": "vector",
+                                            "type": "VECTOR",
+                                            "size": {
+                                              "w": 17,
+                                              "h": 13
+                                            },
+                                            "styles": {
+                                              "bg": "rgb(255, 255, 255)"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "name": "container",
+                                "type": "FRAME",
+                                "size": {
+                                  "w": 120,
+                                  "h": 33
+                                },
+                                "styles": {
+                                  "layout": {
+                                    "direction": "column",
+                                    "gap": 2,
+                                    "align": {
+                                      "main": "start",
+                                      "cross": "start"
+                                    }
+                                  }
+                                },
+                                "children": [
+                                  {
+                                    "name": "container",
+                                    "type": "FRAME",
+                                    "size": {
+                                      "w": 120,
+                                      "h": 15
+                                    },
+                                    "styles": {
+                                      "layout": {
+                                        "direction": "column",
+                                        "gap": 0,
+                                        "align": {
+                                          "main": "start",
+                                          "cross": "center"
+                                        }
+                                      }
+                                    },
+                                    "children": [
+                                      {
+                                        "name": "stethoscope-pro",
+                                        "type": "TEXT",
+                                        "size": {
+                                          "w": 120,
+                                          "h": 15
+                                        },
+                                        "content": "Stethoscope Pro",
+                                        "styles": {
+                                          "bg": "rgb(17, 24, 39)",
+                                          "text": {
+                                            "family": "Inter",
+                                            "size": 15,
+                                            "weight": "500",
+                                            "align": "center"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "name": "container",
+                                    "type": "FRAME",
+                                    "size": {
+                                      "w": 118,
+                                      "h": 16
+                                    },
+                                    "styles": {
+                                      "layout": {
+                                        "direction": "column",
+                                        "gap": 0,
+                                        "align": {
+                                          "main": "start",
+                                          "cross": "center"
+                                        }
+                                      }
+                                    },
+                                    "children": [
+                                      {
+                                        "name": "last-synced--2m-ago",
+                                        "type": "TEXT",
+                                        "size": {
+                                          "w": 118,
+                                          "h": 16
+                                        },
+                                        "content": "Last synced: 2m ago",
+                                        "styles": {
+                                          "bg": "rgb(156, 163, 175)",
+                                          "text": {
+                                            "family": "Inter",
+                                            "size": 12,
+                                            "weight": "400",
+                                            "align": "center"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "name": "container",
+                            "type": "FRAME",
+                            "size": {
+                              "w": 111,
+                              "h": 28
+                            },
+                            "styles": {
+                              "layout": {
+                                "direction": "row",
+                                "gap": 8,
+                                "align": {
+                                  "main": "start",
+                                  "cross": "end"
+                                }
+                              }
+                            },
+                            "children": [
+                              {
+                                "name": "background-border",
+                                "type": "FRAME",
+                                "size": {
+                                  "w": 83,
+                                  "h": 26
+                                },
+                                "styles": {
+                                  "bg": "rgb(240, 253, 244)",
+                                  "border": {
+                                    "width": 1,
+                                    "color": "rgb(220, 252, 231)"
+                                  },
+                                  "radius": 6,
+                                  "layout": {
+                                    "direction": "column",
+                                    "gap": 0,
+                                    "align": {
+                                      "main": "start",
+                                      "cross": "center"
+                                    },
+                                    "padding": [
+                                      4,
+                                      8,
+                                      4,
+                                      8
+                                    ]
+                                  }
+                                },
+                                "children": [
+                                  {
+                                    "name": "connected",
+                                    "type": "TEXT",
+                                    "size": {
+                                      "w": 65,
+                                      "h": 16
+                                    },
+                                    "content": "Connected",
+                                    "styles": {
+                                      "bg": "rgb(22, 163, 74)",
+                                      "text": {
+                                        "family": "Inter",
+                                        "size": 12,
+                                        "weight": "600",
+                                        "align": "center"
+                                      }
+                                    }
+                                  }
+                                ]
+                              },
+                              {
+                                "name": "container",
+                                "type": "FRAME",
+                                "size": {
+                                  "w": 20,
+                                  "h": 28
+                                },
+                                "styles": {
+                                  "layout": {
+                                    "direction": "column",
+                                    "gap": 0,
+                                    "align": {
+                                      "main": "start",
+                                      "cross": "center"
+                                    },
+                                    "padding": [
+                                      0,
+                                      0,
+                                      4,
+                                      0
+                                    ]
+                                  }
+                                },
+                                "children": [
+                                  {
+                                    "name": "container",
+                                    "type": "FRAME",
+                                    "size": {
+                                      "w": 20,
+                                      "h": 24
+                                    },
+                                    "styles": {
+                                      "layout": {
+                                        "direction": "row",
+                                        "gap": 0,
+                                        "align": {
+                                          "main": "start",
+                                          "cross": "start"
+                                        }
+                                      }
+                                    },
+                                    "children": [
+                                      {
+                                        "name": "icon",
+                                        "type": "FRAME",
+                                        "size": {
+                                          "w": 20,
+                                          "h": 24
+                                        },
+                                        "styles": {
+                                          "layout": {
+                                            "direction": "row",
+                                            "gap": 0,
+                                            "align": {
+                                              "main": "start",
+                                              "cross": "start"
+                                            }
+                                          }
+                                        },
+                                        "children": [
+                                          {
+                                            "name": "vector",
+                                            "type": "VECTOR",
+                                            "size": {
+                                              "w": 6,
+                                              "h": 10
+                                            },
+                                            "styles": {
+                                              "bg": "rgb(156, 163, 175)"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "section--legal---security",
+                "type": "FRAME",
+                "size": {
+                  "w": 416,
+                  "h": 179
+                },
+                "styles": {
+                  "layout": {
+                    "direction": "column",
+                    "gap": 0,
+                    "align": {
+                      "main": "start",
+                      "cross": "end"
+                    },
+                    "padding": [
+                      24,
+                      0,
+                      0,
+                      0
+                    ]
+                  }
+                },
+                "children": [
+                  {
+                    "name": "heading-3",
+                    "type": "FRAME",
+                    "size": {
+                      "w": 416,
+                      "h": 24
+                    },
+                    "styles": {
+                      "layout": {
+                        "direction": "column",
+                        "gap": 0,
+                        "align": {
+                          "main": "start",
+                          "cross": "start"
+                        },
+                        "padding": [
+                          0,
+                          16,
+                          8,
+                          0
+                        ]
+                      }
+                    },
+                    "children": [
+                      {
+                        "name": "legal---security",
+                        "type": "TEXT",
+                        "size": {
+                          "w": 122,
+                          "h": 16
+                        },
+                        "content": "Legal & Security",
+                        "styles": {
+                          "bg": "rgb(107, 114, 128)",
+                          "text": {
+                            "family": "Inter",
+                            "size": 12,
+                            "weight": "600",
+                            "align": "left"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "name": "background-border-shadow",
+                    "type": "FRAME",
+                    "size": {
+                      "w": 416,
+                      "h": 131
+                    },
+                    "styles": {
+                      "bg": "rgb(255, 255, 255)",
+                      "border": {
+                        "width": 1,
+                        "color": "rgb(243, 244, 246)"
+                      },
+                      "radius": 12,
+                      "shadow": {
+                        "x": 0,
+                        "y": 1,
+                        "blur": 2,
+                        "color": "rgba(0, 0, 0, 0.05000000074505806)"
+                      },
+                      "layout": {
+                        "direction": "column",
+                        "gap": 0,
+                        "align": {
+                          "main": "start",
+                          "cross": "start"
+                        }
+                      }
+                    },
+                    "children": [
+                      {
+                        "name": "button---privacy---data",
+                        "type": "FRAME",
+                        "size": {
+                          "w": 478,
+                          "h": 65
+                        },
+                        "styles": {
+                          "border": {
+                            "width": 1,
+                            "color": "rgb(243, 244, 246)"
+                          },
+                          "layout": {
+                            "direction": "row",
+                            "gap": 0,
+                            "align": {
+                              "main": "start",
+                              "cross": "start"
+                            }
+                          }
+                        },
+                        "children": [
+                          {
+                            "name": "container",
+                            "type": "FRAME",
+                            "size": {
+                              "w": 152,
+                              "h": 32
+                            },
+                            "styles": {
+                              "layout": {
+                                "direction": "row",
+                                "gap": 16,
+                                "align": {
+                                  "main": "start",
+                                  "cross": "center"
+                                }
+                              }
+                            },
+                            "children": [
+                              {
+                                "name": "background-shadow",
+                                "type": "FRAME",
+                                "size": {
+                                  "w": 32,
+                                  "h": 32
+                                },
+                                "styles": {
+                                  "bg": "rgb(142, 142, 147)",
+                                  "radius": 8,
+                                  "shadow": {
+                                    "x": 0,
+                                    "y": 1,
+                                    "blur": 2,
+                                    "color": "rgba(0, 0, 0, 0.05000000074505806)"
+                                  },
+                                  "layout": {
+                                    "direction": "row",
+                                    "gap": 0,
+                                    "align": {
+                                      "main": "center",
+                                      "cross": "center"
+                                    }
+                                  }
+                                },
+                                "children": [
+                                  {
+                                    "name": "container",
+                                    "type": "FRAME",
+                                    "size": {
+                                      "w": 20,
+                                      "h": 24
+                                    },
+                                    "styles": {
+                                      "layout": {
+                                        "direction": "column",
+                                        "gap": 0,
+                                        "align": {
+                                          "main": "start",
+                                          "cross": "start"
+                                        }
+                                      }
+                                    },
+                                    "children": [
+                                      {
+                                        "name": "icon",
+                                        "type": "FRAME",
+                                        "size": {
+                                          "w": 20,
+                                          "h": 24
+                                        },
+                                        "styles": {
+                                          "layout": {
+                                            "direction": "row",
+                                            "gap": 0,
+                                            "align": {
+                                              "main": "start",
+                                              "cross": "start"
+                                            }
+                                          }
+                                        },
+                                        "children": [
+                                          {
+                                            "name": "vector",
+                                            "type": "VECTOR",
+                                            "size": {
+                                              "w": 13,
+                                              "h": 18
+                                            },
+                                            "styles": {
+                                              "bg": "rgb(255, 255, 255)"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "name": "container",
+                                "type": "FRAME",
+                                "size": {
+                                  "w": 104,
+                                  "h": 23
+                                },
+                                "styles": {
+                                  "layout": {
+                                    "direction": "row",
+                                    "gap": 0,
+                                    "align": {
+                                      "main": "start",
+                                      "cross": "start"
+                                    }
+                                  }
+                                },
+                                "children": [
+                                  {
+                                    "name": "privacy---data",
+                                    "type": "TEXT",
+                                    "size": {
+                                      "w": 105,
+                                      "h": 23
+                                    },
+                                    "content": "Privacy & Data",
+                                    "styles": {
+                                      "bg": "rgb(17, 24, 39)",
+                                      "text": {
+                                        "family": "Inter",
+                                        "size": 15,
+                                        "weight": "500",
+                                        "align": "center"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "name": "container",
+                            "type": "FRAME",
+                            "size": {
+                              "w": 20,
+                              "h": 28
+                            },
+                            "styles": {
+                              "layout": {
+                                "direction": "column",
+                                "gap": 0,
+                                "align": {
+                                  "main": "start",
+                                  "cross": "center"
+                                },
+                                "padding": [
+                                  0,
+                                  0,
+                                  4,
+                                  0
+                                ]
+                              }
+                            },
+                            "children": [
+                              {
+                                "name": "container",
+                                "type": "FRAME",
+                                "size": {
+                                  "w": 20,
+                                  "h": 24
+                                },
+                                "styles": {
+                                  "layout": {
+                                    "direction": "row",
+                                    "gap": 0,
+                                    "align": {
+                                      "main": "start",
+                                      "cross": "start"
+                                    }
+                                  }
+                                },
+                                "children": [
+                                  {
+                                    "name": "icon",
+                                    "type": "FRAME",
+                                    "size": {
+                                      "w": 20,
+                                      "h": 24
+                                    },
+                                    "styles": {
+                                      "layout": {
+                                        "direction": "row",
+                                        "gap": 0,
+                                        "align": {
+                                          "main": "start",
+                                          "cross": "start"
+                                        }
+                                      }
+                                    },
+                                    "children": [
+                                      {
+                                        "name": "vector",
+                                        "type": "VECTOR",
+                                        "size": {
+                                          "w": 6,
+                                          "h": 10
+                                        },
+                                        "styles": {
+                                          "bg": "rgb(156, 163, 175)"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "name": "button---help---support",
+                        "type": "FRAME",
+                        "size": {
+                          "w": 478,
+                          "h": 64
+                        },
+                        "styles": {
+                          "layout": {
+                            "direction": "row",
+                            "gap": 0,
+                            "align": {
+                              "main": "start",
+                              "cross": "start"
+                            }
+                          }
+                        },
+                        "children": [
+                          {
+                            "name": "container",
+                            "type": "FRAME",
+                            "size": {
+                              "w": 156,
+                              "h": 32
+                            },
+                            "styles": {
+                              "layout": {
+                                "direction": "row",
+                                "gap": 16,
+                                "align": {
+                                  "main": "start",
+                                  "cross": "center"
+                                }
+                              }
+                            },
+                            "children": [
+                              {
+                                "name": "background-shadow",
+                                "type": "FRAME",
+                                "size": {
+                                  "w": 32,
+                                  "h": 32
+                                },
+                                "styles": {
+                                  "bg": "rgb(88, 86, 214)",
+                                  "radius": 8,
+                                  "shadow": {
+                                    "x": 0,
+                                    "y": 1,
+                                    "blur": 2,
+                                    "color": "rgba(0, 0, 0, 0.05000000074505806)"
+                                  },
+                                  "layout": {
+                                    "direction": "row",
+                                    "gap": 0,
+                                    "align": {
+                                      "main": "center",
+                                      "cross": "center"
+                                    }
+                                  }
+                                },
+                                "children": [
+                                  {
+                                    "name": "container",
+                                    "type": "FRAME",
+                                    "size": {
+                                      "w": 20,
+                                      "h": 24
+                                    },
+                                    "styles": {
+                                      "layout": {
+                                        "direction": "column",
+                                        "gap": 0,
+                                        "align": {
+                                          "main": "start",
+                                          "cross": "start"
+                                        }
+                                      }
+                                    },
+                                    "children": [
+                                      {
+                                        "name": "icon",
+                                        "type": "FRAME",
+                                        "size": {
+                                          "w": 20,
+                                          "h": 24
+                                        },
+                                        "styles": {
+                                          "layout": {
+                                            "direction": "row",
+                                            "gap": 0,
+                                            "align": {
+                                              "main": "start",
+                                              "cross": "start"
+                                            }
+                                          }
+                                        },
+                                        "children": [
+                                          {
+                                            "name": "vector",
+                                            "type": "VECTOR",
+                                            "size": {
+                                              "w": 17,
+                                              "h": 17
+                                            },
+                                            "styles": {
+                                              "bg": "rgb(255, 255, 255)"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "name": "container",
+                                "type": "FRAME",
+                                "size": {
+                                  "w": 108,
+                                  "h": 23
+                                },
+                                "styles": {
+                                  "layout": {
+                                    "direction": "row",
+                                    "gap": 0,
+                                    "align": {
+                                      "main": "start",
+                                      "cross": "start"
+                                    }
+                                  }
+                                },
+                                "children": [
+                                  {
+                                    "name": "help---support",
+                                    "type": "TEXT",
+                                    "size": {
+                                      "w": 109,
+                                      "h": 23
+                                    },
+                                    "content": "Help & Support",
+                                    "styles": {
+                                      "bg": "rgb(17, 24, 39)",
+                                      "text": {
+                                        "family": "Inter",
+                                        "size": 15,
+                                        "weight": "500",
+                                        "align": "center"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "name": "container",
+                            "type": "FRAME",
+                            "size": {
+                              "w": 20,
+                              "h": 28
+                            },
+                            "styles": {
+                              "layout": {
+                                "direction": "column",
+                                "gap": 0,
+                                "align": {
+                                  "main": "start",
+                                  "cross": "center"
+                                },
+                                "padding": [
+                                  0,
+                                  0,
+                                  4,
+                                  0
+                                ]
+                              }
+                            },
+                            "children": [
+                              {
+                                "name": "container",
+                                "type": "FRAME",
+                                "size": {
+                                  "w": 20,
+                                  "h": 24
+                                },
+                                "styles": {
+                                  "layout": {
+                                    "direction": "row",
+                                    "gap": 0,
+                                    "align": {
+                                      "main": "start",
+                                      "cross": "start"
+                                    }
+                                  }
+                                },
+                                "children": [
+                                  {
+                                    "name": "icon",
+                                    "type": "FRAME",
+                                    "size": {
+                                      "w": 20,
+                                      "h": 24
+                                    },
+                                    "styles": {
+                                      "layout": {
+                                        "direction": "row",
+                                        "gap": 0,
+                                        "align": {
+                                          "main": "start",
+                                          "cross": "start"
+                                        }
+                                      }
+                                    },
+                                    "children": [
+                                      {
+                                        "name": "vector",
+                                        "type": "VECTOR",
+                                        "size": {
+                                          "w": 6,
+                                          "h": 10
+                                        },
+                                        "styles": {
+                                          "bg": "rgb(156, 163, 175)"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "logout-action",
+                "type": "FRAME",
+                "size": {
+                  "w": 416,
+                  "h": 124
+                },
+                "styles": {
+                  "layout": {
+                    "direction": "column",
+                    "gap": 16,
+                    "align": {
+                      "main": "start",
+                      "cross": "start"
+                    },
+                    "padding": [
+                      32,
+                      0,
+                      0,
+                      0
+                    ]
+                  }
+                },
+                "children": [
+                  {
+                    "name": "button",
+                    "type": "FRAME",
+                    "size": {
+                      "w": 416,
+                      "h": 60
+                    },
+                    "styles": {
+                      "bg": "rgb(254, 226, 226)",
+                      "border": {
+                        "width": 1,
+                        "color": "rgb(243, 244, 246)"
+                      },
+                      "radius": 12,
+                      "shadow": {
+                        "x": 0,
+                        "y": 1,
+                        "blur": 2,
+                        "color": "rgba(0, 0, 0, 0.05000000074505806)"
+                      },
+                      "layout": {
+                        "direction": "row",
+                        "gap": 0,
+                        "align": {
+                          "main": "center",
+                          "cross": "center"
+                        },
+                        "padding": [
+                          16,
+                          16,
+                          16,
+                          16
+                        ]
+                      }
+                    },
+                    "children": [
+                      {
+                        "name": "container",
+                        "type": "FRAME",
+                        "size": {
+                          "w": 65,
+                          "h": 26
+                        },
+                        "styles": {
+                          "layout": {
+                            "direction": "row",
+                            "gap": 0,
+                            "align": {
+                              "main": "center",
+                              "cross": "start"
+                            }
+                          }
+                        },
+                        "children": [
+                          {
+                            "name": "log-out",
+                            "type": "TEXT",
+                            "size": {
+                              "w": 65,
+                              "h": 26
+                            },
+                            "content": "Log Out",
+                            "styles": {
+                              "bg": "rgb(255, 59, 48)",
+                              "text": {
+                                "family": "Inter",
+                                "size": 17,
+                                "weight": "600",
+                                "align": "center"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "name": "container",
+                    "type": "FRAME",
+                    "size": {
+                      "w": 416,
+                      "h": 16
+                    },
+                    "styles": {
+                      "layout": {
+                        "direction": "column",
+                        "gap": 0,
+                        "align": {
+                          "main": "start",
+                          "cross": "center"
+                        }
+                      }
+                    },
+                    "children": [
+                      {
+                        "name": "version-2-4-0--build-302-",
+                        "type": "TEXT",
+                        "size": {
+                          "w": 140,
+                          "h": 16
+                        },
+                        "content": "Version 2.4.0 (Build 302)",
+                        "styles": {
+                          "bg": "rgb(156, 163, 175)",
+                          "text": {
+                            "family": "Inter",
+                            "size": 12,
+                            "weight": "400",
+                            "align": "center"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "nav",
+        "type": "FRAME",
+        "size": {
+          "w": 448,
+          "h": 70
+        },
+        "styles": {
+          "bg": "rgb(255, 255, 255)",
+          "border": {
+            "width": 1,
+            "color": "rgb(241, 245, 249)"
+          },
+          "layout": {
+            "direction": "column",
+            "gap": 0,
+            "align": {
+              "main": "start",
+              "cross": "start"
+            }
+          }
+        },
+        "children": [
+          {
+            "name": "container",
+            "type": "FRAME",
+            "size": {
+              "w": 448,
+              "h": 64
+            },
+            "styles": {
+              "layout": {
+                "direction": "row",
+                "gap": 0,
+                "align": {
+                  "main": "start",
+                  "cross": "start"
+                }
+              }
+            },
+            "children": [
+              {
+                "name": "button",
+                "type": "FRAME",
+                "size": {
+                  "w": 48,
+                  "h": 48
+                },
+                "styles": {
+                  "layout": {
+                    "direction": "column",
+                    "gap": 1,
+                    "align": {
+                      "main": "center",
+                      "cross": "center"
+                    }
+                  }
+                },
+                "children": [
+                  {
+                    "name": "container",
+                    "type": "FRAME",
+                    "size": {
+                      "w": 26,
+                      "h": 32
+                    },
+                    "styles": {
+                      "layout": {
+                        "direction": "column",
+                        "gap": 0,
+                        "align": {
+                          "main": "start",
+                          "cross": "start"
+                        }
+                      }
+                    },
+                    "children": [
+                      {
+                        "name": "icon",
+                        "type": "FRAME",
+                        "size": {
+                          "w": 26,
+                          "h": 32
+                        },
+                        "styles": {
+                          "layout": {
+                            "direction": "row",
+                            "gap": 0,
+                            "align": {
+                              "main": "start",
+                              "cross": "start"
+                            }
+                          }
+                        },
+                        "children": [
+                          {
+                            "name": "vector",
+                            "type": "VECTOR",
+                            "size": {
+                              "w": 17,
+                              "h": 20
+                            },
+                            "styles": {
+                              "bg": "rgb(148, 163, 184)"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "name": "container",
+                    "type": "FRAME",
+                    "size": {
+                      "w": 29,
+                      "h": 15
+                    },
+                    "styles": {
+                      "layout": {
+                        "direction": "column",
+                        "gap": 0,
+                        "align": {
+                          "main": "start",
+                          "cross": "center"
+                        }
+                      }
+                    },
+                    "children": [
+                      {
+                        "name": "home",
+                        "type": "TEXT",
+                        "size": {
+                          "w": 29,
+                          "h": 15
+                        },
+                        "content": "Home",
+                        "styles": {
+                          "bg": "rgb(148, 163, 184)",
+                          "text": {
+                            "family": "Inter",
+                            "size": 10,
+                            "weight": "500",
+                            "align": "center"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "button",
+                "type": "FRAME",
+                "size": {
+                  "w": 48,
+                  "h": 48
+                },
+                "styles": {
+                  "layout": {
+                    "direction": "column",
+                    "gap": 1,
+                    "align": {
+                      "main": "center",
+                      "cross": "center"
+                    }
+                  }
+                },
+                "children": [
+                  {
+                    "name": "container",
+                    "type": "FRAME",
+                    "size": {
+                      "w": 26,
+                      "h": 32
+                    },
+                    "styles": {
+                      "layout": {
+                        "direction": "column",
+                        "gap": 0,
+                        "align": {
+                          "main": "start",
+                          "cross": "start"
+                        }
+                      }
+                    },
+                    "children": [
+                      {
+                        "name": "icon",
+                        "type": "FRAME",
+                        "size": {
+                          "w": 26,
+                          "h": 32
+                        },
+                        "styles": {
+                          "layout": {
+                            "direction": "row",
+                            "gap": 0,
+                            "align": {
+                              "main": "start",
+                              "cross": "start"
+                            }
+                          }
+                        },
+                        "children": [
+                          {
+                            "name": "vector",
+                            "type": "VECTOR",
+                            "size": {
+                              "w": 22,
+                              "h": 17
+                            },
+                            "styles": {
+                              "bg": "rgb(148, 163, 184)"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "name": "container",
+                    "type": "FRAME",
+                    "size": {
+                      "w": 47,
+                      "h": 15
+                    },
+                    "styles": {
+                      "layout": {
+                        "direction": "column",
+                        "gap": 0,
+                        "align": {
+                          "main": "start",
+                          "cross": "center"
+                        }
+                      }
+                    },
+                    "children": [
+                      {
+                        "name": "diagnosis",
+                        "type": "TEXT",
+                        "size": {
+                          "w": 47,
+                          "h": 15
+                        },
+                        "content": "Diagnosis",
+                        "styles": {
+                          "bg": "rgb(148, 163, 184)",
+                          "text": {
+                            "family": "Inter",
+                            "size": 10,
+                            "weight": "500",
+                            "align": "center"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "button",
+                "type": "FRAME",
+                "size": {
+                  "w": 48,
+                  "h": 48
+                },
+                "styles": {
+                  "layout": {
+                    "direction": "column",
+                    "gap": 1,
+                    "align": {
+                      "main": "center",
+                      "cross": "center"
+                    }
+                  }
+                },
+                "children": [
+                  {
+                    "name": "container",
+                    "type": "FRAME",
+                    "size": {
+                      "w": 26,
+                      "h": 32
+                    },
+                    "styles": {
+                      "layout": {
+                        "direction": "column",
+                        "gap": 0,
+                        "align": {
+                          "main": "start",
+                          "cross": "start"
+                        }
+                      }
+                    },
+                    "children": [
+                      {
+                        "name": "icon",
+                        "type": "FRAME",
+                        "size": {
+                          "w": 26,
+                          "h": 32
+                        },
+                        "styles": {
+                          "layout": {
+                            "direction": "row",
+                            "gap": 0,
+                            "align": {
+                              "main": "start",
+                              "cross": "start"
+                            }
+                          }
+                        },
+                        "children": [
+                          {
+                            "name": "vector",
+                            "type": "VECTOR",
+                            "size": {
+                              "w": 22,
+                              "h": 22
+                            },
+                            "styles": {
+                              "bg": "rgb(148, 163, 184)"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "name": "container",
+                    "type": "FRAME",
+                    "size": {
+                      "w": 49,
+                      "h": 15
+                    },
+                    "styles": {
+                      "layout": {
+                        "direction": "column",
+                        "gap": 0,
+                        "align": {
+                          "main": "start",
+                          "cross": "center"
+                        }
+                      }
+                    },
+                    "children": [
+                      {
+                        "name": "messages",
+                        "type": "TEXT",
+                        "size": {
+                          "w": 49,
+                          "h": 15
+                        },
+                        "content": "Messages",
+                        "styles": {
+                          "bg": "rgb(148, 163, 184)",
+                          "text": {
+                            "family": "Inter",
+                            "size": 10,
+                            "weight": "500",
+                            "align": "center"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "button",
+                "type": "FRAME",
+                "size": {
+                  "w": 48,
+                  "h": 48
+                },
+                "styles": {
+                  "layout": {
+                    "direction": "column",
+                    "gap": 1,
+                    "align": {
+                      "main": "center",
+                      "cross": "center"
+                    }
+                  }
+                },
+                "children": [
+                  {
+                    "name": "container",
+                    "type": "FRAME",
+                    "size": {
+                      "w": 26,
+                      "h": 32
+                    },
+                    "styles": {
+                      "layout": {
+                        "direction": "column",
+                        "gap": 0,
+                        "align": {
+                          "main": "start",
+                          "cross": "start"
+                        }
+                      }
+                    },
+                    "children": [
+                      {
+                        "name": "icon",
+                        "type": "FRAME",
+                        "size": {
+                          "w": 26,
+                          "h": 32
+                        },
+                        "styles": {
+                          "layout": {
+                            "direction": "row",
+                            "gap": 0,
+                            "align": {
+                              "main": "start",
+                              "cross": "start"
+                            }
+                          }
+                        },
+                        "children": [
+                          {
+                            "name": "vector",
+                            "type": "VECTOR",
+                            "size": {
+                              "w": 22,
+                              "h": 22
+                            },
+                            "styles": {
+                              "bg": "rgb(13, 166, 242)"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "name": "container",
+                    "type": "FRAME",
+                    "size": {
+                      "w": 40,
+                      "h": 15
+                    },
+                    "styles": {
+                      "layout": {
+                        "direction": "column",
+                        "gap": 0,
+                        "align": {
+                          "main": "start",
+                          "cross": "center"
+                        }
+                      }
+                    },
+                    "children": [
+                      {
+                        "name": "settings",
+                        "type": "TEXT",
+                        "size": {
+                          "w": 40,
+                          "h": 15
+                        },
+                        "content": "Settings",
+                        "styles": {
+                          "bg": "rgb(13, 166, 242)",
+                          "text": {
+                            "family": "Inter",
+                            "size": 10,
+                            "weight": "500",
+                            "align": "center"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "container",
+                "type": "FRAME",
+                "size": {
+                  "w": 56,
+                  "h": 56
+                },
+                "styles": {
+                  "layout": {
+                    "direction": "column",
+                    "gap": 0,
+                    "align": {
+                      "main": "start",
+                      "cross": "start"
+                    }
+                  }
+                },
+                "children": [
+                  {
+                    "name": "button",
+                    "type": "FRAME",
+                    "size": {
+                      "w": 56,
+                      "h": 56
+                    },
+                    "styles": {
+                      "bg": "rgb(13, 166, 242)",
+                      "radius": 9999,
+                      "shadow": {
+                        "x": 0,
+                        "y": 4,
+                        "blur": 6,
+                        "color": "rgba(59, 130, 246, 0.4000000059604645)"
+                      },
+                      "layout": {
+                        "direction": "row",
+                        "gap": 0,
+                        "align": {
+                          "main": "center",
+                          "cross": "center"
+                        }
+                      }
+                    },
+                    "children": [
+                      {
+                        "name": "container",
+                        "type": "FRAME",
+                        "size": {
+                          "w": 28,
+                          "h": 34
+                        },
+                        "styles": {
+                          "layout": {
+                            "direction": "column",
+                            "gap": 0,
+                            "align": {
+                              "main": "start",
+                              "cross": "start"
+                            }
+                          }
+                        },
+                        "children": [
+                          {
+                            "name": "icon",
+                            "type": "FRAME",
+                            "size": {
+                              "w": 28,
+                              "h": 34
+                            },
+                            "styles": {
+                              "layout": {
+                                "direction": "row",
+                                "gap": 0,
+                                "align": {
+                                  "main": "start",
+                                  "cross": "start"
+                                }
+                              }
+                            },
+                            "children": [
+                              {
+                                "name": "vector",
+                                "type": "VECTOR",
+                                "size": {
+                                  "w": 23,
+                                  "h": 23
+                                },
+                                "styles": {
+                                  "bg": "rgb(255, 255, 255)"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "summary": {
+    "components": 0,
+    "instances": 0,
+    "frames": 98,
+    "texts": 20,
+    "hasAutoLayout": true,
+    "hasEffects": true
+  }
+}

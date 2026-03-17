@@ -2,6 +2,7 @@ import React from "react";
 import { StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
+import { Gap } from "@/constants/gap";
 import HomeScreenHeader from "@/components/home/HomeScreenHeader";
 import StatusCard from "@/components/home/StatusCard";
 import DeviceConnectionCard from "@/components/home/DeviceConnectionCard";
@@ -31,8 +32,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background.light,
   },
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 40,
+    paddingHorizontal: Gap.medium,
+    paddingTop: Gap.small,
+    paddingBottom: Gap.large,
   },
 });
