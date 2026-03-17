@@ -43,7 +43,7 @@ function LoginScreenContent() {
 
     const result = await login();
     if (result.success) {
-      router.replace("/(tabs)");
+      router.replace("/(doctor)/(tabs)");
     }
   };
 

@@ -22,7 +22,7 @@ export default function SettingsScreen() {
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
             <Image
-              source={require("../../assets/images/Doctor-ava.jpeg")}
+              source={require("@/assets/images/Doctor-ava.jpeg")}
               style={styles.avatar}
             />
             <View style={styles.onlineIndicator} />
