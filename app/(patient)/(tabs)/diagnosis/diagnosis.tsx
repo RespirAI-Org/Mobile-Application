@@ -168,7 +168,8 @@ export default function DiagnosisScreen() {
   }, [allAudio, diagnosisResults, searchQuery]);
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    // <SafeAreaView style={styles.container} edges={["top"]}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Diagnosis History</Text>
         <TouchableOpacity style={styles.headerButton}>
@@ -289,12 +290,14 @@ export default function DiagnosisScreen() {
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+      {/*</SafeAreaView>*/}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    paddingTop: Gap.medium,
     paddingHorizontal: Gap.mediumSmall,
     flex: 1,
     backgroundColor: "#ffffff",

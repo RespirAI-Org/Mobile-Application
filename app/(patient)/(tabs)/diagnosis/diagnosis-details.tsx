@@ -23,6 +23,7 @@ import {
 import { Audio } from "expo-av";
 import { audioService } from "@/services/audioService";
 import { diagnosisService, DiagnosisResult } from "@/services/diagnosisService";
+import { Gap } from "@/constants/gap";
 
 export default function DiagnosisDetailsScreen() {
   const router = useRouter();
@@ -206,7 +207,8 @@ export default function DiagnosisDetailsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+    // <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+    <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* Header */}
@@ -485,12 +487,13 @@ export default function DiagnosisDetailsScreen() {
           </View>
         </ScrollView>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    paddingTop: Gap.medium,
     flex: 1,
     backgroundColor: "#ffffff",
   },

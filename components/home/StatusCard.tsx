@@ -7,12 +7,14 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { ArrowRight } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 import { useDiagnosis } from "@/contexts/DiagnosisContext";
 import { useAudio } from "@/contexts/AudioContext";
 
 export default function StatusCard() {
+  const router = useRouter();
   const { latestAudio, isLoading: audioLoading } = useAudio();
   const { diagnosisResult, isLoading: diagnosisLoading } = useDiagnosis();
 
@@ -119,7 +121,15 @@ export default function StatusCard() {
 
         <View style={styles.divider} />
 
-        <TouchableOpacity style={styles.viewReportButton}>
+        <TouchableOpacity
+          style={styles.viewReportButton}
+          onPress={() => {
+            const reportId = diagnosisResult?.id || latestAudio?.id;
+            if (reportId) {
+              router.push(`/diagnosis/diagnosis-details?id=${reportId}`);
+            }
+          }}
+        >
           <Text style={styles.viewReportText}>View Full Report</Text>
           <ArrowRight size={18} color={Colors.info["200"]} />
         </TouchableOpacity>

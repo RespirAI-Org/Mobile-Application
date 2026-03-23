@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { StyleSheet, ScrollView, RefreshControl } from "react-native";
+import { StyleSheet, ScrollView, RefreshControl, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
 import { Gap } from "@/constants/gap";
@@ -72,7 +72,8 @@ export default function HomeScreen() {
   }, [diagnosisResult, diagnosisError]);
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    // <SafeAreaView style={styles.container} edges={["top"]}>
+    <View style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -86,12 +87,14 @@ export default function HomeScreen() {
         <DoctorNoteCard />
         <QuickActions />
       </ScrollView>
-    </SafeAreaView>
+      {/*</SafeAreaView>*/}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    paddingTop: Gap.medium,
     flex: 1,
     backgroundColor: Colors.background.light,
   },
