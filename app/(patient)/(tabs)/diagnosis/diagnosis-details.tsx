@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,22 +7,37 @@ import {
   TouchableOpacity,
   Platform,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Stack, useRouter } from "expo-router";
+import { Stack, useRouter, useLocalSearchParams } from "expo-router";
 import {
   ArrowLeft,
   Share,
   CheckCircle2,
   Play,
+  Pause,
   SkipBack,
   SkipForward,
 } from "lucide-react-native";
+import { Audio } from "expo-av";
+import { audioService } from "@/services/audioService";
+import { diagnosisService, DiagnosisResult } from "@/services/diagnosisService";
 
 export default function DiagnosisDetailsScreen() {
   const router = useRouter();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const [activeValve, setActiveValve] = useState("Mitral");
   const [audioMode, setAudioMode] = useState<"Raw" | "AI">("Raw");
+
+  const [result, setResult] = useState<DiagnosisResult | null>(null);
+  const [audioRecord, setAudioRecord] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [position, setPosition] = useState(0);
+  const [duration, setDuration] = useState(0);
 
   // Simulated waveform bars
   const waveformBars = Array.from({ length: 30 }, (_, i) => {
@@ -30,6 +45,160 @@ export default function DiagnosisDetailsScreen() {
     const height = Math.max(10, Math.min(40, Math.random() * 40 + 10));
     return height;
   });
+
+  useEffect(() => {
+    async function loadData() {
+      if (!id) {
+        setIsLoading(false);
+        return;
+      }
+      setIsLoading(true);
+
+      let fetchedResult = null;
+      let fetchedAudio = null;
+
+      const res = await diagnosisService.getResultById(id);
+      if (res.success && res.data) {
+        fetchedResult = res.data;
+        const audioRes = await audioService.getAudioById(
+          fetchedResult.audio_id,
+        );
+        if (audioRes.success && audioRes.data) {
+          fetchedAudio = audioRes.data;
+        }
+      } else {
+        const audioRes = await audioService.getAudioById(id);
+        if (audioRes.success && audioRes.data) {
+          fetchedAudio = audioRes.data;
+          const res2 = await diagnosisService.getResultByAudioId(id);
+          if (res2.success && res2.data) {
+            fetchedResult = res2.data;
+          }
+        }
+      }
+
+      setResult(fetchedResult);
+      setAudioRecord(fetchedAudio);
+      setIsLoading(false);
+    }
+    loadData();
+  }, [id]);
+
+  useEffect(() => {
+    return sound
+      ? () => {
+          sound.unloadAsync();
+        }
+      : undefined;
+  }, [sound]);
+
+  const loadAudio = async () => {
+    if (!audioRecord) return;
+    const url = audioService.getAudioUrl(audioRecord);
+    if (!url) return;
+
+    try {
+      const { sound: newSound } = await Audio.Sound.createAsync(
+        { uri: url },
+        { shouldPlay: true },
+        (status) => {
+          if (status.isLoaded) {
+            setPosition(status.positionMillis);
+            setDuration(status.durationMillis || 0);
+            setIsPlaying(status.isPlaying);
+            if (status.didJustFinish) {
+              setIsPlaying(false);
+              setPosition(0);
+            }
+          }
+        },
+      );
+      setSound(newSound);
+    } catch (error) {
+      console.error("Error loading audio", error);
+    }
+  };
+
+  const togglePlayPause = async () => {
+    if (!sound) {
+      await loadAudio();
+    } else {
+      if (isPlaying) {
+        await sound.pauseAsync();
+      } else {
+        await sound.playAsync();
+      }
+    }
+  };
+
+  const formatTime = (millis: number) => {
+    const totalSeconds = Math.floor(millis / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes < 10 ? "0" : ""}${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  };
+
+  let diagnosisTitle = "Pending Analysis";
+  let confidenceValue = 0;
+  let severityText = "PENDING";
+  let severityBg = "#f1f5f9";
+  let severityColor = "#64748b";
+  let probabilities = [
+    { label: "Normal", value: 0, color: "#cbd5e1" },
+    { label: "Wheezes", value: 0, color: "#cbd5e1" },
+    { label: "Crackles", value: 0, color: "#cbd5e1" },
+    { label: "Both", value: 0, color: "#cbd5e1" },
+  ];
+
+  if (result && result.status === "completed") {
+    const predName = result.pred_name?.toLowerCase();
+    if (predName === "normal") {
+      diagnosisTitle = "Healthy Lung Sounds";
+      confidenceValue = Math.round(result.prob_normal * 100);
+      severityText = "NORMAL";
+      severityBg = "#dcfce7";
+      severityColor = "#15803d";
+    } else if (predName === "wheezes") {
+      diagnosisTitle = "Wheeze Detected";
+      confidenceValue = Math.round(result.prob_wheezes * 100);
+      severityText = "MODERATE SEVERITY";
+      severityBg = "#fef9c3";
+      severityColor = "#a16207";
+    } else if (predName === "crackles") {
+      diagnosisTitle = "Crackles Detected";
+      confidenceValue = Math.round(result.prob_crackles * 100);
+      severityText = "MODERATE SEVERITY";
+      severityBg = "#fef9c3";
+      severityColor = "#a16207";
+    } else if (predName === "both") {
+      diagnosisTitle = "Wheezes & Crackles Detected";
+      confidenceValue = Math.round(result.prob_both * 100);
+      severityText = "HIGH SEVERITY";
+      severityBg = "#fee2e2";
+      severityColor = "#b91c1c";
+    } else {
+      diagnosisTitle = result.pred_name || "Unknown";
+      confidenceValue = 0;
+      severityText = "UNKNOWN";
+    }
+
+    probabilities = [
+      { label: "Normal", value: Math.round(result.prob_normal * 100) },
+      { label: "Wheezes", value: Math.round(result.prob_wheezes * 100) },
+      { label: "Crackles", value: Math.round(result.prob_crackles * 100) },
+      { label: "Both", value: Math.round(result.prob_both * 100) },
+    ]
+      .sort((a, b) => b.value - a.value)
+      .map((p, index) => ({
+        ...p,
+        color: index === 0 ? "#0da6f2" : "#cbd5e1",
+      }));
+  } else if (result && result.status === "failed") {
+    diagnosisTitle = "Analysis Failed";
+    severityText = "FAILED";
+    severityBg = "#fee2e2";
+    severityColor = "#b91c1c";
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
@@ -49,47 +218,64 @@ export default function DiagnosisDetailsScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Main Result Card */}
-        <View style={styles.mainCard}>
-          <View style={styles.badgeRow}>
-            <View style={styles.confirmedBadge}>
-              <CheckCircle2
-                size={12}
-                color="#0da6f2"
-                style={styles.badgeIcon}
-              />
-              <Text style={styles.confirmedText}>CONFIRMED</Text>
-            </View>
-            <View style={styles.severityBadge}>
-              <Text style={styles.severityText}>HIGH SEVERITY</Text>
-            </View>
-          </View>
-
-          <Text style={styles.diagnosisTitle}>Systolic Murmur Detected</Text>
-          <Text style={styles.diagnosisSubtitle}>
-            Recording taken at Mitral Valve position.
-          </Text>
-
-          <View style={styles.confidenceContainer}>
-            <Text style={styles.confidenceLabel}>Confidence Score</Text>
-            <Text style={styles.confidenceValue}>92%</Text>
-          </View>
-        </View>
-
-        {/* Valve Selector */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.valveSelectorContainer}
-          style={styles.valveSelectorScrollView}
+      {isLoading ? (
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
-          {["Mitral", "Aortic", "Pulmonic", "Tricuspid", "Erb's Point"].map(
-            (valve) => (
+          <ActivityIndicator size="large" color="#0da6f2" />
+        </View>
+      ) : (
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.contentContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Main Result Card */}
+          <View style={styles.mainCard}>
+            <View style={styles.badgeRow}>
+              <View style={styles.confirmedBadge}>
+                <CheckCircle2
+                  size={12}
+                  color="#0da6f2"
+                  style={styles.badgeIcon}
+                />
+                <Text style={styles.confirmedText}>CONFIRMED</Text>
+              </View>
+              <View
+                style={[styles.severityBadge, { backgroundColor: severityBg }]}
+              >
+                <Text style={[styles.severityText, { color: severityColor }]}>
+                  {severityText}
+                </Text>
+              </View>
+            </View>
+
+            <Text style={styles.diagnosisTitle}>{diagnosisTitle}</Text>
+            <Text style={styles.diagnosisSubtitle}>
+              Recording taken at {activeValve} Valve position.
+            </Text>
+
+            <View style={styles.confidenceContainer}>
+              <Text style={styles.confidenceLabel}>Confidence Score</Text>
+              <Text style={styles.confidenceValue}>{confidenceValue}%</Text>
+            </View>
+          </View>
+
+          {/* Valve Selector */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.valveSelectorContainer}
+            style={styles.valveSelectorScrollView}
+          >
+            {[
+              "Left Upper Lobe",
+              "Right Upper Lobe",
+              "Left Interscapular",
+              "Right Interscapular",
+              "Left Lower Lobe",
+              "RIght Lower Lobe",
+            ].map((valve) => (
               <TouchableOpacity
                 key={valve}
                 style={[
@@ -107,160 +293,192 @@ export default function DiagnosisDetailsScreen() {
                   {valve}
                 </Text>
               </TouchableOpacity>
-            ),
-          )}
-        </ScrollView>
+            ))}
+          </ScrollView>
 
-        {/* Symptom Probability */}
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Symptom Probability</Text>
-          <View style={styles.card}>
-            {[
-              { label: "Murmur", value: 92, color: "#0da6f2" },
-              { label: "Normal", value: 5, color: "#cbd5e1" },
-              { label: "Stenosis", value: 2, color: "#cbd5e1" },
-              { label: "Other", value: 1, color: "#cbd5e1" },
-            ].map((item, index) => (
-              <View key={item.label} style={styles.probabilityRow}>
-                <View style={styles.probabilityHeader}>
-                  <Text style={styles.probabilityLabel}>{item.label}</Text>
+          {/* Symptom Probability */}
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Symptom Probability</Text>
+            <View style={styles.card}>
+              {probabilities.map((item, index) => (
+                <View key={item.label} style={styles.probabilityRow}>
+                  <View style={styles.probabilityHeader}>
+                    <Text style={styles.probabilityLabel}>{item.label}</Text>
+                    <Text
+                      style={[
+                        styles.probabilityValue,
+                        {
+                          color:
+                            item.color === "#0da6f2" ? "#0da6f2" : "#64748b",
+                        },
+                      ]}
+                    >
+                      {item.value}%
+                    </Text>
+                  </View>
+                  <View style={styles.progressBarBg}>
+                    <View
+                      style={[
+                        styles.progressBarFill,
+                        {
+                          width: `${item.value}%`,
+                          backgroundColor: item.color,
+                        },
+                      ]}
+                    />
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* Audio Player */}
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Audio</Text>
+            <View style={styles.card}>
+              <View style={styles.audioTabs}>
+                <TouchableOpacity
+                  style={[
+                    styles.audioTab,
+                    audioMode === "Raw" && styles.audioTabActive,
+                  ]}
+                  onPress={() => setAudioMode("Raw")}
+                >
                   <Text
                     style={[
-                      styles.probabilityValue,
-                      { color: item.value > 50 ? "#0da6f2" : "#64748b" },
+                      styles.audioTabText,
+                      audioMode === "Raw" && styles.audioTabTextActive,
                     ]}
                   >
-                    {item.value}%
+                    Raw Audio
                   </Text>
-                </View>
-                <View style={styles.progressBarBg}>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.audioTab,
+                    audioMode === "AI" && styles.audioTabActive,
+                  ]}
+                  onPress={() => setAudioMode("AI")}
+                >
+                  <Text
+                    style={[
+                      styles.audioTabText,
+                      audioMode === "AI" && styles.audioTabTextActive,
+                    ]}
+                  >
+                    AI Filtered
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.waveformContainer}>
+                {waveformBars.map((height, index) => {
+                  const progress = duration > 0 ? position / duration : 0;
+                  const isActive = index / waveformBars.length <= progress;
+                  return (
+                    <View
+                      key={index}
+                      style={[
+                        styles.waveformBar,
+                        {
+                          height,
+                          backgroundColor: isActive ? "#0da6f2" : "#cbd5e1",
+                        },
+                      ]}
+                    />
+                  );
+                })}
+              </View>
+
+              <View style={styles.audioTimeContainer}>
+                <Text style={styles.audioTimeText}>{formatTime(position)}</Text>
+                <Text style={styles.audioTimeText}>{formatTime(duration)}</Text>
+              </View>
+
+              <View style={styles.audioProgressContainer}>
+                <View style={styles.audioProgressBarBg}>
                   <View
                     style={[
-                      styles.progressBarFill,
-                      { width: `${item.value}%`, backgroundColor: item.color },
+                      styles.audioProgressBarFill,
+                      {
+                        width:
+                          duration > 0
+                            ? `${(position / duration) * 100}%`
+                            : "0%",
+                      },
+                    ]}
+                  />
+                  <View
+                    style={[
+                      styles.audioProgressKnob,
+                      {
+                        left:
+                          duration > 0
+                            ? `${(position / duration) * 100}%`
+                            : "0%",
+                      },
                     ]}
                   />
                 </View>
               </View>
-            ))}
-          </View>
-        </View>
 
-        {/* Audio Player */}
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Audio</Text>
-          <View style={styles.card}>
-            <View style={styles.audioTabs}>
-              <TouchableOpacity
-                style={[
-                  styles.audioTab,
-                  audioMode === "Raw" && styles.audioTabActive,
-                ]}
-                onPress={() => setAudioMode("Raw")}
-              >
-                <Text
-                  style={[
-                    styles.audioTabText,
-                    audioMode === "Raw" && styles.audioTabTextActive,
-                  ]}
+              <View style={styles.audioControls}>
+                <TouchableOpacity>
+                  <SkipBack size={24} color="#94a3b8" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.playButton}
+                  onPress={togglePlayPause}
                 >
-                  Raw Audio
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.audioTab,
-                  audioMode === "AI" && styles.audioTabActive,
-                ]}
-                onPress={() => setAudioMode("AI")}
-              >
-                <Text
-                  style={[
-                    styles.audioTabText,
-                    audioMode === "AI" && styles.audioTabTextActive,
-                  ]}
-                >
-                  AI Filtered
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.waveformContainer}>
-              {waveformBars.map((height, index) => (
-                <View
-                  key={index}
-                  style={[
-                    styles.waveformBar,
-                    {
-                      height,
-                      backgroundColor: index < 12 ? "#0da6f2" : "#cbd5e1",
-                    },
-                  ]}
-                />
-              ))}
-            </View>
-
-            <View style={styles.audioTimeContainer}>
-              <Text style={styles.audioTimeText}>00:05</Text>
-              <Text style={styles.audioTimeText}>00:15</Text>
-            </View>
-
-            <View style={styles.audioProgressContainer}>
-              <View style={styles.audioProgressBarBg}>
-                <View style={styles.audioProgressBarFill} />
-                <View style={styles.audioProgressKnob} />
+                  {isPlaying ? (
+                    <Pause size={24} color="#ffffff" fill="#ffffff" />
+                  ) : (
+                    <Play size={24} color="#ffffff" fill="#ffffff" />
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity>
+                  <SkipForward size={24} color="#94a3b8" />
+                </TouchableOpacity>
               </View>
-            </View>
-
-            <View style={styles.audioControls}>
-              <TouchableOpacity>
-                <SkipBack size={24} color="#94a3b8" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.playButton}>
-                <Play size={24} color="#ffffff" fill="#ffffff" />
-              </TouchableOpacity>
-              <TouchableOpacity>
-                <SkipForward size={24} color="#94a3b8" />
-              </TouchableOpacity>
             </View>
           </View>
-        </View>
 
-        {/* Doctor's Note */}
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Doctor&apos;s Note</Text>
-          <View style={styles.noteCard}>
-            <View style={styles.doctorHeader}>
-              <View style={styles.avatarPlaceholder}>
-                <Image
-                  source={{ uri: "https://i.pravatar.cc/150?u=dr_sarah" }}
-                  style={styles.avatarImage}
-                />
+          {/* Doctor's Note */}
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Doctor&apos;s Note</Text>
+            <View style={styles.noteCard}>
+              <View style={styles.doctorHeader}>
+                <View style={styles.avatarPlaceholder}>
+                  <Image
+                    source={{ uri: "https://i.pravatar.cc/150?u=dr_sarah" }}
+                    style={styles.avatarImage}
+                  />
+                </View>
+                <View style={styles.doctorInfo}>
+                  <Text style={styles.doctorName}>Dr. Sarah Smith</Text>
+                  <Text style={styles.doctorMeta}>
+                    Cardiologist • Today, 10:42 AM
+                  </Text>
+                </View>
               </View>
-              <View style={styles.doctorInfo}>
-                <Text style={styles.doctorName}>Dr. Sarah Smith</Text>
-                <Text style={styles.doctorMeta}>
-                  Cardiologist • Today, 10:42 AM
-                </Text>
-              </View>
+              <View style={styles.divider} />
+              <Text style={styles.noteText}>
+                Patient exhibits clear signs of Grade 2 systolic murmur.{"\n"}
+                The S1 sound is distinct but S2 is partially obscured.{"\n"}
+                Recommend follow-up echocardiogram to confirm severity.
+              </Text>
             </View>
-            <View style={styles.divider} />
-            <Text style={styles.noteText}>
-              Patient exhibits clear signs of Grade 2 systolic murmur.{"\n"}
-              The S1 sound is distinct but S2 is partially obscured.{"\n"}
-              Recommend follow-up echocardiogram to confirm severity.
+          </View>
+
+          <View style={styles.disclaimerContainer}>
+            <Text style={styles.disclaimerText}>
+              AI analysis is for reference only and does not replace
+              professional diagnosis.{"\n"}
+              Please consult with a certified medical professional.
             </Text>
           </View>
-        </View>
-
-        <View style={styles.disclaimerContainer}>
-          <Text style={styles.disclaimerText}>
-            AI analysis is for reference only and does not replace professional
-            diagnosis.{"\n"}
-            Please consult with a certified medical professional.
-          </Text>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }

@@ -64,4 +64,30 @@ export const audioService = {
       };
     }
   },
+
+  async getAudioById(
+    id: string,
+  ): Promise<{ success: boolean; data?: AudioRecord; error?: string }> {
+    try {
+      const record = await pb
+        .collection("respirai_audio")
+        .getOne<AudioRecord>(id);
+
+      return { success: true, data: record };
+    } catch (error: any) {
+      console.error("[AudioService] Fetch Audio Error:", error.message);
+
+      return {
+        success: false,
+        error: error.message || "An error occurred while fetching the audio.",
+      };
+    }
+  },
+
+  getAudioUrl(record: AudioRecord): string | null {
+    if (!record || !record.audio_file) {
+      return null;
+    }
+    return pb.files.getUrl(record, record.audio_file);
+  },
 };
