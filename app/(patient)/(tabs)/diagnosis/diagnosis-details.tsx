@@ -28,7 +28,7 @@ import { Gap } from "@/constants/gap";
 export default function DiagnosisDetailsScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [activeValve, setActiveValve] = useState("Mitral");
+  const [activeValve, setActiveValve] = useState("Left Upper Lobe");
   const [audioMode, setAudioMode] = useState<"Raw" | "AI">("Raw");
 
   const [result, setResult] = useState<DiagnosisResult | null>(null);
