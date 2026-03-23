@@ -41,4 +41,27 @@ export const audioService = {
       };
     }
   },
+
+  async getAllAudioByDeviceId(
+    deviceId: string,
+  ): Promise<{ success: boolean; data?: AudioRecord[]; error?: string }> {
+    try {
+      const records = await pb
+        .collection("respirai_audio")
+        .getFullList<AudioRecord>({
+          filter: `device_id = "${deviceId}"`,
+          sort: "-created",
+        });
+
+      return { success: true, data: records };
+    } catch (error: any) {
+      console.error("[AudioService] Fetch All Audio Error:", error.message);
+
+      return {
+        success: false,
+        error:
+          error.message || "An error occurred while fetching audio records.",
+      };
+    }
+  },
 };

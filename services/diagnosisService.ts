@@ -84,6 +84,44 @@ export const diagnosisService = {
   },
 
   /**
+   * Fetch the diagnosis results associated with multiple audio IDs
+   * @param audioIds The list of audio IDs to look up
+   * @returns The matching diagnosis result objects
+   */
+  async getResultsByAudioIds(
+    audioIds: string[],
+  ): Promise<{ success: boolean; data?: DiagnosisResult[]; error?: string }> {
+    try {
+      if (audioIds.length === 0) {
+        return { success: true, data: [] };
+      }
+
+      const filterString = audioIds
+        .map((id) => `audio_id = "${id}"`)
+        .join(" || ");
+
+      const records = await pb
+        .collection("respirai_results")
+        .getFullList<DiagnosisResult>({
+          filter: filterString,
+        });
+
+      return { success: true, data: records };
+    } catch (error: any) {
+      console.error(
+        "[DiagnosisService] Fetch By Audio IDs Error:",
+        error.message,
+      );
+      return {
+        success: false,
+        error:
+          error.message ||
+          "An error occurred while fetching the diagnosis results.",
+      };
+    }
+  },
+
+  /**
    * Poll for a diagnosis result until the status is 'completed'
    * @param audioId The ID of the audio file to wait for
    * @param maxRetries Maximum number of polling attempts

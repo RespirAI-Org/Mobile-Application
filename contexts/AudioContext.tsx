@@ -5,6 +5,7 @@ interface AudioContextType {
   deviceId: string;
   setDeviceId: (id: string) => void;
   latestAudio: AudioRecord | null;
+  allAudio: AudioRecord[];
   isLoading: boolean;
   error: string | null;
   fetchLatestAudio: () => Promise<{
@@ -12,6 +13,12 @@ interface AudioContextType {
     data?: AudioRecord;
     error?: string;
   }>;
+  fetchAllAudio: () => Promise<{
+    success: boolean;
+    data?: AudioRecord[];
+    error?: string;
+  }>;
+  isFetchingAll: boolean;
   clearError: () => void;
   clearAudio: () => void;
 }
@@ -21,7 +28,9 @@ const AudioContext = createContext<AudioContextType | undefined>(undefined);
 export function AudioProvider({ children }: { children: ReactNode }) {
   const [deviceId, setDeviceId] = useState("");
   const [latestAudio, setLatestAudio] = useState<AudioRecord | null>(null);
+  const [allAudio, setAllAudio] = useState<AudioRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingAll, setIsFetchingAll] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchLatestAudio = async () => {
@@ -53,10 +62,39 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const fetchAllAudio = async () => {
+    if (!deviceId) {
+      const errorMessage = "Device ID is required to fetch audio records.";
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    }
+
+    setIsFetchingAll(true);
+    setError(null);
+
+    try {
+      const result = await audioService.getAllAudioByDeviceId(deviceId);
+      if (result.success && result.data) {
+        setAllAudio(result.data);
+      } else {
+        setError(result.error || "Failed to fetch audio records.");
+      }
+      return result;
+    } catch (err: any) {
+      const errorMessage =
+        err.message || "An unexpected error occurred while fetching audio.";
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsFetchingAll(false);
+    }
+  };
+
   const clearError = () => setError(null);
 
   const clearAudio = () => {
     setLatestAudio(null);
+    setAllAudio([]);
     setDeviceId("");
     setError(null);
   };
@@ -67,9 +105,12 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         deviceId,
         setDeviceId,
         latestAudio,
+        allAudio,
         isLoading,
+        isFetchingAll,
         error,
         fetchLatestAudio,
+        fetchAllAudio,
         clearError,
         clearAudio,
       }}

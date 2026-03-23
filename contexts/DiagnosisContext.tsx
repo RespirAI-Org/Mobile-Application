@@ -15,11 +15,17 @@ interface DiagnosisContextType {
   audioId: string;
   setAudioId: (id: string) => void;
   diagnosisResult: DiagnosisResult | null;
+  diagnosisResults: DiagnosisResult[];
   isLoading: boolean;
   error: string | null;
   fetchDiagnosis: () => Promise<{
     success: boolean;
     data?: DiagnosisResult;
+    error?: string;
+  }>;
+  fetchDiagnosisResults: (audioIds: string[]) => Promise<{
+    success: boolean;
+    data?: DiagnosisResult[];
     error?: string;
   }>;
   waitForDiagnosis: (
@@ -43,6 +49,9 @@ export function DiagnosisProvider({ children }: { children: ReactNode }) {
   const [audioId, setAudioId] = useState("");
   const [diagnosisResult, setDiagnosisResult] =
     useState<DiagnosisResult | null>(null);
+  const [diagnosisResults, setDiagnosisResults] = useState<DiagnosisResult[]>(
+    [],
+  );
 
   // Automatically update the audio ID when a new audio record is fetched
   useEffect(() => {
@@ -76,6 +85,34 @@ export function DiagnosisProvider({ children }: { children: ReactNode }) {
     } catch (err: any) {
       const errorMessage =
         err.message || "An unexpected error occurred while fetching diagnosis.";
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchDiagnosisResults = async (audioIds: string[]) => {
+    if (!audioIds || audioIds.length === 0) {
+      setDiagnosisResults([]);
+      return { success: true, data: [] };
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await diagnosisService.getResultsByAudioIds(audioIds);
+      if (result.success && result.data) {
+        setDiagnosisResults(result.data);
+      } else {
+        setError(result.error || "Failed to fetch diagnosis results");
+      }
+      return result;
+    } catch (err: any) {
+      const errorMessage =
+        err.message ||
+        "An unexpected error occurred while fetching diagnosis results.";
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
@@ -120,6 +157,7 @@ export function DiagnosisProvider({ children }: { children: ReactNode }) {
 
   const clearDiagnosis = () => {
     setDiagnosisResult(null);
+    setDiagnosisResults([]);
     setAudioId("");
     setError(null);
   };
@@ -130,9 +168,11 @@ export function DiagnosisProvider({ children }: { children: ReactNode }) {
         audioId,
         setAudioId,
         diagnosisResult,
+        diagnosisResults,
         isLoading,
         error,
         fetchDiagnosis,
+        fetchDiagnosisResults,
         waitForDiagnosis,
         clearError,
         clearDiagnosis,

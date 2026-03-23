@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,8 @@ import {
   TextInput,
   TouchableOpacity,
   Platform,
+  ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -21,6 +23,8 @@ import {
 import { Colors } from "@/constants/colors";
 import { Gap } from "@/constants/gap";
 import { Radius } from "@/constants/radius";
+import { useAudio } from "@/contexts/AudioContext";
+import { useDiagnosis } from "@/contexts/DiagnosisContext";
 
 type DiagnosisStatus = "Abnormal" | "Normal" | "Review";
 
@@ -32,41 +36,6 @@ interface DiagnosisRecord {
   result: string;
   confidence: number;
 }
-
-const diagnosisData: DiagnosisRecord[] = [
-  {
-    id: "1",
-    location: "At Hospital",
-    date: "Today, 10:30 AM",
-    status: "Abnormal",
-    result: "Wheeze Detected",
-    confidence: 92,
-  },
-  {
-    id: "2",
-    location: "At Home",
-    date: "Yesterday, 8:15 PM",
-    status: "Normal",
-    result: "Healthy Lung Sounds",
-    confidence: 98,
-  },
-  {
-    id: "3",
-    location: "At Home",
-    date: "Oct 24, 9:00 AM",
-    status: "Review",
-    result: "Fine Crackles",
-    confidence: 85,
-  },
-  {
-    id: "4",
-    location: "Clinic Visit",
-    date: "Oct 20, 11:45 AM",
-    status: "Normal",
-    result: "Healthy Lung Sounds",
-    confidence: 95,
-  },
-];
 
 const getStatusColor = (status: DiagnosisStatus) => {
   switch (status) {
@@ -99,6 +68,104 @@ const getStatusColor = (status: DiagnosisStatus) => {
 
 export default function DiagnosisScreen() {
   const router = useRouter();
+  const { deviceId, allAudio, isFetchingAll, fetchAllAudio } = useAudio();
+  const { diagnosisResults, isLoading, fetchDiagnosisResults } = useDiagnosis();
+  const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    if (deviceId) {
+      fetchAllAudio();
+    }
+  }, [deviceId]);
+
+  useEffect(() => {
+    if (allAudio && allAudio.length > 0) {
+      const audioIds = allAudio.map((a) => a.id);
+      console.log(deviceId);
+      console.log(audioIds);
+      fetchDiagnosisResults(audioIds);
+    }
+  }, [allAudio]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    if (deviceId) {
+      await fetchAllAudio();
+    }
+    setRefreshing(false);
+  };
+
+  const combinedData: DiagnosisRecord[] = useMemo(() => {
+    if (!allAudio || !diagnosisResults) return [];
+
+    const data = allAudio.reduce<DiagnosisRecord[]>((acc, audio) => {
+      const result = diagnosisResults.find((r) => r.audio_id === audio.id);
+
+      if (!result) return acc;
+
+      let status: DiagnosisStatus = "Review";
+      let resultText = "Pending Analysis";
+      let confidence = 0;
+
+      if (result.status === "completed") {
+        const predName = result.pred_name?.toLowerCase();
+        if (predName === "normal") {
+          status = "Normal";
+          resultText = "Healthy Lung Sounds";
+          confidence = Math.round(result.prob_normal * 100);
+        } else if (predName === "wheezes") {
+          status = "Abnormal";
+          resultText = "Wheeze Detected";
+          confidence = Math.round(result.prob_wheezes * 100);
+        } else if (predName === "crackles") {
+          status = "Abnormal";
+          resultText = "Crackles Detected";
+          confidence = Math.round(result.prob_crackles * 100);
+        } else if (predName === "both") {
+          status = "Abnormal";
+          resultText = "Wheezes & Crackles";
+          confidence = Math.round(result.prob_both * 100);
+        }
+      } else if (result.status === "failed") {
+        status = "Review";
+        resultText = "Analysis Failed";
+      }
+
+      // Format date
+      const dateObj = new Date(audio.created);
+      const dateFormatted = dateObj.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      });
+
+      acc.push({
+        id: result.id,
+        location: "At Home", // Assuming location
+        date: dateFormatted,
+        status,
+        result: resultText,
+        confidence,
+      });
+
+      return acc;
+    }, []);
+
+    if (searchQuery) {
+      const lowerQuery = searchQuery.toLowerCase();
+      return data.filter(
+        (item) =>
+          item.date.toLowerCase().includes(lowerQuery) ||
+          item.result.toLowerCase().includes(lowerQuery) ||
+          item.status.toLowerCase().includes(lowerQuery),
+      );
+    }
+
+    return data;
+  }, [allAudio, diagnosisResults, searchQuery]);
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -113,6 +180,9 @@ export default function DiagnosisScreen() {
         style={styles.scrollView}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
         <View style={styles.searchContainer}>
           <View style={styles.searchInputContainer}>
@@ -121,6 +191,8 @@ export default function DiagnosisScreen() {
               style={styles.searchInput}
               placeholder="Search by date or result..."
               placeholderTextColor="#94a3b8"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
             />
           </View>
         </View>
@@ -132,76 +204,90 @@ export default function DiagnosisScreen() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.listContainer}>
-          {diagnosisData.map((item) => {
-            const colors = getStatusColor(item.status);
-            const ResultIcon = colors.icon;
+        {isFetchingAll && !refreshing ? (
+          <ActivityIndicator
+            size="large"
+            color="#1961f0"
+            style={{ marginTop: Gap.large }}
+          />
+        ) : combinedData.length === 0 ? (
+          <View style={{ alignItems: "center", marginTop: Gap.large }}>
+            <Text style={{ color: "#64748b" }}>No recordings found.</Text>
+          </View>
+        ) : (
+          <View style={styles.listContainer}>
+            {combinedData.map((item) => {
+              const colors = getStatusColor(item.status);
+              const ResultIcon = colors.icon;
 
-            return (
-              <TouchableOpacity
-                key={item.id}
-                style={styles.card}
-                onPress={() => router.push("./diagnosis-details")}
-              >
-                <View style={styles.cardHeader}>
-                  <View style={styles.cardHeaderLeft}>
+              return (
+                <TouchableOpacity
+                  key={item.id}
+                  style={styles.card}
+                  onPress={() =>
+                    router.push(`./diagnosis-details?id=${item.id}`)
+                  }
+                >
+                  <View style={styles.cardHeader}>
+                    <View style={styles.cardHeaderLeft}>
+                      <View
+                        style={[
+                          styles.iconContainer,
+                          {
+                            backgroundColor: colors.bg,
+                            borderColor: colors.border,
+                          },
+                        ]}
+                      >
+                        <Activity size={24} color={colors.bar} />
+                      </View>
+                      <View style={styles.cardHeaderText}>
+                        <Text style={styles.locationText}>{item.location}</Text>
+                        <Text style={styles.dateText}>{item.date}</Text>
+                      </View>
+                    </View>
                     <View
                       style={[
-                        styles.iconContainer,
+                        styles.statusBadge,
                         {
                           backgroundColor: colors.bg,
                           borderColor: colors.border,
                         },
                       ]}
                     >
-                      <Activity size={24} color={colors.bar} />
-                    </View>
-                    <View style={styles.cardHeaderText}>
-                      <Text style={styles.locationText}>{item.location}</Text>
-                      <Text style={styles.dateText}>{item.date}</Text>
+                      <Text style={[styles.statusText, { color: colors.text }]}>
+                        {item.status}
+                      </Text>
                     </View>
                   </View>
-                  <View
-                    style={[
-                      styles.statusBadge,
-                      {
-                        backgroundColor: colors.bg,
-                        borderColor: colors.border,
-                      },
-                    ]}
-                  >
-                    <Text style={[styles.statusText, { color: colors.text }]}>
-                      {item.status}
-                    </Text>
-                  </View>
-                </View>
 
-                <View style={styles.resultContainer}>
-                  <View style={styles.resultRow}>
-                    <View style={styles.resultInfo}>
-                      <ResultIcon size={16} color={colors.text} />
-                      <Text style={styles.resultText}>{item.result}</Text>
+                  <View style={styles.resultContainer}>
+                    <View style={styles.resultRow}>
+                      <View style={styles.resultInfo}>
+                        <ResultIcon size={16} color={colors.text} />
+                        <Text style={styles.resultText}>{item.result}</Text>
+                      </View>
+                      <Text style={styles.confidenceText}>
+                        {item.confidence}% Confidence
+                      </Text>
                     </View>
-                    <Text style={styles.confidenceText}>
-                      {item.confidence}% Confidence
-                    </Text>
+                    <View style={styles.progressBarBackground}>
+                      <View
+                        style={[
+                          styles.progressBarFill,
+                          {
+                            width: `${item.confidence}%`,
+                            backgroundColor: colors.bar,
+                          },
+                        ]}
+                      />
+                    </View>
                   </View>
-                  <View style={styles.progressBarBackground}>
-                    <View
-                      style={[
-                        styles.progressBarFill,
-                        {
-                          width: `${item.confidence}%`,
-                          backgroundColor: colors.bar,
-                        },
-                      ]}
-                    />
-                  </View>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
