@@ -450,12 +450,12 @@ export default function DiagnosisDetailsScreen() {
               <View style={styles.doctorHeader}>
                 <View style={styles.avatarPlaceholder}>
                   <Image
-                    source={{ uri: "https://i.pravatar.cc/150?u=dr_sarah" }}
+                    source={require("@/assets/images/Doctor-ava.jpeg")}
                     style={styles.avatarImage}
                   />
                 </View>
                 <View style={styles.doctorInfo}>
-                  <Text style={styles.doctorName}>Dr. Sarah Smith</Text>
+                  <Text style={styles.doctorName}>Dr. Emily Chen</Text>
                   <Text style={styles.doctorMeta}>
                     Cardiologist • Today, 10:42 AM
                   </Text>
@@ -463,9 +463,10 @@ export default function DiagnosisDetailsScreen() {
               </View>
               <View style={styles.divider} />
               <Text style={styles.noteText}>
-                Patient exhibits clear signs of Grade 2 systolic murmur.{"\n"}
-                The S1 sound is distinct but S2 is partially obscured.{"\n"}
-                Recommend follow-up echocardiogram to confirm severity.
+                Patient exhibits wheezing at the left upper lobe position.
+                Moderate severity detected with 40% confidence. Crackles remain
+                a secondary possibility. Recommend respiratory follow-up and
+                clinical correlation.
               </Text>
             </View>
           </View>

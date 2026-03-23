@@ -20,9 +20,11 @@ export default function DoctorNoteCard() {
         </View>
         <View style={styles.noteContent}>
           <Text style={styles.noteText}>
-            Your heart sounds are clear. Please continue with the prescribed
-            medication and record again in 3 days. Let me know if you feel any
-            shortness of breath.
+            Across your recent recordings, your lung sounds show a persistent
+            abnormal pattern that should continue to be monitored. Please
+            continue your current treatment plan and record again in 3 days.
+            Seek medical attention sooner if your breathing worsens, you develop
+            chest tightness, or you notice shortness of breath.
           </Text>
         </View>
         <TouchableOpacity style={styles.replyButton}>

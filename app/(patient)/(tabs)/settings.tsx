@@ -29,15 +29,15 @@ export default function SettingsScreen() {
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
             <Image
-              source={require("@/assets/images/Doctor-ava.jpeg")}
+              source={require("@/assets/images/Patient-ava.jpeg")}
               style={styles.avatar}
             />
             <View style={styles.onlineIndicator} />
           </View>
 
-          <Text style={styles.name}>Dr. Sarah Miller</Text>
+          <Text style={styles.name}>Sarah Miller</Text>
           <View style={styles.badgeContainer}>
-            <Text style={styles.badgeText}>Provider</Text>
+            <Text style={styles.badgeText}>Patient</Text>
           </View>
           <Text style={styles.email}>sarah.miller@hospital.com</Text>
         </View>
