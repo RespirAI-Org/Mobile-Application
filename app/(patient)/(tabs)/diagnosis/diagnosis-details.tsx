@@ -48,6 +48,11 @@ export default function DiagnosisDetailsScreen() {
 
   useEffect(() => {
     async function loadData() {
+      setSound(null);
+      setIsPlaying(false);
+      setPosition(0);
+      setDuration(0);
+
       if (!id) {
         setIsLoading(false);
         return;
