@@ -15,6 +15,7 @@ export default function Index() {
         let route = "/(auth)/Login";
 
         if (authDataStr) {
+          console.log("[Auth] User has already authenticated");
           const authData = JSON.parse(authDataStr);
           if (authData && authData.record) {
             const user = authData.record;
