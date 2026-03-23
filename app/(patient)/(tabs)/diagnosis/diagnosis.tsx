@@ -239,14 +239,14 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    backgroundColor: "#f6f6f8",
+    backgroundColor: "white",
   },
   contentContainer: {
     paddingBottom: Gap.large,
   },
   searchContainer: {
     paddingVertical: Gap.extraSmall,
-    backgroundColor: "#f6f6f8",
+    backgroundColor: "white",
   },
   searchInputContainer: {
     flexDirection: "row",
