@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { StyleSheet, ScrollView } from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
+import { StyleSheet, ScrollView, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/colors";
 import { Gap } from "@/constants/gap";
@@ -25,6 +25,19 @@ export default function HomeScreen() {
     diagnosisResult,
     error: diagnosisError,
   } = useDiagnosis();
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    if (deviceId) {
+      await fetchLatestAudio();
+    }
+    if (audioId) {
+      await fetchDiagnosis();
+    }
+    setRefreshing(false);
+  }, [deviceId, audioId, fetchLatestAudio, fetchDiagnosis]);
 
   // Test fetching when the component mounts
   useEffect(() => {
@@ -63,6 +76,9 @@ export default function HomeScreen() {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
         <HomeScreenHeader />
         <StatusCard />
