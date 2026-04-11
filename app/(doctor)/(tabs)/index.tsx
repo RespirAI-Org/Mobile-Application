@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   Platform,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Search, Clock } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 import { Gap } from "@/constants/gap";
@@ -115,9 +114,8 @@ export default function DoctorHomeScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <View style={styles.container}>
       <ScrollView
-        style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -205,21 +203,19 @@ export default function DoctorHomeScreen() {
           })}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    paddingTop: Gap.medium,
     flex: 1,
-    backgroundColor: Colors.background["900"],
-  },
-  scrollView: {
-    flex: 1,
+    backgroundColor: Colors.background.light,
   },
   scrollContent: {
-    paddingHorizontal: Gap.small,
-    paddingTop: Gap.medium,
+    paddingHorizontal: Gap.medium,
+    paddingTop: Gap.small,
     paddingBottom: Gap.large,
     gap: Gap.small,
   },
