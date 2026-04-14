@@ -15,6 +15,7 @@ import { DiagnosisProvider } from "../contexts/DiagnosisContext";
 import { DeviceProvider } from "../contexts/DeviceContext";
 import { NotificationProvider } from "../contexts/NotificationContext";
 import { PatientProvider } from "../contexts/PatientContext";
+import { MessagingProvider } from "../contexts/MessagingContext";
 
 export const unstable_settings = {
   initialRouteName: "(auth)",
@@ -25,6 +26,7 @@ export default function RootLayout() {
 
   return (
     <PatientProvider>
+      <MessagingProvider>
       <DeviceProvider>
         <NotificationProvider>
           <AudioProvider>
@@ -45,6 +47,7 @@ export default function RootLayout() {
           </AudioProvider>
         </NotificationProvider>
       </DeviceProvider>
+      </MessagingProvider>
     </PatientProvider>
   );
 }

@@ -195,6 +195,20 @@ export const messagingService = {
     }
   },
 
+  async getUnreadCount(
+    conversationId: string,
+    userId: string,
+  ): Promise<number> {
+    try {
+      const result = await pb.collection("messages").getList(1, 1, {
+        filter: `conversation = "${conversationId}" && read_by !~ "${userId}"`,
+      });
+      return result.totalItems;
+    } catch {
+      return 0;
+    }
+  },
+
   subscribeToMessages(
     conversationId: string,
     callback: (data: { action: string; record: MessageRecord }) => void,
