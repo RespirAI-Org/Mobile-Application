@@ -33,8 +33,6 @@ export default function DiagnosisDetailsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-      <Stack.Screen options={{ headerShown: false }} />
-
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity

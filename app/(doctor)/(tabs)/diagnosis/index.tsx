@@ -141,7 +141,12 @@ export default function DiagnosisScreen() {
               <TouchableOpacity
                 key={item.id}
                 style={styles.card}
-                onPress={() => router.push("./diagnosis-details")}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(doctor)/(tabs)/diagnosis/diagnosis-details",
+                    params: { id: item.id },
+                  })
+                }
               >
                 <View style={styles.cardHeader}>
                   <View style={styles.cardHeaderLeft}>

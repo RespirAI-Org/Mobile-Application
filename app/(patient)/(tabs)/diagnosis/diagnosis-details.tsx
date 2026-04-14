@@ -161,7 +161,10 @@ export default function DiagnosisDetailsScreen() {
   ];
 
   if (recording?.severity) {
-    const severityMap: Record<string, { text: string; bg: string; color: string }> = {
+    const severityMap: Record<
+      string,
+      { text: string; bg: string; color: string }
+    > = {
       normal: { text: "NORMAL", bg: "#dcfce7", color: "#15803d" },
       low: { text: "LOW SEVERITY", bg: "#dcfce7", color: "#15803d" },
       medium: { text: "MODERATE SEVERITY", bg: "#fef9c3", color: "#a16207" },
@@ -181,15 +184,20 @@ export default function DiagnosisDetailsScreen() {
       if (predName === "normal") diagnosisTitle = "Healthy Lung Sounds";
       else if (predName === "wheezes") diagnosisTitle = "Wheeze Detected";
       else if (predName === "crackles") diagnosisTitle = "Crackles Detected";
-      else if (predName === "both") diagnosisTitle = "Wheezes & Crackles Detected";
+      else if (predName === "both")
+        diagnosisTitle = "Wheezes & Crackles Detected";
       else diagnosisTitle = diagResult.pred_name || "Unknown";
     }
 
     if (!recording?.confidence) {
-      if (predName === "normal") confidenceValue = Math.round(diagResult.prob_normal * 100);
-      else if (predName === "wheezes") confidenceValue = Math.round(diagResult.prob_wheezes * 100);
-      else if (predName === "crackles") confidenceValue = Math.round(diagResult.prob_crackles * 100);
-      else if (predName === "both") confidenceValue = Math.round(diagResult.prob_both * 100);
+      if (predName === "normal")
+        confidenceValue = Math.round(diagResult.prob_normal * 100);
+      else if (predName === "wheezes")
+        confidenceValue = Math.round(diagResult.prob_wheezes * 100);
+      else if (predName === "crackles")
+        confidenceValue = Math.round(diagResult.prob_crackles * 100);
+      else if (predName === "both")
+        confidenceValue = Math.round(diagResult.prob_both * 100);
     }
 
     if (!recording?.severity) {
@@ -246,8 +254,6 @@ export default function DiagnosisDetailsScreen() {
 
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ headerShown: false }} />
-
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}

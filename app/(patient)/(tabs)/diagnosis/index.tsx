@@ -155,7 +155,10 @@ export default function DiagnosisScreen() {
 
       return {
         id: recording.id,
-        location: LOCATION_LABELS[recording.location] || recording.location || "Unknown",
+        location:
+          LOCATION_LABELS[recording.location] ||
+          recording.location ||
+          "Unknown",
         date: dateFormatted,
         status,
         result: resultText,
@@ -235,7 +238,10 @@ export default function DiagnosisScreen() {
                   key={item.id}
                   style={styles.card}
                   onPress={() =>
-                    router.push(`./diagnosis-details?id=${item.id}`)
+                    router.push({
+                      pathname: "/(patient)/(tabs)/diagnosis/diagnosis-details",
+                      params: { id: item.id },
+                    })
                   }
                 >
                   <View style={styles.cardHeader}>

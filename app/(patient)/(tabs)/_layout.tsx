@@ -48,18 +48,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="diagnosis/diagnosis"
+        name="diagnosis"
         options={{
           title: "Diagnosis",
           tabBarIcon: ({ color, focused }) => (
             <Activity size={24} color={color} />
           ),
-        }}
-      />
-      <Tabs.Screen
-        name="diagnosis/diagnosis-details"
-        options={{
-          href: null,
         }}
       />
       <Tabs.Screen
