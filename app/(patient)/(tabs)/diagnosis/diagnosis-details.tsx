@@ -9,7 +9,6 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter, useLocalSearchParams } from "expo-router";
 import {
   ArrowLeft,
@@ -19,11 +18,33 @@ import {
   Pause,
   SkipBack,
   SkipForward,
+  Clock,
 } from "lucide-react-native";
 import { Audio } from "expo-av";
 import { audioService } from "@/services/audioService";
-import { diagnosisService, DiagnosisResult } from "@/services/diagnosisService";
+import { recordingService, RecordingRecord } from "@/services/recordingService";
 import { Gap } from "@/constants/gap";
+
+const BODY_POSITION_LABELS: Record<string, string> = {
+  mitral: "Mitral",
+  aortic: "Aortic",
+  pulmonic: "Pulmonic",
+  tricuspid: "Tricuspid",
+};
+
+function stripHtml(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>\s*<p[^>]*>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .trim();
+}
 
 export default function DiagnosisDetailsScreen() {
   const router = useRouter();
@@ -31,8 +52,7 @@ export default function DiagnosisDetailsScreen() {
   const [activeValve, setActiveValve] = useState("Left Upper Lobe");
   const [audioMode, setAudioMode] = useState<"Raw" | "AI">("Raw");
 
-  const [result, setResult] = useState<DiagnosisResult | null>(null);
-  const [audioRecord, setAudioRecord] = useState<any>(null);
+  const [recording, setRecording] = useState<RecordingRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const [sound, setSound] = useState<Audio.Sound | null>(null);
@@ -40,12 +60,9 @@ export default function DiagnosisDetailsScreen() {
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
 
-  // Simulated waveform bars
-  const waveformBars = Array.from({ length: 30 }, (_, i) => {
-    // Generate somewhat random heights for visual effect
-    const height = Math.max(10, Math.min(40, Math.random() * 40 + 10));
-    return height;
-  });
+  const waveformBars = Array.from({ length: 30 }, () =>
+    Math.max(10, Math.min(40, Math.random() * 40 + 10)),
+  );
 
   useEffect(() => {
     async function loadData() {
@@ -60,31 +77,14 @@ export default function DiagnosisDetailsScreen() {
       }
       setIsLoading(true);
 
-      let fetchedResult = null;
-      let fetchedAudio = null;
-
-      const res = await diagnosisService.getResultById(id);
+      const res = await recordingService.getRecordingById(
+        id,
+        "audio,result,doctor",
+      );
       if (res.success && res.data) {
-        fetchedResult = res.data;
-        const audioRes = await audioService.getAudioById(
-          fetchedResult.audio_id,
-        );
-        if (audioRes.success && audioRes.data) {
-          fetchedAudio = audioRes.data;
-        }
-      } else {
-        const audioRes = await audioService.getAudioById(id);
-        if (audioRes.success && audioRes.data) {
-          fetchedAudio = audioRes.data;
-          const res2 = await diagnosisService.getResultByAudioId(id);
-          if (res2.success && res2.data) {
-            fetchedResult = res2.data;
-          }
-        }
+        setRecording(res.data);
       }
 
-      setResult(fetchedResult);
-      setAudioRecord(fetchedAudio);
       setIsLoading(false);
     }
     loadData();
@@ -97,6 +97,10 @@ export default function DiagnosisDetailsScreen() {
         }
       : undefined;
   }, [sound]);
+
+  const audioRecord = recording?.expand?.audio;
+  const diagResult = recording?.expand?.result;
+  const doctor = recording?.expand?.doctor;
 
   const loadAudio = async () => {
     if (!audioRecord) return;
@@ -144,8 +148,8 @@ export default function DiagnosisDetailsScreen() {
     return `${minutes < 10 ? "0" : ""}${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
-  let diagnosisTitle = "Pending Analysis";
-  let confidenceValue = 0;
+  let diagnosisTitle = recording?.diagnosis_title || "Pending Analysis";
+  let confidenceValue = recording?.confidence || 0;
   let severityText = "PENDING";
   let severityBg = "#f1f5f9";
   let severityColor = "#64748b";
@@ -156,62 +160,94 @@ export default function DiagnosisDetailsScreen() {
     { label: "Both", value: 0, color: "#cbd5e1" },
   ];
 
-  if (result && result.status === "completed") {
-    const predName = result.pred_name?.toLowerCase();
-    if (predName === "normal") {
-      diagnosisTitle = "Healthy Lung Sounds";
-      confidenceValue = Math.round(result.prob_normal * 100);
-      severityText = "NORMAL";
-      severityBg = "#dcfce7";
-      severityColor = "#15803d";
-    } else if (predName === "wheezes") {
-      diagnosisTitle = "Wheeze Detected";
-      confidenceValue = Math.round(result.prob_wheezes * 100);
-      severityText = "MODERATE SEVERITY";
-      severityBg = "#fef9c3";
-      severityColor = "#a16207";
-    } else if (predName === "crackles") {
-      diagnosisTitle = "Crackles Detected";
-      confidenceValue = Math.round(result.prob_crackles * 100);
-      severityText = "MODERATE SEVERITY";
-      severityBg = "#fef9c3";
-      severityColor = "#a16207";
-    } else if (predName === "both") {
-      diagnosisTitle = "Wheezes & Crackles Detected";
-      confidenceValue = Math.round(result.prob_both * 100);
-      severityText = "HIGH SEVERITY";
-      severityBg = "#fee2e2";
-      severityColor = "#b91c1c";
-    } else {
-      diagnosisTitle = result.pred_name || "Unknown";
-      confidenceValue = 0;
-      severityText = "UNKNOWN";
+  if (recording?.severity) {
+    const severityMap: Record<string, { text: string; bg: string; color: string }> = {
+      normal: { text: "NORMAL", bg: "#dcfce7", color: "#15803d" },
+      low: { text: "LOW SEVERITY", bg: "#dcfce7", color: "#15803d" },
+      medium: { text: "MODERATE SEVERITY", bg: "#fef9c3", color: "#a16207" },
+      high: { text: "HIGH SEVERITY", bg: "#fee2e2", color: "#b91c1c" },
+    };
+    const s = severityMap[recording.severity];
+    if (s) {
+      severityText = s.text;
+      severityBg = s.bg;
+      severityColor = s.color;
+    }
+  }
+
+  if (diagResult?.pred_name) {
+    const predName = diagResult.pred_name.toLowerCase();
+    if (!recording?.diagnosis_title) {
+      if (predName === "normal") diagnosisTitle = "Healthy Lung Sounds";
+      else if (predName === "wheezes") diagnosisTitle = "Wheeze Detected";
+      else if (predName === "crackles") diagnosisTitle = "Crackles Detected";
+      else if (predName === "both") diagnosisTitle = "Wheezes & Crackles Detected";
+      else diagnosisTitle = diagResult.pred_name || "Unknown";
+    }
+
+    if (!recording?.confidence) {
+      if (predName === "normal") confidenceValue = Math.round(diagResult.prob_normal * 100);
+      else if (predName === "wheezes") confidenceValue = Math.round(diagResult.prob_wheezes * 100);
+      else if (predName === "crackles") confidenceValue = Math.round(diagResult.prob_crackles * 100);
+      else if (predName === "both") confidenceValue = Math.round(diagResult.prob_both * 100);
+    }
+
+    if (!recording?.severity) {
+      if (predName === "normal") {
+        severityText = "NORMAL";
+        severityBg = "#dcfce7";
+        severityColor = "#15803d";
+      } else {
+        severityText = "MODERATE SEVERITY";
+        severityBg = "#fef9c3";
+        severityColor = "#a16207";
+      }
     }
 
     probabilities = [
-      { label: "Normal", value: Math.round(result.prob_normal * 100) },
-      { label: "Wheezes", value: Math.round(result.prob_wheezes * 100) },
-      { label: "Crackles", value: Math.round(result.prob_crackles * 100) },
-      { label: "Both", value: Math.round(result.prob_both * 100) },
+      { label: "Normal", value: Math.round(diagResult.prob_normal * 100) },
+      { label: "Wheezes", value: Math.round(diagResult.prob_wheezes * 100) },
+      { label: "Crackles", value: Math.round(diagResult.prob_crackles * 100) },
+      { label: "Both", value: Math.round(diagResult.prob_both * 100) },
     ]
       .sort((a, b) => b.value - a.value)
       .map((p, index) => ({
         ...p,
         color: index === 0 ? "#0da6f2" : "#cbd5e1",
       }));
-  } else if (result && result.status === "failed") {
-    diagnosisTitle = "Analysis Failed";
-    severityText = "FAILED";
-    severityBg = "#fee2e2";
-    severityColor = "#b91c1c";
+  } else if (
+    diagResult?.status === "queued" ||
+    diagResult?.status === "processing"
+  ) {
+    diagnosisTitle = "Processing...";
   }
 
+  const bodyPositionLabel =
+    BODY_POSITION_LABELS[recording?.body_position || ""] ||
+    recording?.body_position ||
+    "Unknown";
+
+  const doctorName = doctor?.full_name ? `Dr. ${doctor.full_name}` : null;
+  const doctorSpecialist = doctor?.specialist || null;
+
+  const recordingDate = recording
+    ? new Date(recording.created).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      })
+    : "";
+
+  const doctorMeta = [doctorSpecialist, recordingDate]
+    .filter(Boolean)
+    .join(" • ");
+
   return (
-    // <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -237,16 +273,31 @@ export default function DiagnosisDetailsScreen() {
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}
         >
-          {/* Main Result Card */}
           <View style={styles.mainCard}>
             <View style={styles.badgeRow}>
-              <View style={styles.confirmedBadge}>
-                <CheckCircle2
-                  size={12}
-                  color="#0da6f2"
-                  style={styles.badgeIcon}
-                />
-                <Text style={styles.confirmedText}>CONFIRMED</Text>
+              <View
+                style={[
+                  styles.confirmedBadge,
+                  !recording?.confirmed && { backgroundColor: "#f1f5f9" },
+                ]}
+              >
+                {recording?.confirmed ? (
+                  <CheckCircle2
+                    size={12}
+                    color="#0da6f2"
+                    style={styles.badgeIcon}
+                  />
+                ) : (
+                  <Clock size={12} color="#64748b" style={styles.badgeIcon} />
+                )}
+                <Text
+                  style={[
+                    styles.confirmedText,
+                    !recording?.confirmed && { color: "#64748b" },
+                  ]}
+                >
+                  {recording?.confirmed ? "CONFIRMED" : "PENDING REVIEW"}
+                </Text>
               </View>
               <View
                 style={[styles.severityBadge, { backgroundColor: severityBg }]}
@@ -259,7 +310,7 @@ export default function DiagnosisDetailsScreen() {
 
             <Text style={styles.diagnosisTitle}>{diagnosisTitle}</Text>
             <Text style={styles.diagnosisSubtitle}>
-              Recording taken at {activeValve} Valve position.
+              Recording taken at {bodyPositionLabel} position.
             </Text>
 
             <View style={styles.confidenceContainer}>
@@ -268,7 +319,6 @@ export default function DiagnosisDetailsScreen() {
             </View>
           </View>
 
-          {/* Valve Selector */}
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -281,7 +331,7 @@ export default function DiagnosisDetailsScreen() {
               "Left Interscapular",
               "Right Interscapular",
               "Left Lower Lobe",
-              "RIght Lower Lobe",
+              "Right Lower Lobe",
             ].map((valve) => (
               <TouchableOpacity
                 key={valve}
@@ -303,11 +353,10 @@ export default function DiagnosisDetailsScreen() {
             ))}
           </ScrollView>
 
-          {/* Symptom Probability */}
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Symptom Probability</Text>
             <View style={styles.card}>
-              {probabilities.map((item, index) => (
+              {probabilities.map((item) => (
                 <View key={item.label} style={styles.probabilityRow}>
                   <View style={styles.probabilityHeader}>
                     <Text style={styles.probabilityLabel}>{item.label}</Text>
@@ -339,7 +388,6 @@ export default function DiagnosisDetailsScreen() {
             </View>
           </View>
 
-          {/* Audio Player */}
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Audio</Text>
             <View style={styles.card}>
@@ -450,33 +498,31 @@ export default function DiagnosisDetailsScreen() {
             </View>
           </View>
 
-          {/* Doctor's Note */}
-          <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Doctor&apos;s Note</Text>
-            <View style={styles.noteCard}>
-              <View style={styles.doctorHeader}>
-                <View style={styles.avatarPlaceholder}>
-                  <Image
-                    source={require("@/assets/images/Doctor-ava.jpeg")}
-                    style={styles.avatarImage}
-                  />
+          {recording?.doctor_note ? (
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionTitle}>Doctor&apos;s Note</Text>
+              <View style={styles.noteCard}>
+                <View style={styles.doctorHeader}>
+                  <View style={styles.avatarPlaceholder}>
+                    <Image
+                      source={require("@/assets/images/Doctor-ava.jpeg")}
+                      style={styles.avatarImage}
+                    />
+                  </View>
+                  <View style={styles.doctorInfo}>
+                    <Text style={styles.doctorName}>
+                      {doctorName || "Your Doctor"}
+                    </Text>
+                    <Text style={styles.doctorMeta}>{doctorMeta}</Text>
+                  </View>
                 </View>
-                <View style={styles.doctorInfo}>
-                  <Text style={styles.doctorName}>Dr. Emily Chen</Text>
-                  <Text style={styles.doctorMeta}>
-                    Cardiologist • Today, 10:42 AM
-                  </Text>
-                </View>
+                <View style={styles.divider} />
+                <Text style={styles.noteText}>
+                  {stripHtml(recording.doctor_note)}
+                </Text>
               </View>
-              <View style={styles.divider} />
-              <Text style={styles.noteText}>
-                Patient exhibits wheezing at the left upper lobe position.
-                Moderate severity detected with 40% confidence. Crackles remain
-                a secondary possibility. Recommend respiratory follow-up and
-                clinical correlation.
-              </Text>
             </View>
-          </View>
+          ) : null}
 
           <View style={styles.disclaimerContainer}>
             <Text style={styles.disclaimerText}>
@@ -755,7 +801,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   audioProgressBarFill: {
-    width: "35%",
     height: "100%",
     backgroundColor: "#0da6f2",
     borderRadius: 3,
@@ -768,7 +813,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#0da6f2",
     position: "absolute",
-    left: "35%",
     marginLeft: -8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },

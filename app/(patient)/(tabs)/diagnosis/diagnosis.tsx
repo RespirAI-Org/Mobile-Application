@@ -10,7 +10,6 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import {
   SquarePen,
@@ -23,12 +22,12 @@ import {
 import { Colors } from "@/constants/colors";
 import { Gap } from "@/constants/gap";
 import { Radius } from "@/constants/radius";
-import { useAudio } from "@/contexts/AudioContext";
-import { useDiagnosis } from "@/contexts/DiagnosisContext";
+import { usePatients } from "@/contexts/PatientContext";
+import { recordingService, RecordingRecord } from "@/services/recordingService";
 
 type DiagnosisStatus = "Abnormal" | "Normal" | "Review";
 
-interface DiagnosisRecord {
+interface DiagnosisListItem {
   id: string;
   location: string;
   date: string;
@@ -36,6 +35,12 @@ interface DiagnosisRecord {
   result: string;
   confidence: number;
 }
+
+const LOCATION_LABELS: Record<string, string> = {
+  at_hospital: "At Hospital",
+  at_home: "At Home",
+  clinic_visit: "Clinic Visit",
+};
 
 const getStatusColor = (status: DiagnosisStatus) => {
   switch (status) {
@@ -68,72 +73,78 @@ const getStatusColor = (status: DiagnosisStatus) => {
 
 export default function DiagnosisScreen() {
   const router = useRouter();
-  const { deviceId, allAudio, isFetchingAll, fetchAllAudio } = useAudio();
-  const { diagnosisResults, isLoading, fetchDiagnosisResults } = useDiagnosis();
+  const { patientProfile } = usePatients();
+  const [recordings, setRecordings] = useState<RecordingRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    if (deviceId) {
-      fetchAllAudio();
+  const fetchRecordings = async () => {
+    if (!patientProfile?.id) return;
+    setIsLoading(true);
+    const result = await recordingService.getRecordingsByPatient(
+      patientProfile.id,
+      "result",
+    );
+    if (result.success && result.data) {
+      setRecordings(result.data);
     }
-  }, [deviceId]);
+    setIsLoading(false);
+  };
 
   useEffect(() => {
-    if (allAudio && allAudio.length > 0) {
-      const audioIds = allAudio.map((a) => a.id);
-      console.log(deviceId);
-      console.log(audioIds);
-      fetchDiagnosisResults(audioIds);
-    }
-  }, [allAudio]);
+    fetchRecordings();
+  }, [patientProfile?.id]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    if (deviceId) {
-      await fetchAllAudio();
-    }
+    await fetchRecordings();
     setRefreshing(false);
   };
 
-  const combinedData: DiagnosisRecord[] = useMemo(() => {
-    if (!allAudio || !diagnosisResults) return [];
-
-    const data = allAudio.reduce<DiagnosisRecord[]>((acc, audio) => {
-      const result = diagnosisResults.find((r) => r.audio_id === audio.id);
-
-      if (!result) return acc;
-
+  const combinedData: DiagnosisListItem[] = useMemo(() => {
+    const data = recordings.map((recording) => {
+      const diagResult = recording.expand?.result;
       let status: DiagnosisStatus = "Review";
       let resultText = "Pending Analysis";
-      let confidence = 0;
+      let confidence = recording.confidence || 0;
 
-      if (result.status === "completed") {
-        const predName = result.pred_name?.toLowerCase();
+      if (diagResult?.pred_name) {
+        const predName = diagResult.pred_name.toLowerCase();
         if (predName === "normal") {
           status = "Normal";
           resultText = "Healthy Lung Sounds";
-          confidence = Math.round(result.prob_normal * 100);
+          if (!recording.confidence)
+            confidence = Math.round(diagResult.prob_normal * 100);
         } else if (predName === "wheezes") {
           status = "Abnormal";
           resultText = "Wheeze Detected";
-          confidence = Math.round(result.prob_wheezes * 100);
+          if (!recording.confidence)
+            confidence = Math.round(diagResult.prob_wheezes * 100);
         } else if (predName === "crackles") {
           status = "Abnormal";
           resultText = "Crackles Detected";
-          confidence = Math.round(result.prob_crackles * 100);
+          if (!recording.confidence)
+            confidence = Math.round(diagResult.prob_crackles * 100);
         } else if (predName === "both") {
           status = "Abnormal";
           resultText = "Wheezes & Crackles";
-          confidence = Math.round(result.prob_both * 100);
+          if (!recording.confidence)
+            confidence = Math.round(diagResult.prob_both * 100);
         }
-      } else if (result.status === "failed") {
+      } else if (
+        diagResult?.status === "queued" ||
+        diagResult?.status === "processing"
+      ) {
         status = "Review";
-        resultText = "Analysis Failed";
+        resultText = "Processing...";
       }
 
-      // Format date
-      const dateObj = new Date(audio.created);
+      if (recording.diagnosis_title) {
+        resultText = recording.diagnosis_title;
+      }
+
+      const dateObj = new Date(recording.created);
       const dateFormatted = dateObj.toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
@@ -142,17 +153,15 @@ export default function DiagnosisScreen() {
         hour12: true,
       });
 
-      acc.push({
-        id: result.id,
-        location: "At Home", // Assuming location
+      return {
+        id: recording.id,
+        location: LOCATION_LABELS[recording.location] || recording.location || "Unknown",
         date: dateFormatted,
         status,
         result: resultText,
         confidence,
-      });
-
-      return acc;
-    }, []);
+      };
+    });
 
     if (searchQuery) {
       const lowerQuery = searchQuery.toLowerCase();
@@ -160,15 +169,15 @@ export default function DiagnosisScreen() {
         (item) =>
           item.date.toLowerCase().includes(lowerQuery) ||
           item.result.toLowerCase().includes(lowerQuery) ||
-          item.status.toLowerCase().includes(lowerQuery),
+          item.status.toLowerCase().includes(lowerQuery) ||
+          item.location.toLowerCase().includes(lowerQuery),
       );
     }
 
     return data;
-  }, [allAudio, diagnosisResults, searchQuery]);
+  }, [recordings, searchQuery]);
 
   return (
-    // <SafeAreaView style={styles.container} edges={["top"]}>
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Diagnosis History</Text>
@@ -205,7 +214,7 @@ export default function DiagnosisScreen() {
           </TouchableOpacity>
         </View>
 
-        {isFetchingAll && !refreshing ? (
+        {isLoading && !refreshing ? (
           <ActivityIndicator
             size="large"
             color="#1961f0"
@@ -290,7 +299,6 @@ export default function DiagnosisScreen() {
           </View>
         )}
       </ScrollView>
-      {/*</SafeAreaView>*/}
     </View>
   );
 }
@@ -441,7 +449,7 @@ const styles = StyleSheet.create({
     paddingVertical: Gap.xxxSmall,
     borderRadius: Radius.round,
     borderWidth: 1,
-    borderColor: "transparent", // Added to match style structure but keep transparent usually unless specified
+    borderColor: "transparent",
   },
   statusText: {
     fontSize: 12,
