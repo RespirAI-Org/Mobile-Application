@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { StyleSheet, ScrollView, RefreshControl, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { Colors } from "@/constants/colors";
 import { Gap } from "@/constants/gap";
 import HomeScreenHeader from "@/components/home/HomeScreenHeader";
@@ -10,69 +10,102 @@ import DoctorNoteCard from "@/components/home/DoctorNoteCard";
 import QuickActions from "@/components/home/QuickActions";
 import { useAudio } from "@/contexts/AudioContext";
 import { useDiagnosis } from "@/contexts/DiagnosisContext";
+import { useDevices } from "@/contexts/DeviceContext";
+import { useNotifications } from "@/contexts/NotificationContext";
+import { usePatients } from "@/contexts/PatientContext";
+import { patientService } from "@/services/patientService";
+import { recordingService, RecordingRecord } from "@/services/recordingService";
 
 export default function HomeScreen() {
-  const {
-    deviceId,
-    setDeviceId,
-    fetchLatestAudio,
-    latestAudio,
-    error: audioError,
-  } = useAudio();
-  const {
-    audioId,
-    fetchDiagnosis,
-    diagnosisResult,
-    error: diagnosisError,
-  } = useDiagnosis();
+  const router = useRouter();
+  const { deviceId, setDeviceId, fetchLatestAudio, latestAudio } = useAudio();
+  const { audioId, fetchDiagnosis } = useDiagnosis();
+  const { devices, selectedDevice, fetchDevices } = useDevices();
+  const { unreadCount, fetchNotifications } = useNotifications();
+  const { patientProfile, fetchPatientProfile } = usePatients();
 
   const [refreshing, setRefreshing] = useState(false);
+  const [latestRecording, setLatestRecording] =
+    useState<RecordingRecord | null>(null);
+
+  const patientName = patientProfile?.full_name || "User";
+  const patientAvatarUri = patientProfile
+    ? patientService.getAvatarUrl(patientProfile)
+    : null;
+
+  const activeDevice =
+    selectedDevice ||
+    devices.find((d) => d.status === "active") ||
+    devices[0] ||
+    null;
+
+  const fetchLatestRecording = useCallback(async () => {
+    if (!patientProfile?.id) return;
+    const result = await recordingService.getRecordingsByPatient(
+      patientProfile.id,
+      "doctor",
+    );
+    if (result.success && result.data && result.data.length > 0) {
+      setLatestRecording(result.data[0]);
+    }
+  }, [patientProfile?.id]);
+
+  const doctor =
+    latestRecording?.expand?.doctor || patientProfile?.expand?.doctor;
+  const doctorName = doctor?.full_name ? `Dr. ${doctor.full_name}` : null;
+  const doctorSpecialist = doctor?.specialist || null;
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    if (deviceId) {
-      await fetchLatestAudio();
-    }
+    await Promise.all([
+      fetchPatientProfile(),
+      fetchDevices(),
+      fetchNotifications(),
+      deviceId ? fetchLatestAudio() : Promise.resolve(),
+    ]);
     if (audioId) {
       await fetchDiagnosis();
     }
     setRefreshing(false);
-  }, [deviceId, audioId, fetchLatestAudio, fetchDiagnosis]);
+  }, [
+    deviceId,
+    audioId,
+    fetchLatestAudio,
+    fetchDiagnosis,
+    fetchDevices,
+    fetchNotifications,
+    fetchPatientProfile,
+  ]);
 
-  // Test fetching when the component mounts
   useEffect(() => {
-    // TODO: Replace with the actual device ID (e.g., from user profile / auth context)
-    setDeviceId("test");
+    fetchPatientProfile();
+    fetchDevices();
+    fetchNotifications();
   }, []);
 
-  // Fetch audio once deviceId is set
+  useEffect(() => {
+    if (activeDevice?.device_code && activeDevice.device_code !== deviceId) {
+      setDeviceId(activeDevice.device_code);
+    }
+  }, [activeDevice?.device_code]);
+
   useEffect(() => {
     if (deviceId) {
       fetchLatestAudio();
     }
   }, [deviceId]);
 
-  // Fetch diagnosis once audioId is automatically updated by the context
   useEffect(() => {
     if (audioId) {
       fetchDiagnosis();
     }
   }, [audioId]);
 
-  // Log results to verify the services run properly
   useEffect(() => {
-    if (latestAudio) console.log("Fetched Latest Audio ID:", latestAudio.id);
-    if (audioError) console.error("Audio Fetch Error:", audioError);
-  }, [latestAudio, audioError]);
-
-  useEffect(() => {
-    if (diagnosisResult)
-      console.log("Fetched Diagnosis Result:", diagnosisResult);
-    if (diagnosisError) console.error("Diagnosis Fetch Error:", diagnosisError);
-  }, [diagnosisResult, diagnosisError]);
+    fetchLatestRecording();
+  }, [fetchLatestRecording]);
 
   return (
-    // <SafeAreaView style={styles.container} edges={["top"]}>
     <View style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -81,13 +114,31 @@ export default function HomeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <HomeScreenHeader />
+        <HomeScreenHeader
+          userName={patientName}
+          avatarUri={patientAvatarUri}
+          unreadCount={unreadCount}
+          onNotificationPress={() => router.push("/notifications" as any)}
+        />
         <StatusCard />
-        <DeviceConnectionCard />
-        <DoctorNoteCard />
+        <DeviceConnectionCard
+          deviceName={activeDevice?.name || null}
+          status={activeDevice?.status || null}
+        />
+        <DoctorNoteCard
+          doctorName={doctorName}
+          doctorAvatarUri={null}
+          specialist={doctorSpecialist}
+          note={latestRecording?.doctor_note || null}
+          createdAt={latestRecording?.created || null}
+          onReply={() => {
+            if (doctor?.user) {
+              router.push(`/messages/${doctor.user}` as any);
+            }
+          }}
+        />
         <QuickActions />
       </ScrollView>
-      {/*</SafeAreaView>*/}
     </View>
   );
 }

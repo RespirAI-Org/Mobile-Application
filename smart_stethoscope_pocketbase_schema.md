@@ -39,8 +39,15 @@
 - `created`, `updated` — autodate
 - Unique index: `device_code`
 
+## `doctors` (Base)
+- `user` — relation → users (single), required, unique
+- `full_name` — text, required
+- `specialist` — text (e.g. "Cardiology", "Pulmonology")
+- `created`, `updated` — autodate
+
 ## `patients` (Base)
-- `doctor` — relation → users (single), required
+- `doctor` — relation → doctors (single), required
+- `user` — relation → users (single), nullable, unique (the patient's own login account, if they have one)
 - `full_name` — text, required
 - `gender` — select single: `male`, `female`, `other`
 - `date_of_birth` — date
@@ -51,7 +58,7 @@
 
 ## `recordings` (Base)
 - `patient` — relation → patients (single), required
-- `doctor` — relation → users (single), required
+- `doctor` — relation → doctors (single), required
 - `audio` — relation → respirai_audio (single, cascade delete)
 - `result` — relation → respirai_results (single, nullable)
 - `location` — select single: `at_hospital`, `at_home`, `clinic_visit`
@@ -66,7 +73,7 @@
 
 ## `consultations` (Base)
 - `patient` — relation → patients (single)
-- `doctor` — relation → users (single)
+- `doctor` — relation → doctors (single)
 - `title` — text
 - `scheduled_at` — date, required
 - `type` — select single: `video_call`, `voice_call`, `in_person`, `follow_up`

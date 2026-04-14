@@ -5,6 +5,7 @@ import {
   ConsultationCreateData,
 } from "../services/consultationService";
 import { authService } from "../services/authService";
+import { doctorService } from "../services/doctorService";
 
 interface ConsultationContextType {
   consultations: ConsultationRecord[];
@@ -76,8 +77,15 @@ export function ConsultationProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
+      const doctorResult = await doctorService.getDoctorByUserId(user.id);
+      if (!doctorResult.success || !doctorResult.data) {
+        const errorMessage = doctorResult.error || "Doctor profile not found.";
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+
       const result = await consultationService.getConsultationsByDoctor(
-        user.id,
+        doctorResult.data.id,
         "patient",
       );
       if (result.success && result.data) {
@@ -135,8 +143,15 @@ export function ConsultationProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
+      const doctorResult = await doctorService.getDoctorByUserId(user.id);
+      if (!doctorResult.success || !doctorResult.data) {
+        const errorMessage = doctorResult.error || "Doctor profile not found.";
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+
       const result = await consultationService.getUpcomingConsultations(
-        user.id,
+        doctorResult.data.id,
         "patient",
       );
       if (result.success && result.data) {
@@ -174,9 +189,16 @@ export function ConsultationProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
+      const doctorResult = await doctorService.getDoctorByUserId(user.id);
+      if (!doctorResult.success || !doctorResult.data) {
+        const errorMessage = doctorResult.error || "Doctor profile not found.";
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+
       const result = await consultationService.createConsultation({
         ...data,
-        doctor: user.id,
+        doctor: doctorResult.data.id,
       });
       if (result.success && result.data) {
         setConsultations((prev) => [result.data!, ...prev]);

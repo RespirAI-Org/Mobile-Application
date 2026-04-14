@@ -21,6 +21,7 @@ export interface RecordingRecord {
     audio?: any;
     result?: any;
     patient?: any;
+    doctor?: any;
   };
 }
 
@@ -134,6 +135,29 @@ export const recordingService = {
       return {
         success: false,
         error: error.message || "An error occurred while updating the recording.",
+      };
+    }
+  },
+
+  async getRecordingByAudioId(
+    audioId: string,
+    expand?: string,
+  ): Promise<{ success: boolean; data?: RecordingRecord; error?: string }> {
+    try {
+      const record = await pb
+        .collection("recordings")
+        .getFirstListItem<RecordingRecord>(`audio = "${audioId}"`, {
+          expand: expand || "",
+        });
+      return { success: true, data: record };
+    } catch (error: any) {
+      if (error.status === 404) {
+        return { success: false, error: "No recording found for this audio." };
+      }
+      console.error("[RecordingService] Fetch By Audio Error:", error.message);
+      return {
+        success: false,
+        error: error.message || "An error occurred while fetching the recording.",
       };
     }
   },

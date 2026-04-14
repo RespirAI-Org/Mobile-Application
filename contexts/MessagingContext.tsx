@@ -2,7 +2,6 @@ import React, {
   createContext,
   useContext,
   useState,
-  useEffect,
   useCallback,
   ReactNode,
 } from "react";
@@ -66,23 +65,6 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!activeConversation) return;
-
-    messagingService.subscribeToMessages(
-      activeConversation.id,
-      ({ action, record }) => {
-        if (action === "create") {
-          setMessages((prev) => [record, ...prev]);
-        }
-      },
-    );
-
-    return () => {
-      messagingService.unsubscribeFromMessages();
-    };
-  }, [activeConversation]);
 
   const fetchConversations = async () => {
     const user = authService.getCurrentUser();

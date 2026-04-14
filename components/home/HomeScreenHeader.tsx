@@ -10,23 +10,53 @@ import {
 import { Bell } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 
-export default function HomeScreenHeader() {
+interface HomeScreenHeaderProps {
+  userName: string;
+  avatarUri: string | null;
+  unreadCount: number;
+  onNotificationPress?: () => void;
+}
+
+export default function HomeScreenHeader({
+  userName,
+  avatarUri,
+  unreadCount,
+  onNotificationPress,
+}: HomeScreenHeaderProps) {
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? "Good Morning," : hour < 18 ? "Good Afternoon," : "Good Evening,";
+
   return (
     <View style={styles.header}>
       <View style={styles.headerLeft}>
         <View style={styles.profileImageContainer}>
-          <Image
-            source={require("@/assets/images/Patient-ava.jpeg")}
-            style={styles.profileImage}
-          />
+          {avatarUri ? (
+            <Image source={{ uri: avatarUri }} style={styles.profileImage} />
+          ) : (
+            <Image
+              source={require("@/assets/images/Patient-ava.jpeg")}
+              style={styles.profileImage}
+            />
+          )}
         </View>
         <View>
-          <Text style={styles.greetingText}>Good Morning,</Text>
-          <Text style={styles.userName}>Sarah</Text>
+          <Text style={styles.greetingText}>{greeting}</Text>
+          <Text style={styles.userName}>{userName}</Text>
         </View>
       </View>
-      <TouchableOpacity style={styles.notificationButton}>
+      <TouchableOpacity
+        style={styles.notificationButton}
+        onPress={onNotificationPress}
+      >
         <Bell size={20} color={Colors.typography["0"]} />
+        {unreadCount > 0 && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </Text>
+          </View>
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -86,5 +116,22 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 1,
+  },
+  badge: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    backgroundColor: Colors.error["500"],
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    color: Colors.typography.white,
+    fontSize: 10,
+    fontWeight: "700",
   },
 });

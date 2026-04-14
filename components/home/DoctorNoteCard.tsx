@@ -3,31 +3,56 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { Repeat2 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 
-export default function DoctorNoteCard() {
+interface DoctorNoteCardProps {
+  doctorName: string | null;
+  doctorAvatarUri: string | null;
+  specialist: string | null;
+  note: string | null;
+  createdAt: string | null;
+  onReply?: () => void;
+}
+
+export default function DoctorNoteCard({
+  doctorName,
+  doctorAvatarUri,
+  specialist,
+  note,
+  createdAt,
+  onReply,
+}: DoctorNoteCardProps) {
+  if (!note) return null;
+
+  const timeAgo = createdAt ? formatTimeAgo(createdAt) : "";
+  const roleParts = [specialist, timeAgo].filter(Boolean);
+  const roleLabel = roleParts.join(" • ");
+
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{"Doctor's Note"}</Text>
       <View style={styles.noteCard}>
         <View style={styles.doctorHeader}>
-          <Image
-            source={require("@/assets/images/Doctor-ava.jpeg")}
-            style={styles.doctorImage}
-          />
+          {doctorAvatarUri ? (
+            <Image
+              source={{ uri: doctorAvatarUri }}
+              style={styles.doctorImage}
+            />
+          ) : (
+            <Image
+              source={require("@/assets/images/Doctor-ava.jpeg")}
+              style={styles.doctorImage}
+            />
+          )}
           <View>
-            <Text style={styles.doctorName}>Dr. Emily Chen</Text>
-            <Text style={styles.doctorRole}>Cardiologist • 2 hours ago</Text>
+            <Text style={styles.doctorName}>
+              {doctorName || "Your Doctor"}
+            </Text>
+            <Text style={styles.doctorRole}>{roleLabel}</Text>
           </View>
         </View>
         <View style={styles.noteContent}>
-          <Text style={styles.noteText}>
-            Across your recent recordings, your lung sounds show a persistent
-            abnormal pattern that should continue to be monitored. Please
-            continue your current treatment plan and record again in 3 days.
-            Seek medical attention sooner if your breathing worsens, you develop
-            chest tightness, or you notice shortness of breath.
-          </Text>
+          <Text style={styles.noteText}>{stripHtml(note)}</Text>
         </View>
-        <TouchableOpacity style={styles.replyButton}>
+        <TouchableOpacity style={styles.replyButton} onPress={onReply}>
           <Text style={styles.replyButtonText}>Reply to Doctor</Text>
           <Repeat2
             size={16}
@@ -38,6 +63,39 @@ export default function DoctorNoteCard() {
       </View>
     </View>
   );
+}
+
+function stripHtml(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>\s*<p[^>]*>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .trim();
+}
+
+function formatTimeAgo(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+  if (diffMinutes < 1) return "Just now";
+  if (diffMinutes < 60) return `${diffMinutes} min ago`;
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours} ${diffHours === 1 ? "hour" : "hours"} ago`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 30) return `${diffDays} ${diffDays === 1 ? "day" : "days"} ago`;
+
+  const diffMonths = Math.floor(diffDays / 30);
+  return `${diffMonths} ${diffMonths === 1 ? "month" : "months"} ago`;
 }
 
 const styles = StyleSheet.create({

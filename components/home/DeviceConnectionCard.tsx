@@ -1,17 +1,44 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { Bluetooth } from "lucide-react-native";
+import { Bluetooth, BluetoothOff } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 
-export default function DeviceConnectionCard() {
+interface DeviceConnectionCardProps {
+  deviceName: string | null;
+  status: "active" | "inactive" | "unpaired" | null;
+}
+
+export default function DeviceConnectionCard({
+  deviceName,
+  status,
+}: DeviceConnectionCardProps) {
+  const isConnected = status === "active";
+
+  const title = isConnected
+    ? deviceName || "Stethoscope Connected"
+    : "No Device Connected";
+  const subtitle = isConnected
+    ? "Ready to record new sounds"
+    : "Pair a stethoscope to get started";
+  const backgroundColor = isConnected ? "#10B981" : Colors.background["300"];
+  const shadowColor = isConnected ? Colors.success["500"] : "transparent";
+  const Icon = isConnected ? Bluetooth : BluetoothOff;
+
   return (
-    <View style={styles.deviceCard}>
+    <View style={[styles.deviceCard, { backgroundColor, shadowColor }]}>
       <View style={styles.deviceInfo}>
-        <Text style={styles.deviceTitle}>Stethoscope Connected</Text>
-        <Text style={styles.deviceSubtitle}>Ready to record new sounds</Text>
+        <Text style={styles.deviceTitle}>{title}</Text>
+        <Text
+          style={[
+            styles.deviceSubtitle,
+            !isConnected && { color: Colors.typography["600"] },
+          ]}
+        >
+          {subtitle}
+        </Text>
       </View>
       <View style={styles.deviceIconContainer}>
-        <Bluetooth size={24} color={Colors.typography.white} />
+        <Icon size={24} color={Colors.typography.white} />
       </View>
     </View>
   );
@@ -26,7 +53,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 24,
-    shadowColor: Colors.success["500"],
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

@@ -5,6 +5,7 @@ import {
   RecordingCreateData,
 } from "../services/recordingService";
 import { authService } from "../services/authService";
+import { doctorService } from "../services/doctorService";
 
 interface RecordingContextType {
   recordings: RecordingRecord[];
@@ -96,8 +97,15 @@ export function RecordingProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
+      const doctorResult = await doctorService.getDoctorByUserId(user.id);
+      if (!doctorResult.success || !doctorResult.data) {
+        const errorMessage = doctorResult.error || "Doctor profile not found.";
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+
       const result = await recordingService.getRecordingsByDoctor(
-        user.id,
+        doctorResult.data.id,
         "audio,result,patient",
       );
       if (result.success && result.data) {

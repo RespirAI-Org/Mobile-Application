@@ -56,6 +56,14 @@ export const authService = {
     return pb.authStore.isValid;
   },
 
+  getAvatarUrl(): string | null {
+    const user = pb.authStore.record;
+    if (!user || !user.avatar) {
+      return null;
+    }
+    return pb.files.getUrl(user, user.avatar);
+  },
+
   // Log in via OAuth2 provider (e.g., Google, Zalo)
   async loginWithOAuth2(provider: "google" | "zalo") {
     // PocketBase provides authWithOAuth2, but you need an adapter for RN.

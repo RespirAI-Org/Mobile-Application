@@ -7,12 +7,16 @@ export interface PatientRecord {
   created: string;
   updated: string;
   doctor: string;
+  user: string;
   full_name: string;
   gender: "male" | "female" | "other";
   date_of_birth: string;
   avatar: string;
   medical_history: string;
   status: "review" | "follow_up" | "normal";
+  expand?: {
+    doctor?: any;
+  };
 }
 
 export type PatientCreateData = {
@@ -41,6 +45,29 @@ export const patientService = {
       return {
         success: false,
         error: error.message || "An error occurred while fetching patients.",
+      };
+    }
+  },
+
+  async getPatientByUserId(
+    userId: string,
+    expand?: string,
+  ): Promise<{ success: boolean; data?: PatientRecord; error?: string }> {
+    try {
+      const record = await pb
+        .collection("patients")
+        .getFirstListItem<PatientRecord>(`user = "${userId}"`, {
+          expand: expand || "",
+        });
+      return { success: true, data: record };
+    } catch (error: any) {
+      if (error.status === 404) {
+        return { success: false, error: "No patient profile found for this user." };
+      }
+      console.error("[PatientService] Fetch Patient By User Error:", error.message);
+      return {
+        success: false,
+        error: error.message || "An error occurred while fetching the patient profile.",
       };
     }
   },

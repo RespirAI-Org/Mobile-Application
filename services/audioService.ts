@@ -24,9 +24,6 @@ export const audioService = {
 
       return { success: true, data: record };
     } catch (error: any) {
-      console.error("[AudioService] Fetch Latest Audio Error:", error.message);
-
-      // PocketBase throws a 404 error if getFirstListItem doesn't find any matches
       if (error.status === 404) {
         return {
           success: false,
@@ -34,6 +31,7 @@ export const audioService = {
         };
       }
 
+      console.error("[AudioService] Fetch Latest Audio Error:", error.message);
       return {
         success: false,
         error:

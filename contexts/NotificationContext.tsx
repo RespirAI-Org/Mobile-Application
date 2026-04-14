@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 import {
   notificationService,
   NotificationRecord,
@@ -45,27 +39,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const user = authService.getCurrentUser();
-    if (!user) return;
-
-    notificationService.subscribeToNotifications(
-      user.id,
-      ({ action, record }) => {
-        if (action === "create") {
-          setNotifications((prev) => [record, ...prev]);
-          if (!record.read) {
-            setUnreadCount((prev) => prev + 1);
-          }
-        }
-      },
-    );
-
-    return () => {
-      notificationService.unsubscribeFromNotifications();
-    };
-  }, []);
 
   const fetchNotifications = async () => {
     const user = authService.getCurrentUser();

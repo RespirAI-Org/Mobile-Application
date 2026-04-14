@@ -5,12 +5,19 @@ import {
   PatientCreateData,
 } from "../services/patientService";
 import { authService } from "../services/authService";
+import { doctorService } from "../services/doctorService";
 
 interface PatientContextType {
+  patientProfile: PatientRecord | null;
   patients: PatientRecord[];
   selectedPatient: PatientRecord | null;
   isLoading: boolean;
   error: string | null;
+  fetchPatientProfile: () => Promise<{
+    success: boolean;
+    data?: PatientRecord;
+    error?: string;
+  }>;
   fetchPatients: () => Promise<{
     success: boolean;
     data?: PatientRecord[];
@@ -40,11 +47,44 @@ interface PatientContextType {
 const PatientContext = createContext<PatientContextType | undefined>(undefined);
 
 export function PatientProvider({ children }: { children: ReactNode }) {
+  const [patientProfile, setPatientProfile] = useState<PatientRecord | null>(
+    null,
+  );
   const [patients, setPatients] = useState<PatientRecord[]>([]);
   const [selectedPatient, setSelectedPatient] =
     useState<PatientRecord | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const fetchPatientProfile = async () => {
+    const user = authService.getCurrentUser();
+    if (!user) {
+      const errorMessage = "User must be logged in to fetch patient profile.";
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await patientService.getPatientByUserId(user.id, "doctor");
+      if (result.success && result.data) {
+        setPatientProfile(result.data);
+      } else {
+        setError(result.error || "Failed to fetch patient profile.");
+      }
+      return result;
+    } catch (err: any) {
+      const errorMessage =
+        err.message ||
+        "An unexpected error occurred while fetching patient profile.";
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const fetchPatients = async () => {
     const user = authService.getCurrentUser();
@@ -58,7 +98,16 @@ export function PatientProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
-      const result = await patientService.getPatientsByDoctor(user.id);
+      const doctorResult = await doctorService.getDoctorByUserId(user.id);
+      if (!doctorResult.success || !doctorResult.data) {
+        const errorMessage = doctorResult.error || "Doctor profile not found.";
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+
+      const result = await patientService.getPatientsByDoctor(
+        doctorResult.data.id,
+      );
       if (result.success && result.data) {
         setPatients(result.data);
       } else {
@@ -91,9 +140,16 @@ export function PatientProvider({ children }: { children: ReactNode }) {
     setError(null);
 
     try {
+      const doctorResult = await doctorService.getDoctorByUserId(user.id);
+      if (!doctorResult.success || !doctorResult.data) {
+        const errorMessage = doctorResult.error || "Doctor profile not found.";
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      }
+
       const result = await patientService.createPatient({
         ...data,
-        doctor: user.id,
+        doctor: doctorResult.data.id,
       });
       if (result.success && result.data) {
         setPatients((prev) => [result.data!, ...prev]);
@@ -171,10 +227,12 @@ export function PatientProvider({ children }: { children: ReactNode }) {
   return (
     <PatientContext.Provider
       value={{
+        patientProfile,
         patients,
         selectedPatient,
         isLoading,
         error,
+        fetchPatientProfile,
         fetchPatients,
         selectPatient,
         createPatient,
