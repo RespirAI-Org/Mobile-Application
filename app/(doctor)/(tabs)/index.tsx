@@ -12,6 +12,7 @@ import {
   Image,
 } from "react-native";
 import { Search, Clock } from "lucide-react-native";
+import { useRouter } from "expo-router";
 import { Colors } from "@/constants/colors";
 import { Gap } from "@/constants/gap";
 import { Radius } from "@/constants/radius";
@@ -84,6 +85,7 @@ function getStatusStyle(label: string | null) {
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function DoctorHomeScreen() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [patients, setPatients] = useState<PatientRecord[]>([]);
   const [latestRecByPatient, setLatestRecByPatient] = useState<
@@ -202,6 +204,11 @@ export default function DoctorHomeScreen() {
                   key={patient.id}
                   style={styles.card}
                   activeOpacity={0.7}
+                  onPress={() =>
+                    router.push(
+                      `/(doctor)/(tabs)/patient/${patient.id}` as any,
+                    )
+                  }
                 >
                   {/* Avatar */}
                   <View style={styles.avatarWrapper}>

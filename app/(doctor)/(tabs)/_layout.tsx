@@ -86,6 +86,11 @@ export default function TabLayout() {
           ),
         }}
       />
+      {/* Patient profile stack — hidden from the tab bar */}
+      <Tabs.Screen
+        name="patient"
+        options={{ href: null }}
+      />
     </Tabs>
   );
 }
