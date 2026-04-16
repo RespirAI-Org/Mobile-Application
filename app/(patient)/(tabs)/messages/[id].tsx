@@ -187,7 +187,7 @@ function MessageBubble({
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function ChatScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, displayName } = useLocalSearchParams<{ id: string; displayName?: string }>();
   const router = useRouter();
 
   const currentUser = authService.getCurrentUser();
@@ -210,7 +210,7 @@ export default function ChatScreen() {
   const otherParticipant = conversation?.expand?.participants?.find(
     (p: any) => p.id !== currentUser?.id,
   );
-  const otherName: string = otherParticipant?.name ?? "Chat";
+  const otherName: string = otherParticipant?.name ?? displayName ?? "Chat";
   const otherAvatarUrl: string | null =
     otherParticipant?.avatar
       ? pb.files.getUrl(otherParticipant, otherParticipant.avatar)

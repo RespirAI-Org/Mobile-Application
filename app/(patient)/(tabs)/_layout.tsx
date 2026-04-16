@@ -70,6 +70,14 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="messages"
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            // Always navigate to the messages list root, resetting any
+            // nested stack that may have been pushed by cross-tab navigation.
+            navigation.navigate("messages", { screen: "index" });
+          },
+        })}
         options={{
           title: "Messages",
           tabBarIcon: ({ color, focused }) => (

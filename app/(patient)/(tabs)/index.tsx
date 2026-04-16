@@ -15,6 +15,8 @@ import { useNotifications } from "@/contexts/NotificationContext";
 import { usePatients } from "@/contexts/PatientContext";
 import { patientService } from "@/services/patientService";
 import { recordingService, RecordingRecord } from "@/services/recordingService";
+import { messagingService } from "@/services/messagingService";
+import { authService } from "@/services/authService";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -131,9 +133,19 @@ export default function HomeScreen() {
           specialist={doctorSpecialist}
           note={latestRecording?.doctor_note || null}
           createdAt={latestRecording?.created || null}
-          onReply={() => {
-            if (doctor?.user) {
-              router.push(`/messages/${doctor.user}` as any);
+          onReply={async () => {
+            if (!doctor?.user) return;
+            const currentUser = authService.getCurrentUser();
+            if (!currentUser) return;
+            const result = await messagingService.getOrCreateConversation([
+              currentUser.id,
+              doctor.user,
+            ]);
+            if (result.success && result.data) {
+              router.navigate({
+                pathname: `/messages/${result.data.id}` as any,
+                params: { displayName: doctorName ?? undefined },
+              });
             }
           }}
         />
