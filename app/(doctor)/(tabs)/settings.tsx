@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { authService } from "../../../services/authService";
@@ -19,7 +18,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.safeArea}>
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
@@ -108,7 +107,7 @@ export default function SettingsScreen() {
 
         <Text style={styles.versionText}>Version 2.4.0 (Build 302)</Text>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   Platform,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import {
   SquarePen,
@@ -101,7 +100,7 @@ export default function DiagnosisScreen() {
   const router = useRouter();
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Diagnosis History</Text>
         <TouchableOpacity style={styles.headerButton}>
@@ -208,22 +207,23 @@ export default function DiagnosisScreen() {
           })}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: Gap.mediumSmall,
     flex: 1,
-    backgroundColor: "#ffffff",
+    paddingTop: Gap.medium,
+    paddingHorizontal: Gap.mediumSmall,
+    backgroundColor: Colors.background.light,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingVertical: Gap.small,
-    backgroundColor: "#ffffff",
+    backgroundColor: Colors.background.light,
   },
   headerTitle: {
     fontSize: 24,
@@ -244,14 +244,14 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    backgroundColor: "#f6f6f8",
+    backgroundColor: Colors.background["900"],
   },
   contentContainer: {
     paddingBottom: Gap.large,
   },
   searchContainer: {
     paddingVertical: Gap.extraSmall,
-    backgroundColor: "#f6f6f8",
+    backgroundColor: Colors.background["900"],
   },
   searchInputContainer: {
     flexDirection: "row",

@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background.light,
   },
   scrollContent: {
-    paddingHorizontal: Gap.medium,
+    paddingHorizontal: Gap.mediumSmall,
     paddingTop: Gap.small,
     paddingBottom: Gap.large,
     gap: Gap.small,
