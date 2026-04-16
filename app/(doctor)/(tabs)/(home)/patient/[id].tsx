@@ -488,7 +488,7 @@ export default function PatientProfileScreen() {
                 recording={latestRec}
                 onPress={() =>
                   router.push({
-                    pathname: "/(doctor)/(tabs)/patient/diagnosis-details" as any,
+                    pathname: "/(doctor)/(tabs)/diagnosis/diagnosis-details" as any,
                     params: { id: latestRec.id },
                   })
                 }
@@ -508,7 +508,7 @@ export default function PatientProfileScreen() {
                       recording={rec}
                       onPress={() =>
                         router.push({
-                          pathname: "/(doctor)/(tabs)/patient/diagnosis-details" as any,
+                          pathname: "/(doctor)/(tabs)/diagnosis/diagnosis-details" as any,
                           params: { id: rec.id },
                         })
                       }
