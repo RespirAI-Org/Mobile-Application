@@ -489,7 +489,7 @@ export default function PatientProfileScreen() {
                 onPress={() =>
                   router.push({
                     pathname: "/(doctor)/(tabs)/diagnosis/diagnosis-details" as any,
-                    params: { id: latestRec.id },
+                    params: { id: latestRec.id, from: "patient" },
                   })
                 }
               />
@@ -509,7 +509,7 @@ export default function PatientProfileScreen() {
                       onPress={() =>
                         router.push({
                           pathname: "/(doctor)/(tabs)/diagnosis/diagnosis-details" as any,
-                          params: { id: rec.id },
+                          params: { id: rec.id, from: "patient" },
                         })
                       }
                     />
@@ -602,26 +602,21 @@ function FeaturedRecordingCard({ recording, onPress }: { recording: RecordingRec
         <View style={featStyles.probSection}>
           <Text style={featStyles.probTitle}>Symptom Probability</Text>
           <View style={featStyles.probList}>
-            <ProbabilityBar
-              label="Normal"
-              value={analysis.probNormal}
-              color={Colors.success["400"]}
-            />
-            <ProbabilityBar
-              label="Wheezes"
-              value={analysis.probWheezes}
-              color={Colors.warning["400"]}
-            />
-            <ProbabilityBar
-              label="Crackles"
-              value={analysis.probCrackles}
-              color={Colors.error["400"]}
-            />
-            <ProbabilityBar
-              label="Wheezes & Crackles"
-              value={analysis.probBoth}
-              color={Colors.error["300"]}
-            />
+            {[
+              { label: "Normal", value: analysis.probNormal },
+              { label: "Wheezes", value: analysis.probWheezes },
+              { label: "Crackles", value: analysis.probCrackles },
+              { label: "Wheezes & Crackles", value: analysis.probBoth },
+            ]
+              .sort((a, b) => b.value - a.value)
+              .map((p, i) => (
+                <ProbabilityBar
+                  key={p.label}
+                  label={p.label}
+                  value={p.value}
+                  color={i === 0 ? "#0da6f2" : "#cbd5e1"}
+                />
+              ))}
           </View>
         </View>
       )}

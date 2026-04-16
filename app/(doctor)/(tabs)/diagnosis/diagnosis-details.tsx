@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
+  BackHandler,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import {
@@ -55,7 +56,7 @@ function stripHtml(html: string): string {
 
 export default function DoctorDiagnosisDetailsScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, from } = useLocalSearchParams<{ id: string; from?: string }>();
 
   const [audioMode, setAudioMode] = useState<"Raw" | "AI">("Raw");
   const [recording, setRecording] = useState<RecordingRecord | null>(null);
@@ -66,6 +67,24 @@ export default function DoctorDiagnosisDetailsScreen() {
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isConfirming, setIsConfirming] = useState(false);
+
+  const handleBack = useCallback(() => {
+    if (from === "patient") {
+      // Switch back to the Home tab — the patient profile is still on its stack
+      router.navigate("/(doctor)/(tabs)/(home)" as any);
+    } else {
+      router.back();
+    }
+  }, [from, router]);
+
+  // Handle Android hardware back button
+  useEffect(() => {
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      handleBack();
+      return true;
+    });
+    return () => sub.remove();
+  }, [handleBack]);
 
   const waveformBars = React.useMemo(
     () => Array.from({ length: 30 }, () => Math.max(10, Math.min(40, Math.random() * 40 + 10))),
@@ -238,7 +257,7 @@ export default function DoctorDiagnosisDetailsScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
+        <TouchableOpacity onPress={handleBack} style={styles.iconButton}>
           <ArrowLeft size={24} color="#0d121c" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Diagnosis Report</Text>
