@@ -146,6 +146,8 @@ export const messagingService = {
       formData.append("conversation", conversationId);
       formData.append("sender", senderId);
       formData.append("body", body);
+      // Sender has implicitly read their own message
+      formData.append("read_by", senderId);
 
       if (attachments) {
         for (const file of attachments) {
@@ -201,7 +203,8 @@ export const messagingService = {
   ): Promise<number> {
     try {
       const result = await pb.collection("messages").getList(1, 1, {
-        filter: `conversation = "${conversationId}" && read_by !~ "${userId}"`,
+        // Exclude messages sent by the user — their own messages are never "unread" to them
+        filter: `conversation = "${conversationId}" && read_by !~ "${userId}" && sender != "${userId}"`,
       });
       return result.totalItems;
     } catch {
@@ -224,5 +227,27 @@ export const messagingService = {
 
   unsubscribeFromMessages() {
     pb.collection("messages").unsubscribe("*");
+  },
+
+  subscribeToConversations(
+    userId: string,
+    callback: (data: { action: string; record: ConversationRecord }) => void,
+  ) {
+    return pb
+      .collection("conversations")
+      .subscribe<ConversationRecord>("*", (e) => {
+        // Client-side guard: only forward events for conversations this user is in.
+        // The record's participants array may or may not be expanded depending on
+        // how PocketBase sends SSE payloads, so we check both the raw id list and
+        // the expanded objects.
+        const participants: string[] = e.record.participants ?? [];
+        if (participants.includes(userId)) {
+          callback(e);
+        }
+      });
+  },
+
+  unsubscribeFromConversations() {
+    pb.collection("conversations").unsubscribe("*");
   },
 };

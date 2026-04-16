@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -54,15 +54,35 @@ function formatDayHeader(dateString: string): string {
   });
 }
 
-// Group messages by day (messages are newest-first, so we process in order)
-function shouldShowDayHeader(
-  messages: MessageRecord[],
-  index: number,
-): boolean {
-  const current = new Date(messages[index].created).toDateString();
-  if (index === messages.length - 1) return true;
-  const next = new Date(messages[index + 1].created).toDateString();
-  return current !== next;
+// ─── Flat list item types ─────────────────────────────────────────────────────
+// Using a flat data array (messages + separator items) avoids ordering issues
+// caused by the double scaleY(-1) applied to cells in an inverted FlatList.
+
+type FlatItem =
+  | { type: "message"; data: MessageRecord }
+  | { type: "separator"; label: string; dateKey: string };
+
+// Messages are newest-first. A separator is inserted AFTER the oldest message
+// of each day group so that, in the inverted FlatList, it renders visually
+// ABOVE that group (higher index = closer to the top of the screen).
+function buildFlatItems(messages: MessageRecord[]): FlatItem[] {
+  const result: FlatItem[] = [];
+  for (let i = 0; i < messages.length; i++) {
+    result.push({ type: "message", data: messages[i] });
+    const isLastOverall = i === messages.length - 1;
+    const isDayBoundary =
+      isLastOverall ||
+      new Date(messages[i].created).toDateString() !==
+        new Date(messages[i + 1].created).toDateString();
+    if (isDayBoundary) {
+      result.push({
+        type: "separator",
+        label: formatDayHeader(messages[i].created),
+        dateKey: new Date(messages[i].created).toDateString(),
+      });
+    }
+  }
+  return result;
 }
 
 const AVATAR_PALETTE = [
@@ -96,8 +116,6 @@ function MessageBubble({
   otherAvatarUrl,
 }: BubbleProps) {
   const colors = avatarColors(otherName);
-  const isOptimistic = message.id.startsWith("optimistic_");
-
   return (
     <View
       style={[
@@ -159,7 +177,7 @@ function MessageBubble({
             isOwn ? styles.bubbleTimeOwn : styles.bubbleTimeOther,
           ]}
         >
-          {isOptimistic ? "Sending…" : formatBubbleTime(message.created)}
+          {formatBubbleTime(message.created)}
         </Text>
       </View>
     </View>
@@ -183,6 +201,9 @@ export default function ChatScreen() {
   const [inputText, setInputText] = useState("");
 
   const inputRef = useRef<TextInput>(null);
+
+  // Flat data array for FlatList (messages interleaved with day separators)
+  const flatItems = useMemo(() => buildFlatItems(messages), [messages]);
 
   // ── Derived other-participant info ────────────────────────────────────────
 
@@ -267,36 +288,16 @@ export default function ChatScreen() {
     const body = inputText.trim();
     if (!body || !currentUser || !id) return;
 
+    // Clear the input immediately so the user can keep typing.
     setInputText("");
     setIsSending(true);
 
-    // Optimistic message (newest-first, so prepend)
-    const optimisticId = `optimistic_${Date.now()}`;
-    const optimistic: MessageRecord = {
-      id: optimisticId,
-      collectionId: "messages",
-      collectionName: "messages",
-      created: new Date().toISOString(),
-      conversation: id,
-      sender: currentUser.id,
-      body,
-      attachments: [],
-      read_by: [currentUser.id],
-      expand: { sender: currentUser },
-    };
-    setMessages((prev) => [optimistic, ...prev]);
-
-    const result = await messagingService.sendMessage(id, currentUser.id, body);
-
-    if (result.success && result.data) {
-      // Replace optimistic with confirmed record; subscription may also fire
-      setMessages((prev) =>
-        prev.map((m) => (m.id === optimisticId ? result.data! : m)),
-      );
-    } else {
-      // Remove failed optimistic message
-      setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
-    }
+    // We do NOT add an optimistic message here. The SSE subscription on the
+    // messages collection is the single source of truth: as soon as the server
+    // creates the record it pushes a "create" event and the subscription handler
+    // prepends it to the list. This avoids any race between an optimistic entry
+    // and the real record arriving through the socket.
+    await messagingService.sendMessage(id, currentUser.id, body);
 
     setIsSending(false);
   }, [inputText, currentUser, id]);
@@ -304,34 +305,39 @@ export default function ChatScreen() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   const renderItem = useCallback(
-    ({ item, index }: { item: MessageRecord; index: number }) => {
-      const isOwn = item.sender === currentUser?.id;
-      // With inverted FlatList, index 0 is bottom. Show avatar when the next
-      // message (index + 1, visually above) is from a different sender.
-      const nextMsg = messages[index + 1];
-      const showAvatar = !isOwn && nextMsg?.sender !== item.sender;
+    ({ item, index }: { item: FlatItem; index: number }) => {
+      if (item.type === "separator") {
+        return (
+          <View style={styles.dayHeader}>
+            <Text style={styles.dayHeaderText}>{item.label}</Text>
+          </View>
+        );
+      }
+
+      const msg = item.data;
+      const isOwn = msg.sender === currentUser?.id;
+      // Next flat item (index + 1) is visually above in the inverted FlatList.
+      // Show avatar at the bottom of a consecutive group from the other sender,
+      // i.e. when the next item is a separator or from a different sender.
+      const nextFlatItem = flatItems[index + 1];
+      const showAvatar =
+        !isOwn &&
+        (!nextFlatItem ||
+          nextFlatItem.type === "separator" ||
+          (nextFlatItem.type === "message" &&
+            nextFlatItem.data.sender !== msg.sender));
 
       return (
-        <>
-          {/* Day separator — shown between day-boundary messages */}
-          {shouldShowDayHeader(messages, index) && (
-            <View style={styles.dayHeader}>
-              <Text style={styles.dayHeaderText}>
-                {formatDayHeader(item.created)}
-              </Text>
-            </View>
-          )}
-          <MessageBubble
-            message={item}
-            isOwn={isOwn}
-            showAvatar={showAvatar}
-            otherName={otherName}
-            otherAvatarUrl={otherAvatarUrl}
-          />
-        </>
+        <MessageBubble
+          message={msg}
+          isOwn={isOwn}
+          showAvatar={showAvatar}
+          otherName={otherName}
+          otherAvatarUrl={otherAvatarUrl}
+        />
       );
     },
-    [messages, currentUser, otherName, otherAvatarUrl],
+    [flatItems, currentUser, otherName, otherAvatarUrl],
   );
 
   return (
@@ -387,8 +393,10 @@ export default function ChatScreen() {
         </View>
       ) : (
         <FlatList
-          data={messages}
-          keyExtractor={(item) => item.id}
+          data={flatItems}
+          keyExtractor={(item) =>
+            item.type === "message" ? item.data.id : `sep_${item.dateKey}`
+          }
           renderItem={renderItem}
           inverted
           contentContainerStyle={styles.messageListContent}

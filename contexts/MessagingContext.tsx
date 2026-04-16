@@ -3,6 +3,8 @@ import React, {
   useContext,
   useState,
   useCallback,
+  useEffect,
+  useRef,
   ReactNode,
 } from "react";
 import {
@@ -66,6 +68,9 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Holds the unsubscribe function for the conversations SSE subscription.
+  const convUnsubRef = useRef<(() => void) | null>(null);
+
   const fetchConversations = async () => {
     const user = authService.getCurrentUser();
     if (!user) {
@@ -84,6 +89,40 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
       );
       if (result.success && result.data) {
         setConversations(result.data);
+
+        // Start real-time subscription for conversation updates (e.g. new
+        // last_message_preview) the first time we have data. Subsequent calls
+        // to fetchConversations (pull-to-refresh) reuse the existing socket.
+        if (!convUnsubRef.current) {
+          messagingService
+            .subscribeToConversations(user.id, ({ action, record }) => {
+              if (action === "update") {
+                setConversations((prev) =>
+                  prev
+                    .map((c) =>
+                      c.id === record.id
+                        ? {
+                            // Preserve existing expand (participants with avatars etc.)
+                            // and overwrite only the fields that change on new messages.
+                            ...c,
+                            last_message_at: record.last_message_at,
+                            last_message_preview: record.last_message_preview,
+                            updated: record.updated,
+                          }
+                        : c,
+                    )
+                    .sort(
+                      (a, b) =>
+                        new Date(b.last_message_at || b.updated).getTime() -
+                        new Date(a.last_message_at || a.updated).getTime(),
+                    ),
+                );
+              }
+            })
+            .then((unsub) => {
+              convUnsubRef.current = unsub;
+            });
+        }
       } else {
         setError(result.error || "Failed to fetch conversations.");
       }
@@ -98,6 +137,14 @@ export function MessagingProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     }
   };
+
+  // Clean up conversations subscription when the provider unmounts.
+  useEffect(() => {
+    return () => {
+      convUnsubRef.current?.();
+      messagingService.unsubscribeFromConversations();
+    };
+  }, []);
 
   const openConversation = async (conversationId: string) => {
     setIsLoading(true);

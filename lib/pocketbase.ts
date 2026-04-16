@@ -1,5 +1,11 @@
 import PocketBase, { AsyncAuthStore } from "pocketbase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import EventSource from "react-native-sse";
+
+// PocketBase uses EventSource (SSE) for real-time subscriptions.
+// React Native doesn't include EventSource natively, so we polyfill it.
+// @ts-ignore
+global.EventSource = EventSource;
 
 // The AsyncStorage needs to be passed to an AsyncAuthStore instance
 // so that PocketBase knows how to save and retrieve the authentication tokens
