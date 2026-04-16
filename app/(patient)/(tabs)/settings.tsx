@@ -8,13 +8,13 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { authService } from "../../../services/authService";
 import { usePatients } from "@/contexts/PatientContext";
 import { deviceService, DeviceRecord } from "@/services/deviceService";
 import { pb } from "@/lib/pocketbase";
+import { Gap } from "@/constants/gap";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -108,7 +108,7 @@ export default function SettingsScreen() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.safeArea}>
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
@@ -147,14 +147,18 @@ export default function SettingsScreen() {
         <Text style={styles.sectionTitle}>GENERAL</Text>
         <View style={styles.card}>
           <TouchableOpacity style={styles.row}>
-            <View style={[styles.iconContainer, { backgroundColor: "#0da6f2" }]}>
+            <View
+              style={[styles.iconContainer, { backgroundColor: "#0da6f2" }]}
+            >
               <Feather name="user" size={18} color="#ffffff" />
             </View>
             <Text style={styles.rowTitle}>Account Info</Text>
           </TouchableOpacity>
           <View style={styles.divider} />
           <TouchableOpacity style={[styles.row, { borderBottomWidth: 0 }]}>
-            <View style={[styles.iconContainer, { backgroundColor: "#eb4d3d" }]}>
+            <View
+              style={[styles.iconContainer, { backgroundColor: "#eb4d3d" }]}
+            >
               <Feather name="bell" size={18} color="#ffffff" />
             </View>
             <Text style={styles.rowTitle}>Notifications</Text>
@@ -223,14 +227,18 @@ export default function SettingsScreen() {
         <Text style={styles.sectionTitle}>LEGAL & SECURITY</Text>
         <View style={styles.card}>
           <TouchableOpacity style={styles.row}>
-            <View style={[styles.iconContainer, { backgroundColor: "#8e8e93" }]}>
+            <View
+              style={[styles.iconContainer, { backgroundColor: "#8e8e93" }]}
+            >
               <Feather name="lock" size={18} color="#ffffff" />
             </View>
             <Text style={styles.rowTitle}>Privacy & Data</Text>
           </TouchableOpacity>
           <View style={styles.divider} />
           <TouchableOpacity style={[styles.row, { borderBottomWidth: 0 }]}>
-            <View style={[styles.iconContainer, { backgroundColor: "#5856d6" }]}>
+            <View
+              style={[styles.iconContainer, { backgroundColor: "#5856d6" }]}
+            >
               <Feather name="help-circle" size={18} color="#ffffff" />
             </View>
             <Text style={styles.rowTitle}>Help & Support</Text>
@@ -243,7 +251,7 @@ export default function SettingsScreen() {
 
         <Text style={styles.versionText}>Version 2.4.0 (Build 302)</Text>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -255,7 +263,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   container: {
-    paddingHorizontal: 20,
+    paddingTop: Gap.large,
+    paddingHorizontal: Gap.mediumSmall,
     paddingBottom: 40,
   },
   headerTitle: {

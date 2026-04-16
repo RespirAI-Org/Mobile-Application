@@ -145,13 +145,12 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: Gap.medium,
     flex: 1,
     backgroundColor: Colors.background.light,
   },
   scrollContent: {
-    paddingHorizontal: Gap.medium,
-    paddingTop: Gap.small,
+    paddingHorizontal: Gap.mediumSmall,
+    paddingTop: Gap.large,
     paddingBottom: Gap.large,
   },
 });

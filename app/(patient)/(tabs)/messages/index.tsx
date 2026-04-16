@@ -52,8 +52,7 @@ function formatMessageTime(dateString: string): string {
   if (diffDays === 0)
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7)
-    return date.toLocaleDateString([], { weekday: "short" });
+  if (diffDays < 7) return date.toLocaleDateString([], { weekday: "short" });
   return date.toLocaleDateString([], { month: "short", day: "numeric" });
 }
 
@@ -134,8 +133,7 @@ export default function MessagesScreen() {
         setUpcomingConsultations(
           r.data
             .filter(
-              (c) =>
-                c.status === "scheduled" && new Date(c.scheduled_at) > now,
+              (c) => c.status === "scheduled" && new Date(c.scheduled_at) > now,
             )
             .sort(
               (a, b) =>
@@ -272,10 +270,7 @@ export default function MessagesScreen() {
                     ]}
                   >
                     <Text
-                      style={[
-                        styles.consultAvatarText,
-                        { color: colors.text },
-                      ]}
+                      style={[styles.consultAvatarText, { color: colors.text }]}
                     >
                       {getInitials(doctorName)}
                     </Text>
@@ -319,7 +314,9 @@ export default function MessagesScreen() {
         />
       ) : filteredConversations.length === 0 ? (
         <Text style={styles.emptyText}>
-          {searchQuery ? "No conversations match your search." : "No conversations yet."}
+          {searchQuery
+            ? "No conversations match your search."
+            : "No conversations yet."}
         </Text>
       ) : (
         <View style={styles.messagesList}>
@@ -330,10 +327,9 @@ export default function MessagesScreen() {
               ) || [];
             const other = others[0];
             const name: string = other?.name ?? "Unknown";
-            const avatarUrl =
-              other?.avatar
-                ? pb.files.getUrl(other, other.avatar)
-                : null;
+            const avatarUrl = other?.avatar
+              ? pb.files.getUrl(other, other.avatar)
+              : null;
             const colors = avatarColors(name);
             const timeStr = formatMessageTime(
               conv.last_message_at || conv.updated,
@@ -345,9 +341,7 @@ export default function MessagesScreen() {
                 key={conv.id}
                 style={styles.messageRow}
                 activeOpacity={0.7}
-                onPress={() =>
-                  router.push(`/messages/${conv.id}` as any)
-                }
+                onPress={() => router.push(`/messages/${conv.id}` as any)}
               >
                 {/* Avatar */}
                 <View style={styles.avatarContainer}>
@@ -364,10 +358,7 @@ export default function MessagesScreen() {
                       ]}
                     >
                       <Text
-                        style={[
-                          styles.avatarInitials,
-                          { color: colors.text },
-                        ]}
+                        style={[styles.avatarInitials, { color: colors.text }]}
                       >
                         {getInitials(name)}
                       </Text>
@@ -420,6 +411,7 @@ export default function MessagesScreen() {
 
 const styles = StyleSheet.create({
   container: {
+    paddingHorizontal: Gap.mediumSmall,
     flex: 1,
     backgroundColor: Colors.background.light,
     paddingTop: Gap.medium,
@@ -429,7 +421,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: Gap.small,
     marginBottom: Gap.small,
     marginTop: Gap.xxSmall,
   },
@@ -456,7 +447,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background["900"],
     borderRadius: Radius.small,
     padding: 4,
-    marginHorizontal: Gap.small,
     marginBottom: Gap.small,
   },
   tab: {
@@ -493,10 +483,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: Colors.background["900"],
     borderRadius: Radius.small,
-    paddingHorizontal: Gap.small,
     height: 48,
-    marginHorizontal: Gap.small,
     marginBottom: Gap.medium,
+    paddingHorizontal: Gap.small,
   },
   searchIcon: {
     marginRight: Gap.xxSmall,
@@ -512,7 +501,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background["900"],
     borderRadius: 16,
     padding: Gap.small,
-    marginHorizontal: Gap.small,
     marginBottom: Gap.medium,
     borderWidth: 1,
     borderColor: Colors.outline["800"],
@@ -576,14 +564,12 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: Colors.typography["0"],
     marginBottom: Gap.small,
-    paddingHorizontal: Gap.small,
   },
   // Consultation card
   consultCard: {
     backgroundColor: Colors.background["950"],
     borderRadius: 16,
     padding: Gap.small,
-    marginHorizontal: Gap.small,
     marginBottom: Gap.small,
     borderWidth: 1,
     borderColor: Colors.outline["800"],
@@ -678,7 +664,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: Gap.small,
-    paddingHorizontal: Gap.small,
     borderBottomWidth: 1,
     borderBottomColor: Colors.outline["800"],
     gap: Gap.small,

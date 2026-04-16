@@ -8,6 +8,7 @@ import {
   LucideIcon,
 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
+import { Gap } from "@/constants/gap";
 
 export default function QuickActions() {
   return (
@@ -78,10 +79,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    gap: 12,
+    gap: Gap.small,
   },
   actionButton: {
-    width: "47%", // roughly (100% - gap) / 2
+    width: "48%", // roughly (100% - gap) / 2
     backgroundColor: Colors.background["950"],
     borderRadius: 16,
     borderWidth: 1,
