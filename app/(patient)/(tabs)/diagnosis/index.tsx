@@ -9,6 +9,7 @@ import {
   Platform,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import {
@@ -18,6 +19,9 @@ import {
   AlertCircle,
   CheckCircle2,
   AlertTriangle,
+  Trash2,
+  CheckSquare,
+  Square,
 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 import { Gap } from "@/constants/gap";
@@ -79,6 +83,11 @@ export default function DiagnosisScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // ── Edit / multi-select state ───────────────────────────────────────────────
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const fetchRecordings = async () => {
     if (!patientProfile?.id) return;
     setIsLoading(true);
@@ -100,6 +109,61 @@ export default function DiagnosisScreen() {
     setRefreshing(true);
     await fetchRecordings();
     setRefreshing(false);
+  };
+
+  const enterEditMode = () => {
+    setIsEditing(true);
+    setSelectedIds(new Set());
+  };
+
+  const exitEditMode = () => {
+    setIsEditing(false);
+    setSelectedIds(new Set());
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === combinedData.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(combinedData.map((item) => item.id)));
+    }
+  };
+
+  const handleDelete = () => {
+    if (selectedIds.size === 0) return;
+    const count = selectedIds.size;
+    Alert.alert(
+      "Delete Recordings",
+      `Delete ${count} recording${count > 1 ? "s" : ""}? This cannot be undone.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            setIsDeleting(true);
+            await Promise.all(
+              [...selectedIds].map((id) => recordingService.deleteRecording(id)),
+            );
+            setRecordings((prev) =>
+              prev.filter((r) => !selectedIds.has(r.id)),
+            );
+            setSelectedIds(new Set());
+            setIsEditing(false);
+            setIsDeleting(false);
+          },
+        },
+      ],
+    );
   };
 
   const combinedData: DiagnosisListItem[] = useMemo(() => {
@@ -180,41 +244,68 @@ export default function DiagnosisScreen() {
     return data;
   }, [recordings, searchQuery]);
 
+  const allSelected =
+    combinedData.length > 0 && selectedIds.size === combinedData.length;
+
   return (
     <View style={styles.container}>
+      {/* ── Header ── */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Diagnosis History</Text>
-        <TouchableOpacity style={styles.headerButton}>
-          <SquarePen size={20} color={Colors.typography["0"]} />
-        </TouchableOpacity>
+        {isEditing ? (
+          <TouchableOpacity onPress={exitEditMode} style={styles.cancelButton}>
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={styles.headerButton}
+            onPress={enterEditMode}
+          >
+            <SquarePen size={20} color={Colors.typography["0"]} />
+          </TouchableOpacity>
+        )}
       </View>
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={[
+          styles.contentContainer,
+          isEditing && styles.contentContainerEditing,
+        ]}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          !isEditing ? (
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          ) : undefined
         }
       >
-        <View style={styles.searchContainer}>
-          <View style={styles.searchInputContainer}>
-            <Search size={20} color="#94a3b8" style={styles.searchIcon} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search by date or result..."
-              placeholderTextColor="#94a3b8"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
+        {/* Search (hidden in edit mode) */}
+        {!isEditing && (
+          <View style={styles.searchContainer}>
+            <View style={styles.searchInputContainer}>
+              <Search size={20} color="#94a3b8" style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search by date or result..."
+                placeholderTextColor="#94a3b8"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+            </View>
           </View>
-        </View>
+        )}
 
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>RECENT RECORDINGS</Text>
-          <TouchableOpacity>
-            <Text style={styles.filterButton}>Filter</Text>
-          </TouchableOpacity>
+          <Text style={styles.sectionTitle}>
+            {isEditing
+              ? `${selectedIds.size} selected`
+              : "RECENT RECORDINGS"}
+          </Text>
+          {!isEditing && (
+            <TouchableOpacity>
+              <Text style={styles.filterButton}>Filter</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {isLoading && !refreshing ? (
@@ -232,18 +323,43 @@ export default function DiagnosisScreen() {
             {combinedData.map((item) => {
               const colors = getStatusColor(item.status);
               const ResultIcon = colors.icon;
+              const isSelected = selectedIds.has(item.id);
 
               return (
-                <TouchableOpacity
-                  key={item.id}
-                  style={styles.card}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/(patient)/(tabs)/diagnosis/diagnosis-details",
-                      params: { id: item.id },
-                    })
-                  }
-                >
+                <View key={item.id} style={styles.cardRow}>
+                  {/* Checkbox sits outside the card boundary */}
+                  {isEditing && (
+                    <TouchableOpacity
+                      style={styles.checkbox}
+                      onPress={() => toggleSelect(item.id)}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                      {isSelected ? (
+                        <CheckSquare size={22} color="#1961f0" />
+                      ) : (
+                        <Square size={22} color="#94a3b8" />
+                      )}
+                    </TouchableOpacity>
+                  )}
+
+                  <TouchableOpacity
+                    style={[
+                      styles.card,
+                      isEditing && isSelected && styles.cardSelected,
+                    ]}
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      if (isEditing) {
+                        toggleSelect(item.id);
+                      } else {
+                        router.push({
+                          pathname:
+                            "/(patient)/(tabs)/diagnosis/diagnosis-details",
+                          params: { id: item.id },
+                        });
+                      }
+                    }}
+                  >
                   <View style={styles.cardHeader}>
                     <View style={styles.cardHeaderLeft}>
                       <View
@@ -299,12 +415,48 @@ export default function DiagnosisScreen() {
                       />
                     </View>
                   </View>
-                </TouchableOpacity>
+                  </TouchableOpacity>
+                </View>
               );
             })}
           </View>
         )}
       </ScrollView>
+
+      {/* ── Bottom action bar (edit mode only) ── */}
+      {isEditing && (
+        <View style={styles.actionBar}>
+          <TouchableOpacity
+            style={styles.selectAllButton}
+            onPress={toggleSelectAll}
+          >
+            <Text style={styles.selectAllText}>
+              {allSelected ? "Deselect All" : "Select All"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.deleteButton,
+              (selectedIds.size === 0 || isDeleting) &&
+                styles.deleteButtonDisabled,
+            ]}
+            onPress={handleDelete}
+            disabled={selectedIds.size === 0 || isDeleting}
+          >
+            {isDeleting ? (
+              <ActivityIndicator size="small" color="#ffffff" />
+            ) : (
+              <>
+                <Trash2 size={16} color="#ffffff" />
+                <Text style={styles.deleteButtonText}>
+                  Delete{selectedIds.size > 0 ? ` (${selectedIds.size})` : ""}
+                </Text>
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -340,12 +492,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  cancelButton: {
+    paddingHorizontal: Gap.extraSmall,
+    paddingVertical: Gap.xxxSmall,
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#1961f0",
+  },
   scrollView: {
     flex: 1,
     backgroundColor: "white",
   },
   contentContainer: {
     paddingBottom: Gap.large,
+  },
+  contentContainerEditing: {
+    // Extra bottom padding so the last card isn't hidden behind the action bar
+    paddingBottom: 100,
   },
   searchContainer: {
     paddingVertical: Gap.extraSmall,
@@ -402,6 +567,7 @@ const styles = StyleSheet.create({
     gap: Gap.small,
   },
   card: {
+    flex: 1,
     backgroundColor: "#ffffff",
     borderRadius: 12,
     padding: Gap.mediumSmall,
@@ -418,6 +584,19 @@ const styles = StyleSheet.create({
         elevation: 2,
       },
     }),
+  },
+  cardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  checkbox: {
+    width: 36,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cardSelected: {
+    borderColor: "#1961f0",
+    backgroundColor: "#f0f4ff",
   },
   cardHeader: {
     flexDirection: "row",
@@ -499,5 +678,56 @@ const styles = StyleSheet.create({
   progressBarFill: {
     height: "100%",
     borderRadius: Radius.round,
+  },
+  // ── Edit mode action bar ───────────────────────────────────────────────────
+  actionBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: Gap.mediumSmall,
+    paddingVertical: Gap.extraSmall,
+    marginHorizontal: Gap.mediumSmall,
+    marginBottom: Gap.extraSmall,
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+      },
+      android: { elevation: 2 },
+    }),
+  },
+  selectAllButton: {
+    paddingVertical: Gap.xxSmall,
+    paddingHorizontal: Gap.extraSmall,
+  },
+  selectAllText: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#1961f0",
+  },
+  deleteButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Gap.xxSmall,
+    backgroundColor: Colors.error["500"],
+    paddingVertical: Gap.xxSmall,
+    paddingHorizontal: Gap.small,
+    borderRadius: Radius.small,
+    minWidth: 100,
+    justifyContent: "center",
+  },
+  deleteButtonDisabled: {
+    backgroundColor: "#94a3b8",
+  },
+  deleteButtonText: {
+    color: "#ffffff",
+    fontSize: 15,
+    fontWeight: "600",
   },
 });
