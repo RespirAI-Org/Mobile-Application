@@ -11,6 +11,7 @@ export interface PatientRecord {
   full_name: string;
   gender: "male" | "female" | "other";
   date_of_birth: string;
+  age: number;
   avatar: string;
   medical_history: string;
   status: "review" | "follow_up" | "normal";

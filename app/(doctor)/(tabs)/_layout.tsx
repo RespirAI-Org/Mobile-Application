@@ -41,7 +41,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="(home)"
         options={{
           title: "Home",
           tabBarIcon: ({ color, focused }) => <House size={24} color={color} />,
@@ -85,11 +85,6 @@ export default function TabLayout() {
             <Settings size={24} color={color} />
           ),
         }}
-      />
-      {/* Patient profile stack — hidden from the tab bar */}
-      <Tabs.Screen
-        name="patient"
-        options={{ href: null }}
       />
     </Tabs>
   );

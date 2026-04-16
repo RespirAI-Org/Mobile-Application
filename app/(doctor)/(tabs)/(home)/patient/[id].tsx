@@ -37,23 +37,22 @@ import { authService } from "@/services/authService";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function calculateAge(dateOfBirth: string): number | null {
-  if (!dateOfBirth) return null;
-  const dob = new Date(dateOfBirth);
-  const now = new Date();
-  let age = now.getFullYear() - dob.getFullYear();
-  const m = now.getMonth() - dob.getMonth();
-  if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) age--;
-  return age;
-}
 
-function formatDateOfBirth(dateString: string): string {
-  if (!dateString) return "—";
-  return new Date(dateString).toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
+/** Strip HTML tags produced by PocketBase's `editor` field type. */
+function stripHtml(html: string): string {
+  if (!html) return "";
+  return html
+    .replace(/<\/p>/gi, "\n")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 function formatRecordingDate(dateString: string): string {
@@ -317,7 +316,7 @@ export default function PatientProfileScreen() {
 
   const avatarUrl = patientService.getAvatarUrl(patient);
   const colors = avatarColors(patient.full_name);
-  const age = calculateAge(patient.date_of_birth);
+  const age: number | null = patient.age ?? null;
   const patientStatus = getPatientStatusStyle(patient.status);
   const gender = patient.gender
     ? patient.gender.charAt(0).toUpperCase() + patient.gender.slice(1)
@@ -338,21 +337,7 @@ export default function PatientProfileScreen() {
           <ChevronLeft size={24} color={Colors.typography["0"]} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Patient Profile</Text>
-        {patient.user ? (
-          <TouchableOpacity
-            style={styles.headerIconBtn}
-            onPress={handleMessage}
-            disabled={isMessaging}
-          >
-            {isMessaging ? (
-              <ActivityIndicator size="small" color={Colors.info["400"]} />
-            ) : (
-              <MessageCircleMore size={22} color={Colors.info["400"]} />
-            )}
-          </TouchableOpacity>
-        ) : (
-          <View style={styles.headerIconBtn} />
-        )}
+        <View style={styles.headerIconBtn} />
       </View>
 
       <ScrollView
@@ -429,8 +414,10 @@ export default function PatientProfileScreen() {
               <CalendarDays size={16} color={Colors.info["400"]} />
             </View>
             <View style={styles.infoContent}>
-              <Text style={styles.infoLabel}>Date of Birth</Text>
-              <Text style={styles.infoValue}>{formatDateOfBirth(patient.date_of_birth)}</Text>
+              <Text style={styles.infoLabel}>Age</Text>
+              <Text style={styles.infoValue}>
+                {age !== null ? `${age} years old` : "—"}
+              </Text>
             </View>
           </View>
 
@@ -472,7 +459,7 @@ export default function PatientProfileScreen() {
                 <ClipboardList size={18} color={Colors.info["400"]} />
                 <Text style={styles.historyHeaderText}>Patient Notes</Text>
               </View>
-              <Text style={styles.historyText}>{patient.medical_history}</Text>
+              <Text style={styles.historyText}>{stripHtml(patient.medical_history)}</Text>
             </View>
           </>
         )}
@@ -496,7 +483,17 @@ export default function PatientProfileScreen() {
         ) : (
           <>
             {/* Featured latest recording */}
-            {latestRec && <FeaturedRecordingCard recording={latestRec} />}
+            {latestRec && (
+              <FeaturedRecordingCard
+                recording={latestRec}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(doctor)/(tabs)/patient/diagnosis-details" as any,
+                    params: { id: latestRec.id },
+                  })
+                }
+              />
+            )}
 
             {/* Previous recordings */}
             {previousRecs.length > 0 && (
@@ -506,7 +503,16 @@ export default function PatientProfileScreen() {
                 </Text>
                 <View style={styles.recordingList}>
                   {previousRecs.map((rec) => (
-                    <CompactRecordingCard key={rec.id} recording={rec} />
+                    <CompactRecordingCard
+                      key={rec.id}
+                      recording={rec}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/(doctor)/(tabs)/patient/diagnosis-details" as any,
+                          params: { id: rec.id },
+                        })
+                      }
+                    />
                   ))}
                 </View>
               </>
@@ -523,7 +529,7 @@ export default function PatientProfileScreen() {
 
 // ─── Featured Recording Card ──────────────────────────────────────────────────
 
-function FeaturedRecordingCard({ recording }: { recording: RecordingRecord }) {
+function FeaturedRecordingCard({ recording, onPress }: { recording: RecordingRecord; onPress: () => void }) {
   const analysis = getAnalysisResult(recording);
   const theme = getStatusTheme(analysis.status);
   const ResultIcon = theme.icon;
@@ -534,7 +540,7 @@ function FeaturedRecordingCard({ recording }: { recording: RecordingRecord }) {
     analysis.probBoth > 0;
 
   return (
-    <View style={featStyles.card}>
+    <TouchableOpacity style={featStyles.card} onPress={onPress} activeOpacity={0.8}>
       {/* Card header: location + date + status badge */}
       <View style={featStyles.headerRow}>
         <View style={featStyles.headerLeft}>
@@ -624,10 +630,10 @@ function FeaturedRecordingCard({ recording }: { recording: RecordingRecord }) {
       {!!recording.doctor_note && (
         <View style={featStyles.noteBox}>
           <Text style={featStyles.noteLabel}>Doctor&apos;s Note</Text>
-          <Text style={featStyles.noteText}>{recording.doctor_note}</Text>
+          <Text style={featStyles.noteText}>{stripHtml(recording.doctor_note)}</Text>
         </View>
       )}
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -752,13 +758,13 @@ const featStyles = StyleSheet.create({
 
 // ─── Compact Recording Card ───────────────────────────────────────────────────
 
-function CompactRecordingCard({ recording }: { recording: RecordingRecord }) {
+function CompactRecordingCard({ recording, onPress }: { recording: RecordingRecord; onPress: () => void }) {
   const analysis = getAnalysisResult(recording);
   const theme = getStatusTheme(analysis.status);
   const ResultIcon = theme.icon;
 
   return (
-    <View style={compactStyles.card}>
+    <TouchableOpacity style={compactStyles.card} onPress={onPress} activeOpacity={0.7}>
       <View style={[compactStyles.iconBox, { backgroundColor: theme.bg, borderColor: theme.border }]}>
         <Activity size={18} color={theme.bar} />
       </View>
@@ -781,7 +787,7 @@ function CompactRecordingCard({ recording }: { recording: RecordingRecord }) {
         </View>
         <Text style={compactStyles.dateText}>{formatRecordingDate(recording.created)}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 

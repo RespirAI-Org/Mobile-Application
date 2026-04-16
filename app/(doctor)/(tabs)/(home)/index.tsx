@@ -23,15 +23,6 @@ import { recordingService, RecordingRecord } from "@/services/recordingService";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function calculateAge(dateOfBirth: string): number | null {
-  if (!dateOfBirth) return null;
-  const dob = new Date(dateOfBirth);
-  const now = new Date();
-  let age = now.getFullYear() - dob.getFullYear();
-  const m = now.getMonth() - dob.getMonth();
-  if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) age--;
-  return age;
-}
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
@@ -185,13 +176,12 @@ export default function DoctorHomeScreen() {
           <View style={styles.listContainer}>
             {filtered.map((patient) => {
               const latestRec = latestRecByPatient[patient.id];
-              const dateStr = latestRec?.created ?? patient.updated;
-              const today = isToday(dateStr);
+              const today = latestRec ? isToday(latestRec.created) : false;
               const statusLabel = STATUS_LABELS[patient.status] ?? null;
               const statusStyle = getStatusStyle(statusLabel);
               const colors = avatarColors(patient.full_name);
               const avatarUrl = patientService.getAvatarUrl(patient);
-              const age = calculateAge(patient.date_of_birth);
+              const age: number | null = patient.age ?? null;
               const gender = patient.gender
                 ? patient.gender.charAt(0).toUpperCase() + patient.gender.slice(1)
                 : null;
@@ -253,21 +243,27 @@ export default function DoctorHomeScreen() {
                       <Text style={styles.demographicsText}>{demographics}</Text>
                     )}
                     <View style={styles.dateRow}>
-                      {today && (
-                        <Clock
-                          size={13}
-                          color={Colors.info["400"]}
-                          style={styles.clockIcon}
-                        />
+                      {latestRec ? (
+                        <>
+                          {today && (
+                            <Clock
+                              size={13}
+                              color={Colors.info["400"]}
+                              style={styles.clockIcon}
+                            />
+                          )}
+                          <Text
+                            style={[
+                              styles.dateText,
+                              today && { color: Colors.info["400"] },
+                            ]}
+                          >
+                            {formatDate(latestRec.created)}
+                          </Text>
+                        </>
+                      ) : (
+                        <Text style={styles.noRecordText}>No records yet</Text>
                       )}
-                      <Text
-                        style={[
-                          styles.dateText,
-                          today && { color: Colors.info["400"] },
-                        ]}
-                      >
-                        {formatDate(dateStr)}
-                      </Text>
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -426,6 +422,11 @@ const styles = StyleSheet.create({
   },
   clockIcon: {
     marginTop: 1,
+  },
+  noRecordText: {
+    fontSize: 12,
+    color: Colors.typography["400"],
+    fontStyle: "italic",
   },
   dateText: {
     fontSize: 12,
