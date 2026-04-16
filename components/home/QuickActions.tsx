@@ -7,10 +7,13 @@ import {
   Pill,
   LucideIcon,
 } from "lucide-react-native";
+import { useRouter } from "expo-router";
 import { Colors } from "@/constants/colors";
 import { Gap } from "@/constants/gap";
 
 export default function QuickActions() {
+  const router = useRouter();
+
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>Quick Actions</Text>
@@ -20,6 +23,7 @@ export default function QuickActions() {
           label="Message"
           color={Colors.info["950"]}
           iconColor={Colors.info["500"]}
+          onPress={() => router.navigate("/(patient)/(tabs)/messages" as any)}
         />
         <QuickActionButton
           Icon={Video}
@@ -32,6 +36,7 @@ export default function QuickActions() {
           label="History"
           color={Colors.warning["900"]}
           iconColor={Colors.warning["500"]}
+          onPress={() => router.navigate("/(patient)/(tabs)/diagnosis" as any)}
         />
         <QuickActionButton
           Icon={Pill}
@@ -49,14 +54,16 @@ function QuickActionButton({
   label,
   color,
   iconColor,
+  onPress,
 }: {
   Icon: LucideIcon;
   label: string;
   color: string;
   iconColor: string;
+  onPress?: () => void;
 }) {
   return (
-    <TouchableOpacity style={styles.actionButton}>
+    <TouchableOpacity style={styles.actionButton} onPress={onPress}>
       <View style={[styles.actionIconContainer, { backgroundColor: color }]}>
         <Icon size={24} color={iconColor} />
       </View>
