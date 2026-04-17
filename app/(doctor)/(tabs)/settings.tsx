@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -6,16 +6,98 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { authService } from "../../../services/authService";
+import { authService } from "@/services/authService";
+import { doctorService, DoctorRecord } from "@/services/doctorService";
+import { deviceService, DeviceRecord } from "@/services/deviceService";
+import { Gap } from "@/constants/gap";
 
-export default function SettingsScreen() {
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function getInitials(name: string): string {
+  return (name || "?")
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+function formatLastSeen(dateString: string): string {
+  if (!dateString) return "Never";
+  const diff = Date.now() - new Date(dateString).getTime();
+  const minutes = Math.floor(diff / 60_000);
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
+function statusColor(status: DeviceRecord["status"]): {
+  bg: string;
+  text: string;
+  label: string;
+} {
+  switch (status) {
+    case "active":
+      return { bg: "#f0fdf4", text: "#16a34a", label: "Connected" };
+    case "inactive":
+      return { bg: "#fef9c3", text: "#a16207", label: "Inactive" };
+    case "unpaired":
+    default:
+      return { bg: "#f3f4f6", text: "#6b7280", label: "Unpaired" };
+  }
+}
+
+// ─── Screen ───────────────────────────────────────────────────────────────────
+
+export default function DoctorSettingsScreen() {
+  const [doctorProfile, setDoctorProfile] = useState<DoctorRecord | null>(null);
+  const [devices, setDevices] = useState<DeviceRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const currentUser = authService.getCurrentUser();
+
+  useEffect(() => {
+    const load = async () => {
+      setIsLoading(true);
+      const promises: Promise<any>[] = [];
+
+      if (currentUser) {
+        promises.push(
+          doctorService.getDoctorByUserId(currentUser.id).then((r) => {
+            if (r.success && r.data) setDoctorProfile(r.data);
+          }),
+          deviceService.getDevicesByOwner(currentUser.id).then((r) => {
+            if (r.success && r.data) setDevices(r.data);
+          }),
+        );
+      }
+
+      await Promise.all(promises);
+      setIsLoading(false);
+    };
+    load();
+  }, []);
+
   const handleLogout = () => {
     authService.logout();
     router.replace("/(auth)/Login");
   };
+
+  // ── Derived display values ─────────────────────────────────────────────────
+
+  const displayName = doctorProfile?.full_name || currentUser?.name || "Doctor";
+  const displayEmail = currentUser?.email ?? "";
+  const specialistLabel = doctorProfile?.specialist || "Doctor";
+  const avatarUrl = authService.getAvatarUrl();
+
+  // ── Render ────────────────────────────────────────────────────────────────
 
   return (
     <View style={styles.safeArea}>
@@ -25,76 +107,115 @@ export default function SettingsScreen() {
       >
         <Text style={styles.headerTitle}>Settings</Text>
 
+        {/* ── Profile ── */}
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
-            <Image
-              source={require("@/assets/images/Doctor-ava.jpeg")}
-              style={styles.avatar}
-            />
+            {avatarUrl ? (
+              <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+            ) : (
+              <View style={styles.avatarFallback}>
+                <Text style={styles.avatarInitials}>
+                  {getInitials(displayName)}
+                </Text>
+              </View>
+            )}
             <View style={styles.onlineIndicator} />
           </View>
 
-          <Text style={styles.name}>Dr. Sarah Miller</Text>
-          <View style={styles.badgeContainer}>
-            <Text style={styles.badgeText}>Provider</Text>
-          </View>
-          <Text style={styles.email}>sarah.miller@hospital.com</Text>
+          {isLoading ? (
+            <ActivityIndicator color="#1961f0" style={{ marginVertical: 12 }} />
+          ) : (
+            <>
+              <Text style={styles.name}>{displayName}</Text>
+              <View style={styles.badgeContainer}>
+                <Text style={styles.badgeText}>{specialistLabel}</Text>
+              </View>
+              <Text style={styles.email}>{displayEmail}</Text>
+            </>
+          )}
         </View>
 
+        {/* ── General ── */}
         <Text style={styles.sectionTitle}>GENERAL</Text>
         <View style={styles.card}>
           <TouchableOpacity style={styles.row}>
-            <View
-              style={[styles.iconContainer, { backgroundColor: "#0da6f2" }]}
-            >
+            <View style={[styles.iconContainer, { backgroundColor: "#0da6f2" }]}>
               <Feather name="user" size={18} color="#ffffff" />
             </View>
             <Text style={styles.rowTitle}>Account Info</Text>
           </TouchableOpacity>
           <View style={styles.divider} />
           <TouchableOpacity style={[styles.row, { borderBottomWidth: 0 }]}>
-            <View
-              style={[styles.iconContainer, { backgroundColor: "#eb4d3d" }]}
-            >
+            <View style={[styles.iconContainer, { backgroundColor: "#eb4d3d" }]}>
               <Feather name="bell" size={18} color="#ffffff" />
             </View>
             <Text style={styles.rowTitle}>Notifications</Text>
           </TouchableOpacity>
         </View>
 
+        {/* ── Hardware ── */}
         <Text style={styles.sectionTitle}>HARDWARE</Text>
         <View style={styles.card}>
-          <TouchableOpacity style={[styles.row, { borderBottomWidth: 0 }]}>
-            <View
-              style={[styles.iconContainer, { backgroundColor: "#32ade6" }]}
-            >
-              <Feather name="activity" size={18} color="#ffffff" />
+          {isLoading && devices.length === 0 ? (
+            <View style={styles.row}>
+              <ActivityIndicator color="#1961f0" />
             </View>
-            <View style={styles.rowTextContainer}>
-              <Text style={styles.rowTitle}>Stethoscope Pro</Text>
-              <Text style={styles.rowSubtitle}>Last synced: 2m ago</Text>
-            </View>
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusBadgeText}>Connected</Text>
-            </View>
-          </TouchableOpacity>
+          ) : devices.length === 0 ? (
+            <TouchableOpacity style={[styles.row, { borderBottomWidth: 0 }]}>
+              <View style={[styles.iconContainer, { backgroundColor: "#32ade6" }]}>
+                <Feather name="activity" size={18} color="#ffffff" />
+              </View>
+              <Text style={[styles.rowTitle, { color: "#9ca3af" }]}>
+                No device paired
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            devices.map((device, i) => {
+              const { bg, text, label } = statusColor(device.status);
+              return (
+                <React.Fragment key={device.id}>
+                  {i > 0 && <View style={styles.divider} />}
+                  <TouchableOpacity
+                    style={[
+                      styles.row,
+                      i === devices.length - 1 && { borderBottomWidth: 0 },
+                    ]}
+                  >
+                    <View style={[styles.iconContainer, { backgroundColor: "#32ade6" }]}>
+                      <Feather name="activity" size={18} color="#ffffff" />
+                    </View>
+                    <View style={styles.rowTextContainer}>
+                      <Text style={styles.rowTitle}>
+                        {device.name || device.model || "Stethoscope"}
+                      </Text>
+                      <Text style={styles.rowSubtitle}>
+                        Last synced: {formatLastSeen(device.last_seen)}
+                      </Text>
+                    </View>
+                    <View style={[styles.statusBadge, { backgroundColor: bg }]}>
+                      <Text style={[styles.statusBadgeText, { color: text }]}>
+                        {label}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                </React.Fragment>
+              );
+            })
+          )}
         </View>
 
+        {/* ── Legal & Security ── */}
         <Text style={styles.sectionTitle}>LEGAL & SECURITY</Text>
         <View style={styles.card}>
           <TouchableOpacity style={styles.row}>
-            <View
-              style={[styles.iconContainer, { backgroundColor: "#8e8e93" }]}
-            >
+            <View style={[styles.iconContainer, { backgroundColor: "#8e8e93" }]}>
               <Feather name="lock" size={18} color="#ffffff" />
             </View>
             <Text style={styles.rowTitle}>Privacy & Data</Text>
           </TouchableOpacity>
           <View style={styles.divider} />
           <TouchableOpacity style={[styles.row, { borderBottomWidth: 0 }]}>
-            <View
-              style={[styles.iconContainer, { backgroundColor: "#5856d6" }]}
-            >
+            <View style={[styles.iconContainer, { backgroundColor: "#5856d6" }]}>
               <Feather name="help-circle" size={18} color="#ffffff" />
             </View>
             <Text style={styles.rowTitle}>Help & Support</Text>
@@ -111,13 +232,16 @@ export default function SettingsScreen() {
   );
 }
 
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: "#ffffff",
   },
   container: {
-    paddingHorizontal: 20,
+    paddingTop: Gap.large,
+    paddingHorizontal: Gap.mediumSmall,
     paddingBottom: 40,
   },
   headerTitle: {
@@ -140,6 +264,19 @@ const styles = StyleSheet.create({
     width: 88,
     height: 88,
     borderRadius: 44,
+  },
+  avatarFallback: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: "#dbeafe",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarInitials: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#1961f0",
   },
   onlineIndicator: {
     position: "absolute",
@@ -217,13 +354,11 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   statusBadge: {
-    backgroundColor: "#f0fdf4",
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 6,
   },
   statusBadgeText: {
-    color: "#16a34a",
     fontSize: 14,
     fontWeight: "500",
   },
