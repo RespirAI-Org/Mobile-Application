@@ -24,6 +24,7 @@ import { Radius } from "@/constants/radius";
 import { useMessaging } from "@/contexts/MessagingContext";
 import { authService } from "@/services/authService";
 import { doctorService } from "@/services/doctorService";
+import { patientService } from "@/services/patientService";
 import { messagingService } from "@/services/messagingService";
 import {
   consultationService,
@@ -113,6 +114,7 @@ export default function DoctorMessagesScreen() {
     ConsultationRecord[]
   >([]);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
+  const [patientNameMap, setPatientNameMap] = useState<Record<string, string>>({});
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const currentUser = authService.getCurrentUser();
@@ -125,13 +127,24 @@ export default function DoctorMessagesScreen() {
     if (!currentUser) return;
     const doctorResult = await doctorService.getDoctorByUserId(currentUser.id);
     if (!doctorResult.success || !doctorResult.data) return;
+    const doctorId = doctorResult.data.id;
 
-    const result = await consultationService.getUpcomingConsultations(
-      doctorResult.data.id,
-      "patient",
-    );
-    if (result.success && result.data) {
-      setUpcomingConsultations(result.data.slice(0, 3));
+    const [consultResult, patientsResult] = await Promise.all([
+      consultationService.getUpcomingConsultations(doctorId, "patient"),
+      patientService.getPatientsByDoctor(doctorId),
+    ]);
+
+    if (consultResult.success && consultResult.data) {
+      setUpcomingConsultations(consultResult.data.slice(0, 3));
+    }
+
+    if (patientsResult.success && patientsResult.data) {
+      // Build userId → full_name map so we can resolve participant names
+      const map: Record<string, string> = {};
+      for (const p of patientsResult.data) {
+        if (p.user) map[p.user] = p.full_name;
+      }
+      setPatientNameMap(map);
     }
   }, []);
 
@@ -170,7 +183,8 @@ export default function DoctorMessagesScreen() {
     const others =
       conv.expand?.participants?.filter((p: any) => p.id !== currentUser?.id) ||
       [];
-    const name: string = others[0]?.name ?? "";
+    const other = others[0];
+    const name: string = (other?.id && patientNameMap[other.id]) || other?.name || "";
     const preview = conv.last_message_preview ?? "";
     const q = searchQuery.toLowerCase();
     return name.toLowerCase().includes(q) || preview.toLowerCase().includes(q);
@@ -315,7 +329,10 @@ export default function DoctorMessagesScreen() {
                 (p: any) => p.id !== currentUser?.id,
               ) || [];
             const other = others[0];
-            const name: string = other?.name ?? "Unknown";
+            const name: string =
+              (other?.id && patientNameMap[other.id]) ||
+              other?.name ||
+              "Unknown";
             const avatarUrl = other?.avatar
               ? pb.files.getUrl(other, other.avatar)
               : null;
@@ -331,9 +348,10 @@ export default function DoctorMessagesScreen() {
                 style={styles.messageRow}
                 activeOpacity={0.7}
                 onPress={() =>
-                  router.push(
-                    `/(doctor)/(tabs)/messages/${conv.id}` as any,
-                  )
+                  router.push({
+                    pathname: `/(doctor)/(tabs)/messages/${conv.id}` as any,
+                    params: { displayName: name },
+                  })
                 }
               >
                 {/* Avatar */}

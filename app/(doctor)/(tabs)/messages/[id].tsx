@@ -201,7 +201,7 @@ export default function DoctorChatScreen() {
   const otherParticipant = conversation?.expand?.participants?.find(
     (p: any) => p.id !== currentUser?.id,
   );
-  const otherName: string = otherParticipant?.name ?? displayName ?? "Chat";
+  const otherName: string = otherParticipant?.name || displayName || "Chat";
   const otherAvatarUrl: string | null =
     otherParticipant?.avatar
       ? pb.files.getUrl(otherParticipant, otherParticipant.avatar)
