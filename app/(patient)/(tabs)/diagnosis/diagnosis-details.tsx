@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Platform,
   Image,
   ActivityIndicator,
+  PanResponder,
 } from "react-native";
 import { Stack, useRouter, useLocalSearchParams } from "expo-router";
 import {
@@ -60,8 +61,52 @@ export default function DiagnosisDetailsScreen() {
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
 
-  const waveformBars = Array.from({ length: 30 }, () =>
-    Math.max(10, Math.min(40, Math.random() * 40 + 10)),
+  const progressBarWidth = useRef(0);
+  const durationRef = useRef(0);
+  const soundRef = useRef<Audio.Sound | null>(null);
+  const isSeekingRef = useRef(false);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponderCapture: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponderCapture: () => true,
+      onPanResponderGrant: (evt) => {
+        const barW = progressBarWidth.current;
+        const dur = durationRef.current;
+        if (!barW || !dur) return;
+        isSeekingRef.current = true;
+        const x = Math.max(0, Math.min(evt.nativeEvent.locationX, barW));
+        setPosition(Math.round((x / barW) * dur));
+      },
+      onPanResponderMove: (evt) => {
+        const barW = progressBarWidth.current;
+        const dur = durationRef.current;
+        if (!barW || !dur) return;
+        const x = Math.max(0, Math.min(evt.nativeEvent.locationX, barW));
+        setPosition(Math.round((x / barW) * dur));
+      },
+      onPanResponderRelease: (evt) => {
+        const barW = progressBarWidth.current;
+        const dur = durationRef.current;
+        if (!barW || !dur) { isSeekingRef.current = false; return; }
+        const x = Math.max(0, Math.min(evt.nativeEvent.locationX, barW));
+        const newPos = Math.round((x / barW) * dur);
+        setPosition(newPos);
+        soundRef.current?.setPositionAsync(newPos).finally(() => {
+          isSeekingRef.current = false;
+        });
+      },
+      onPanResponderTerminate: () => {
+        isSeekingRef.current = false;
+      },
+    }),
+  ).current;
+
+  const waveformBars = React.useMemo(
+    () => Array.from({ length: 30 }, () => Math.max(10, Math.min(40, Math.random() * 40 + 10))),
+    [],
   );
 
   useEffect(() => {
@@ -91,12 +136,11 @@ export default function DiagnosisDetailsScreen() {
   }, [id]);
 
   useEffect(() => {
-    return sound
-      ? () => {
-          sound.unloadAsync();
-        }
-      : undefined;
+    soundRef.current = sound;
+    return sound ? () => { sound.unloadAsync(); } : undefined;
   }, [sound]);
+
+  useEffect(() => { durationRef.current = duration; }, [duration]);
 
   const audioRecord = recording?.expand?.audio;
   const diagResult = recording?.expand?.result;
@@ -113,7 +157,7 @@ export default function DiagnosisDetailsScreen() {
         { shouldPlay: true },
         (status) => {
           if (status.isLoaded) {
-            setPosition(status.positionMillis);
+            if (!isSeekingRef.current) setPosition(status.positionMillis);
             setDuration(status.durationMillis || 0);
             setIsPlaying(status.isPlaying);
             if (status.didJustFinish) {
@@ -457,27 +501,24 @@ export default function DiagnosisDetailsScreen() {
               </View>
 
               <View style={styles.audioProgressContainer}>
-                <View style={styles.audioProgressBarBg}>
+                <View
+                  style={styles.audioProgressTouchArea}
+                  onLayout={(e) => { progressBarWidth.current = e.nativeEvent.layout.width; }}
+                  {...panResponder.panHandlers}
+                >
+                  <View pointerEvents="none" style={styles.audioProgressBarBg}>
+                    <View
+                      style={[
+                        styles.audioProgressBarFill,
+                        { width: duration > 0 ? `${(position / duration) * 100}%` : "0%" },
+                      ]}
+                    />
+                  </View>
                   <View
-                    style={[
-                      styles.audioProgressBarFill,
-                      {
-                        width:
-                          duration > 0
-                            ? `${(position / duration) * 100}%`
-                            : "0%",
-                      },
-                    ]}
-                  />
-                  <View
+                    pointerEvents="none"
                     style={[
                       styles.audioProgressKnob,
-                      {
-                        left:
-                          duration > 0
-                            ? `${(position / duration) * 100}%`
-                            : "0%",
-                      },
+                      { left: duration > 0 ? `${(position / duration) * 100}%` : "0%" },
                     ]}
                   />
                 </View>
@@ -799,12 +840,15 @@ const styles = StyleSheet.create({
   audioProgressContainer: {
     marginBottom: 20,
   },
+  audioProgressTouchArea: {
+    height: 32,
+    justifyContent: "center",
+  },
   audioProgressBarBg: {
     height: 6,
     backgroundColor: "#f1f5f9",
     borderRadius: 3,
-    position: "relative",
-    justifyContent: "center",
+    overflow: "hidden",
   },
   audioProgressBarFill: {
     height: "100%",
@@ -820,6 +864,7 @@ const styles = StyleSheet.create({
     borderColor: "#0da6f2",
     position: "absolute",
     marginLeft: -8,
+    top: 8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
