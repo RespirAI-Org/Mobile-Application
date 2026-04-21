@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,8 @@ import {
   ActivityIndicator,
   Alert,
   BackHandler,
+  PanResponder,
+  TextInput,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import {
@@ -21,6 +23,9 @@ import {
   SkipForward,
   ClipboardPen,
   XCircle,
+  Pencil,
+  X,
+  Check,
 } from "lucide-react-native";
 import { Audio } from "expo-av";
 import { audioService } from "@/services/audioService";
@@ -68,6 +73,57 @@ export default function DoctorDiagnosisDetailsScreen() {
   const [duration, setDuration] = useState(0);
   const [isConfirming, setIsConfirming] = useState(false);
 
+  // Note editing
+  const [noteText, setNoteText] = useState("");
+  const [isEditingNote, setIsEditingNote] = useState(false);
+  const [isSavingNote, setIsSavingNote] = useState(false);
+
+  // Audio slider drag — refs to avoid stale closures in PanResponder
+  const progressBarWidth = useRef(0);
+  const durationRef = useRef(0);
+  const soundRef = useRef<Audio.Sound | null>(null);
+  const isSeekingRef = useRef(false);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponderCapture: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponderCapture: () => true,
+      onPanResponderGrant: (evt) => {
+        const barW = progressBarWidth.current;
+        const dur = durationRef.current;
+        if (!barW || !dur) return;
+        isSeekingRef.current = true;
+        const x = Math.max(0, Math.min(evt.nativeEvent.locationX, barW));
+        const newPos = Math.round((x / barW) * dur);
+        setPosition(newPos);
+      },
+      onPanResponderMove: (evt) => {
+        const barW = progressBarWidth.current;
+        const dur = durationRef.current;
+        if (!barW || !dur) return;
+        const x = Math.max(0, Math.min(evt.nativeEvent.locationX, barW));
+        const newPos = Math.round((x / barW) * dur);
+        setPosition(newPos);
+      },
+      onPanResponderRelease: (evt) => {
+        const barW = progressBarWidth.current;
+        const dur = durationRef.current;
+        if (!barW || !dur) { isSeekingRef.current = false; return; }
+        const x = Math.max(0, Math.min(evt.nativeEvent.locationX, barW));
+        const newPos = Math.round((x / barW) * dur);
+        setPosition(newPos);
+        soundRef.current?.setPositionAsync(newPos).finally(() => {
+          isSeekingRef.current = false;
+        });
+      },
+      onPanResponderTerminate: () => {
+        isSeekingRef.current = false;
+      },
+    }),
+  ).current;
+
   const handleBack = useCallback(() => {
     if (from === "patient") {
       // Switch back to the Home tab — the patient profile is still on its stack
@@ -100,15 +156,21 @@ export default function DoctorDiagnosisDetailsScreen() {
       if (!id) { setIsLoading(false); return; }
       setIsLoading(true);
       const res = await recordingService.getRecordingById(id, "audio,result");
-      if (res.success && res.data) setRecording(res.data);
+      if (res.success && res.data) {
+        setRecording(res.data);
+        setNoteText(stripHtml(res.data.doctor_note || ""));
+      }
       setIsLoading(false);
     }
     loadData();
   }, [id]);
 
   useEffect(() => {
+    soundRef.current = sound;
     return sound ? () => { sound.unloadAsync(); } : undefined;
   }, [sound]);
+
+  useEffect(() => { durationRef.current = duration; }, [duration]);
 
   const audioRecord = recording?.expand?.audio;
   const diagResult = recording?.expand?.result;
@@ -123,7 +185,7 @@ export default function DoctorDiagnosisDetailsScreen() {
         { shouldPlay: true },
         (status) => {
           if (status.isLoaded) {
-            setPosition(status.positionMillis);
+            if (!isSeekingRef.current) setPosition(status.positionMillis);
             setDuration(status.durationMillis || 0);
             setIsPlaying(status.isPlaying);
             if (status.didJustFinish) { setIsPlaying(false); setPosition(0); }
@@ -173,6 +235,19 @@ export default function DoctorDiagnosisDetailsScreen() {
         },
       ],
     );
+  };
+
+  const handleSaveNote = async () => {
+    if (!recording) return;
+    setIsSavingNote(true);
+    const result = await recordingService.updateRecording(recording.id, { doctor_note: noteText });
+    setIsSavingNote(false);
+    if (result.success && result.data) {
+      setRecording(result.data);
+      setIsEditingNote(false);
+    } else {
+      Alert.alert("Error", "Failed to save note. Please try again.");
+    }
   };
 
   const formatTime = (millis: number) => {
@@ -363,14 +438,25 @@ export default function DoctorDiagnosisDetailsScreen() {
               </View>
 
               <View style={styles.audioProgressContainer}>
-                <View style={styles.audioProgressBarBg}>
+                {/* 32px tall touch area so taps register; visual bar is centered inside */}
+                <View
+                  style={styles.audioProgressTouchArea}
+                  onLayout={(e) => { progressBarWidth.current = e.nativeEvent.layout.width; }}
+                  {...panResponder.panHandlers}
+                >
                   <View
-                    style={[
-                      styles.audioProgressBarFill,
-                      { width: duration > 0 ? `${(position / duration) * 100}%` : "0%" },
-                    ]}
-                  />
+                    pointerEvents="none"
+                    style={styles.audioProgressBarBg}
+                  >
+                    <View
+                      style={[
+                        styles.audioProgressBarFill,
+                        { width: duration > 0 ? `${(position / duration) * 100}%` : "0%" },
+                      ]}
+                    />
+                  </View>
                   <View
+                    pointerEvents="none"
                     style={[
                       styles.audioProgressKnob,
                       { left: duration > 0 ? `${(position / duration) * 100}%` : "0%" },
@@ -393,21 +479,70 @@ export default function DoctorDiagnosisDetailsScreen() {
           </View>
 
           {/* ── My Note ── */}
-          {recording?.doctor_note ? (
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>My Note</Text>
-              <View style={styles.noteCard}>
-                <View style={styles.noteHeader}>
-                  <View style={styles.noteIconBox}>
-                    <ClipboardPen size={18} color="#0da6f2" />
-                  </View>
-                  <Text style={styles.noteTitleText}>Doctor's Note</Text>
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>My Note</Text>
+            <View style={styles.noteCard}>
+              <View style={styles.noteHeader}>
+                <View style={styles.noteIconBox}>
+                  <ClipboardPen size={18} color="#0da6f2" />
                 </View>
-                <View style={styles.divider} />
-                <Text style={styles.noteText}>{stripHtml(recording.doctor_note)}</Text>
+                <Text style={styles.noteTitleText}>Doctor's Note</Text>
+                {!isEditingNote && (
+                  <TouchableOpacity
+                    style={styles.noteEditButton}
+                    onPress={() => setIsEditingNote(true)}
+                  >
+                    <Pencil size={16} color="#0da6f2" />
+                  </TouchableOpacity>
+                )}
               </View>
+              <View style={styles.divider} />
+              {isEditingNote ? (
+                <>
+                  <TextInput
+                    style={styles.noteInput}
+                    value={noteText}
+                    onChangeText={setNoteText}
+                    multiline
+                    placeholder="Add a note..."
+                    placeholderTextColor="#94a3b8"
+                    autoFocus
+                  />
+                  <View style={styles.noteActions}>
+                    <TouchableOpacity
+                      style={styles.noteCancelButton}
+                      onPress={() => {
+                        setNoteText(stripHtml(recording?.doctor_note || ""));
+                        setIsEditingNote(false);
+                      }}
+                      disabled={isSavingNote}
+                    >
+                      <X size={16} color="#64748b" />
+                      <Text style={styles.noteCancelText}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.noteSaveButton}
+                      onPress={handleSaveNote}
+                      disabled={isSavingNote}
+                    >
+                      {isSavingNote ? (
+                        <ActivityIndicator size="small" color="#ffffff" />
+                      ) : (
+                        <>
+                          <Check size={16} color="#ffffff" />
+                          <Text style={styles.noteSaveText}>Save</Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </>
+              ) : (
+                <Text style={[styles.noteText, !noteText && styles.notePlaceholder]}>
+                  {noteText || "Tap the pencil icon to add a note."}
+                </Text>
+              )}
             </View>
-          ) : null}
+          </View>
 
           {/* ── Confirm / Unconfirm ── */}
           {recording && (
@@ -643,12 +778,15 @@ const styles = StyleSheet.create({
   },
   audioTimeText: { fontSize: 10, color: "#94a3b8" },
   audioProgressContainer: { marginBottom: 20 },
+  audioProgressTouchArea: {
+    height: 32,
+    justifyContent: "center",
+  },
   audioProgressBarBg: {
     height: 6,
     backgroundColor: "#f1f5f9",
     borderRadius: 3,
-    position: "relative",
-    justifyContent: "center",
+    overflow: "hidden",
   },
   audioProgressBarFill: {
     height: "100%",
@@ -664,6 +802,7 @@ const styles = StyleSheet.create({
     borderColor: "#0da6f2",
     position: "absolute",
     marginLeft: -8,
+    top: 8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -725,6 +864,60 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#0d121c",
     lineHeight: 22,
+  },
+  notePlaceholder: {
+    color: "#94a3b8",
+    fontStyle: "italic",
+  },
+  noteEditButton: {
+    marginLeft: "auto",
+    padding: 4,
+  },
+  noteInput: {
+    fontSize: 14,
+    color: "#0d121c",
+    lineHeight: 22,
+    minHeight: 80,
+    textAlignVertical: "top",
+    borderWidth: 1,
+    borderColor: "#bfdbfe",
+    borderRadius: 8,
+    padding: 10,
+    backgroundColor: "#ffffff",
+  },
+  noteActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 10,
+    marginTop: 10,
+  },
+  noteCancelButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    backgroundColor: "#f1f5f9",
+  },
+  noteCancelText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#64748b",
+  },
+  noteSaveButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    backgroundColor: "#0da6f2",
+  },
+  noteSaveText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#ffffff",
   },
   confirmContainer: {
     paddingHorizontal: 16,
