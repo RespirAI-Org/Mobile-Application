@@ -41,15 +41,19 @@ export default function HomeScreen() {
     devices[0] ||
     null;
 
+  const [isLoadingRecording, setIsLoadingRecording] = useState(false);
+
   const fetchLatestRecording = useCallback(async () => {
     if (!patientProfile?.id) return;
+    setIsLoadingRecording(true);
     const result = await recordingService.getRecordingsByPatient(
       patientProfile.id,
-      "doctor",
+      "doctor,result",
     );
     if (result.success && result.data && result.data.length > 0) {
       setLatestRecording(result.data[0]);
     }
+    setIsLoadingRecording(false);
   }, [patientProfile?.id]);
 
   const doctor =
@@ -63,6 +67,7 @@ export default function HomeScreen() {
       fetchPatientProfile(),
       fetchDevices(),
       fetchNotifications(),
+      fetchLatestRecording(),
       deviceId ? fetchLatestAudio() : Promise.resolve(),
     ]);
     if (audioId) {
@@ -77,6 +82,7 @@ export default function HomeScreen() {
     fetchDevices,
     fetchNotifications,
     fetchPatientProfile,
+    fetchLatestRecording,
   ]);
 
   useEffect(() => {
@@ -122,7 +128,7 @@ export default function HomeScreen() {
           unreadCount={unreadCount}
           onNotificationPress={() => router.push("/notifications" as any)}
         />
-        <StatusCard />
+        <StatusCard recording={latestRecording} isLoading={isLoadingRecording} />
         <DeviceConnectionCard
           deviceName={activeDevice?.name || null}
           status={activeDevice?.status || null}
