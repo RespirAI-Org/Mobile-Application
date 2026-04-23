@@ -41,7 +41,7 @@ function SignupScreenContent() {
     const result = await signup(email, password, confirmPassword);
     if (result.success) {
       Alert.alert("Success", "Account created successfully.");
-      router.replace("/(auth)/login");
+      router.replace("/(auth)/Login");
     } else {
       Alert.alert("Error", result.error || "Failed to create account.");
     }
@@ -50,7 +50,7 @@ function SignupScreenContent() {
   const handleTabPress = (tab: "signin" | "signup") => {
     clearError();
     if (tab === "signin") {
-      router.replace("/(auth)/login");
+      router.replace("/(auth)/Login");
     }
   };
 
