@@ -4,9 +4,11 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import {
   ArrowLeft,
   HelpCircle,
@@ -17,59 +19,107 @@ import {
 
 export default function ScanScreen() {
   const router = useRouter();
+  const [permission, requestPermission] = useCameraPermissions();
+
+  if (!permission) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator color="#ffffff" />
+      </View>
+    );
+  }
+
+  if (!permission.granted) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.permissionText}>Camera access is required to scan QR codes.</Text>
+        <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
+          <Text style={styles.permissionButtonText}>Grant Permission</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
-          <ArrowLeft size={24} color="#ffffff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Scan QR Code</Text>
-        <TouchableOpacity style={styles.iconButton}>
-          <HelpCircle size={24} color="#ffffff" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Camera fill */}
-      <View style={styles.cameraFill} />
-
-      {/* Bottom controls */}
-      <View style={styles.controls}>
-        <Text style={styles.instructionTitle}>Align the QR code</Text>
-        <Text style={styles.instructionSubtitle}>
-          Scan device to pair stethoscope or patient ID
-        </Text>
-
-        <TouchableOpacity style={styles.flashlightButton}>
-          <Zap size={20} color="#ffffff" fill="#ffffff" />
-          <Text style={styles.flashlightText}>Flashlight</Text>
-        </TouchableOpacity>
-
-        <View style={styles.bottomActions}>
-          <TouchableOpacity style={styles.actionButton}>
-            <View style={styles.actionIconCircle}>
-              <ImageIcon size={24} color="#ffffff" />
-            </View>
-            <Text style={styles.actionText}>Import</Text>
+    <CameraView style={styles.camera} facing="back">
+      <SafeAreaView style={styles.overlay} edges={["top", "bottom"]}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
+            <ArrowLeft size={24} color="#ffffff" />
           </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionButton}>
-            <View style={styles.actionIconCircle}>
-              <Keyboard size={24} color="#ffffff" />
-            </View>
-            <Text style={styles.actionText}>Enter ID</Text>
+          <Text style={styles.headerTitle}>Scan QR Code</Text>
+          <TouchableOpacity style={styles.iconButton}>
+            <HelpCircle size={24} color="#ffffff" />
           </TouchableOpacity>
         </View>
-      </View>
-    </SafeAreaView>
+
+        {/* Spacer — camera fills this space */}
+        <View style={{ flex: 1 }} />
+
+        {/* Bottom controls */}
+        <View style={styles.controls}>
+          <Text style={styles.instructionTitle}>Align the QR code</Text>
+          <Text style={styles.instructionSubtitle}>
+            Scan device to pair stethoscope or patient ID
+          </Text>
+
+          <TouchableOpacity style={styles.flashlightButton}>
+            <Zap size={20} color="#ffffff" fill="#ffffff" />
+            <Text style={styles.flashlightText}>Flashlight</Text>
+          </TouchableOpacity>
+
+          <View style={styles.bottomActions}>
+            <TouchableOpacity style={styles.actionButton}>
+              <View style={styles.actionIconCircle}>
+                <ImageIcon size={24} color="#ffffff" />
+              </View>
+              <Text style={styles.actionText}>Import</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.actionButton}>
+              <View style={styles.actionIconCircle}>
+                <Keyboard size={24} color="#ffffff" />
+              </View>
+              <Text style={styles.actionText}>Enter ID</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </SafeAreaView>
+    </CameraView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  camera: {
+    flex: 1,
+  },
+  overlay: {
+    flex: 1,
+  },
+  centered: {
     flex: 1,
     backgroundColor: "#1e1e1e",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+    paddingHorizontal: 32,
+  },
+  permissionText: {
+    color: "#ffffff",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  permissionButton: {
+    backgroundColor: "#0da6f2",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 30,
+  },
+  permissionButtonText: {
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "600",
   },
   header: {
     flexDirection: "row",
@@ -90,9 +140,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     alignItems: "center",
     justifyContent: "center",
-  },
-  cameraFill: {
-    flex: 1,
   },
   controls: {
     alignItems: "center",
