@@ -44,6 +44,7 @@
 - `full_name` — text, required
 - `specialist` — text (e.g. "Cardiology", "Pulmonology")
 - `created`, `updated` — autodate
+- `addresses` - json
 
 ## `patients` (Base)
 - `doctor` — relation → doctors (single), required
@@ -80,6 +81,7 @@
 - `status` — select single: `pending`, `scheduled`, `completed`, `cancelled`
 - `notes` — editor
 - `created`, `updated` — autodate
+- `address` - text
 
 ## `conversations` (Base)
 - `participants` — relation → users (multiple), required

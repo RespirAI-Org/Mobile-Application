@@ -9,6 +9,7 @@ export interface DoctorRecord {
   user: string;
   full_name: string;
   specialist: string;
+  addresses: string[];
   expand?: {
     user?: any;
   };

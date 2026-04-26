@@ -111,9 +111,8 @@ export default function DoctorMessagesScreen() {
 
   const [activeTab, setActiveTab] = useState<ActiveTab>("messages");
   const [searchQuery, setSearchQuery] = useState("");
-  const [upcomingConsultations, setUpcomingConsultations] = useState<
-    ConsultationRecord[]
-  >([]);
+  const [upcomingConsultations, setUpcomingConsultations] = useState<ConsultationRecord[]>([]);
+  const [pendingConsultations, setPendingConsultations] = useState<ConsultationRecord[]>([]);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [patientNameMap, setPatientNameMap] = useState<Record<string, string>>({});
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -130,13 +129,18 @@ export default function DoctorMessagesScreen() {
     if (!doctorResult.success || !doctorResult.data) return;
     const doctorId = doctorResult.data.id;
 
-    const [consultResult, patientsResult] = await Promise.all([
+    const [consultResult, pendingResult, patientsResult] = await Promise.all([
       consultationService.getUpcomingConsultations(doctorId, "patient"),
+      consultationService.getPendingConsultations(doctorId, "patient"),
       patientService.getPatientsByDoctor(doctorId),
     ]);
 
     if (consultResult.success && consultResult.data) {
       setUpcomingConsultations(consultResult.data.slice(0, 3));
+    }
+
+    if (pendingResult.success && pendingResult.data) {
+      setPendingConsultations(pendingResult.data);
     }
 
     if (patientsResult.success && patientsResult.data) {
@@ -353,6 +357,50 @@ export default function DoctorMessagesScreen() {
         </>
       ) : (
         <>
+          {/* Pending Consultation Requests */}
+          {pendingConsultations.length > 0 && (
+            <>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Pending Requests</Text>
+                <View style={styles.pendingBadge}>
+                  <Text style={styles.pendingBadgeText}>{pendingConsultations.length}</Text>
+                </View>
+              </View>
+              <View style={styles.consultationList}>
+                {pendingConsultations.map((consult) => {
+                  const patient = consult.expand?.patient;
+                  const patientName: string = patient?.full_name ?? "Patient";
+                  const colors = avatarColors(patientName);
+                  return (
+                    <TouchableOpacity
+                      key={consult.id}
+                      style={styles.consultationCard}
+                      activeOpacity={0.7}
+                      onPress={() =>
+                        router.push({
+                          pathname: `/(doctor)/(tabs)/messages/consultation/${consult.id}` as any,
+                        })
+                      }
+                    >
+                      <View style={[styles.consultAvatar, { backgroundColor: colors.bg }]}>
+                        <Text style={[styles.consultAvatarText, { color: colors.text }]}>
+                          {getInitials(patientName)}
+                        </Text>
+                      </View>
+                      <View style={styles.consultationInfo}>
+                        <Text style={styles.consultationName}>{patientName}</Text>
+                        <Text style={styles.consultationType}>{consult.title || "Consultation Request"}</Text>
+                      </View>
+                      <View style={styles.pendingStatusBadge}>
+                        <Text style={styles.pendingStatusText}>Review</Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </>
+          )}
+
           {/* Scheduled Consultations */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Scheduled Consultations</Text>
@@ -380,24 +428,15 @@ export default function DoctorMessagesScreen() {
                     style={styles.consultationCard}
                     activeOpacity={0.7}
                   >
-                    <View
-                      style={[
-                        styles.consultAvatar,
-                        { backgroundColor: colors.bg },
-                      ]}
-                    >
-                      <Text
-                        style={[styles.consultAvatarText, { color: colors.text }]}
-                      >
+                    <View style={[styles.consultAvatar, { backgroundColor: colors.bg }]}>
+                      <Text style={[styles.consultAvatarText, { color: colors.text }]}>
                         {getInitials(patientName)}
                       </Text>
                     </View>
                     <View style={styles.consultationInfo}>
                       <Text style={styles.consultationName}>{patientName}</Text>
                       <Text style={styles.consultationType}>
-                        {consult.title ||
-                          CONSULTATION_TYPE_LABELS[consult.type] ||
-                          "Consultation"}
+                        {consult.title || CONSULTATION_TYPE_LABELS[consult.type] || "Consultation"}
                       </Text>
                     </View>
                     <View style={styles.consultationTime}>
@@ -523,6 +562,28 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#1961F0",
   },
+  pendingBadge: {
+    backgroundColor: "#FEF3C7",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  pendingBadgeText: {
+    color: "#D97706",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  pendingStatusBadge: {
+    backgroundColor: "#FEF3C7",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  pendingStatusText: {
+    color: "#D97706",
+    fontSize: 12,
+    fontWeight: "600",
+  },
   emptyConsultations: {
     paddingVertical: Gap.small,
     paddingHorizontal: Gap.extraSmall,
@@ -548,15 +609,6 @@ const styles = StyleSheet.create({
     gap: Gap.small,
     borderWidth: 1,
     borderColor: Colors.outline["800"],
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.06,
-        shadowRadius: 4,
-      },
-      android: { elevation: 2 },
-    }),
   },
   consultAvatar: {
     width: 48,

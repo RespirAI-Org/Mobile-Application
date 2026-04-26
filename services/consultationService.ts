@@ -13,6 +13,7 @@ export interface ConsultationRecord {
   type: "video_call" | "voice_call" | "in_person" | "follow_up";
   status: "pending" | "scheduled" | "completed" | "cancelled";
   notes: string;
+  address: string;
   expand?: {
     patient?: any;
     doctor?: any;
@@ -27,6 +28,7 @@ export type ConsultationCreateData = {
   type: ConsultationRecord["type"];
   status?: ConsultationRecord["status"];
   notes?: string;
+  address?: string;
 };
 
 export const consultationService = {
@@ -144,6 +146,29 @@ export const consultationService = {
     }
   },
 
+  async getPendingConsultations(
+    doctorId: string,
+    expand?: string,
+  ): Promise<{ success: boolean; data?: ConsultationRecord[]; error?: string }> {
+    try {
+      const records = await pb
+        .collection("consultations")
+        .getFullList<ConsultationRecord>({
+          filter: `doctor = "${doctorId}" && status = "pending"`,
+          sort: "-created",
+          expand: expand || "",
+          $autoCancel: false,
+        });
+      return { success: true, data: records };
+    } catch (error: any) {
+      console.error("[ConsultationService] Fetch Pending Error:", error.message);
+      return {
+        success: false,
+        error: error.message || "An error occurred while fetching pending consultations.",
+      };
+    }
+  },
+
   async getUpcomingConsultations(
     doctorId: string,
     expand?: string,
@@ -156,6 +181,7 @@ export const consultationService = {
           filter: `doctor = "${doctorId}" && scheduled_at > "${now}" && status = "scheduled"`,
           sort: "scheduled_at",
           expand: expand || "",
+          $autoCancel: false,
         });
       return { success: true, data: records };
     } catch (error: any) {

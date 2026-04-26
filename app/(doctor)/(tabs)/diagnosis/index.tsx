@@ -34,6 +34,7 @@ const styles = StyleSheet.create({
     color: Colors.typography["0"],
     paddingHorizontal: Gap.mediumSmall,
     paddingBottom: Gap.small,
+    marginTop: Gap.xxSmall,
     fontFamily: Platform.select({
       ios: "System",
       android: "sans-serif-medium",
