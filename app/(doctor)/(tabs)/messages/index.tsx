@@ -12,6 +12,7 @@ import {
   Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   SquarePen,
   Search,
@@ -171,9 +172,11 @@ export default function DoctorMessagesScreen() {
     });
   }, [conversations]);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [loadData])
+  );
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -438,6 +441,11 @@ export default function DoctorMessagesScreen() {
                       <Text style={styles.consultationType}>
                         {consult.title || CONSULTATION_TYPE_LABELS[consult.type] || "Consultation"}
                       </Text>
+                      {!!consult.address && (
+                        <Text style={styles.consultationAddress} numberOfLines={1}>
+                          {consult.address}
+                        </Text>
+                      )}
                     </View>
                     <View style={styles.consultationTime}>
                       <View style={styles.consultTimeBlock}>
@@ -633,6 +641,11 @@ const styles = StyleSheet.create({
   consultationType: {
     fontSize: 13,
     color: Colors.typography["300"],
+  },
+  consultationAddress: {
+    fontSize: 12,
+    color: Colors.typography["400"],
+    marginTop: 2,
   },
   consultationTime: {
     flexDirection: "row",
