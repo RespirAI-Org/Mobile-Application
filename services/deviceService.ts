@@ -101,6 +101,30 @@ export const deviceService = {
     }
   },
 
+  async pairDeviceById(
+    deviceId: string,
+    ownerId: string,
+  ): Promise<{ success: boolean; data?: DeviceRecord; error?: string }> {
+    try {
+      const updated = await pb
+        .collection("devices")
+        .update<DeviceRecord>(deviceId, {
+          owner: ownerId,
+          status: "active",
+        });
+      return { success: true, data: updated };
+    } catch (error: any) {
+      console.error("[DeviceService] Pair Device By ID Error:", error.message);
+      if (error.status === 404) {
+        return { success: false, error: "Device not found." };
+      }
+      return {
+        success: false,
+        error: error.message || "An error occurred while pairing the device.",
+      };
+    }
+  },
+
   async unpairDevice(
     deviceId: string,
   ): Promise<{ success: boolean; data?: DeviceRecord; error?: string }> {

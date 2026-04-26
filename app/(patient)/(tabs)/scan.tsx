@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,18 +8,91 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { CameraView, useCameraPermissions } from "expo-camera";
+import { useFocusEffect } from "@react-navigation/native";
+import { CameraView, useCameraPermissions, BarcodeScanningResult } from "expo-camera";
 import {
   ArrowLeft,
   HelpCircle,
   Zap,
   Image as ImageIcon,
   Keyboard,
+  CheckCircle,
+  XCircle,
 } from "lucide-react-native";
+import { authService } from "@/services/authService";
+import { deviceService } from "@/services/deviceService";
+import { useDevices } from "@/contexts/DeviceContext";
+
+type ScanState = "scanning" | "loading" | "success" | "error";
 
 export default function ScanScreen() {
   const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
+  const { fetchDevices } = useDevices();
+  const [scanState, setScanState] = useState<ScanState>("scanning");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useFocusEffect(
+    useCallback(() => {
+      setScanState("scanning");
+      setErrorMessage("");
+    }, [])
+  );
+
+  const handleBarcodeScanned = useCallback(async (result: BarcodeScanningResult) => {
+    if (scanState !== "scanning") return;
+
+    setScanState("loading");
+
+    try {
+      const parsed = JSON.parse(result.data);
+      const deviceId: string = parsed?.id;
+
+      if (!deviceId) {
+        setErrorMessage("Invalid QR code format.");
+        setScanState("error");
+        return;
+      }
+
+      const currentUser = authService.getCurrentUser();
+      if (!currentUser) {
+        setErrorMessage("You must be logged in to pair a device.");
+        setScanState("error");
+        return;
+      }
+
+      const deviceResult = await deviceService.getDeviceById(deviceId);
+      if (!deviceResult.success) {
+        setErrorMessage(deviceResult.error || "Device not found.");
+        setScanState("error");
+        return;
+      }
+
+      if (deviceResult.data?.owner) {
+        setErrorMessage("This device is already paired to another account.");
+        setScanState("error");
+        return;
+      }
+
+      const response = await deviceService.pairDeviceById(deviceId, currentUser.id);
+
+      if (response.success) {
+        setScanState("success");
+        fetchDevices();
+      } else {
+        setErrorMessage(response.error || "Failed to pair device.");
+        setScanState("error");
+      }
+    } catch {
+      setErrorMessage("Could not read QR code data.");
+      setScanState("error");
+    }
+  }, [scanState]);
+
+  const resetScan = () => {
+    setErrorMessage("");
+    setScanState("scanning");
+  };
 
   if (!permission) {
     return (
@@ -41,7 +114,12 @@ export default function ScanScreen() {
   }
 
   return (
-    <CameraView style={styles.camera} facing="back">
+    <CameraView
+      style={styles.camera}
+      facing="back"
+      onBarcodeScanned={scanState === "scanning" ? handleBarcodeScanned : undefined}
+      barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+    >
       <SafeAreaView style={styles.overlay} edges={["top", "bottom"]}>
         {/* Header */}
         <View style={styles.header}>
@@ -54,41 +132,86 @@ export default function ScanScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Spacer — camera fills this space */}
-        <View style={{ flex: 1 }} />
+        {/* Viewfinder */}
+        <View style={styles.viewfinderContainer}>
+          <View style={styles.viewfinder}>
+            <View style={[styles.corner, styles.topLeft]} />
+            <View style={[styles.corner, styles.topRight]} />
+            <View style={[styles.corner, styles.bottomLeft]} />
+            <View style={[styles.corner, styles.bottomRight]} />
+          </View>
+
+        </View>
 
         {/* Bottom controls */}
         <View style={styles.controls}>
-          <Text style={styles.instructionTitle}>Align the QR code</Text>
-          <Text style={styles.instructionSubtitle}>
-            Scan device to pair stethoscope or patient ID
-          </Text>
+          {scanState === "scanning" ? (
+            <>
+              <Text style={styles.instructionTitle}>Align the QR code</Text>
+              <Text style={styles.instructionSubtitle}>
+                Scan device to pair stethoscope or patient ID
+              </Text>
 
-          <TouchableOpacity style={styles.flashlightButton}>
-            <Zap size={20} color="#ffffff" fill="#ffffff" />
-            <Text style={styles.flashlightText}>Flashlight</Text>
-          </TouchableOpacity>
+              <TouchableOpacity style={styles.flashlightButton}>
+                <Zap size={20} color="#ffffff" fill="#ffffff" />
+                <Text style={styles.flashlightText}>Flashlight</Text>
+              </TouchableOpacity>
 
-          <View style={styles.bottomActions}>
-            <TouchableOpacity style={styles.actionButton}>
-              <View style={styles.actionIconCircle}>
-                <ImageIcon size={24} color="#ffffff" />
+              <View style={styles.bottomActions}>
+                <TouchableOpacity style={styles.actionButton}>
+                  <View style={styles.actionIconCircle}>
+                    <ImageIcon size={24} color="#ffffff" />
+                  </View>
+                  <Text style={styles.actionText}>Import</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.actionButton}>
+                  <View style={styles.actionIconCircle}>
+                    <Keyboard size={24} color="#ffffff" />
+                  </View>
+                  <Text style={styles.actionText}>Enter ID</Text>
+                </TouchableOpacity>
               </View>
-              <Text style={styles.actionText}>Import</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionButton}>
-              <View style={styles.actionIconCircle}>
-                <Keyboard size={24} color="#ffffff" />
-              </View>
-              <Text style={styles.actionText}>Enter ID</Text>
-            </TouchableOpacity>
-          </View>
+            </>
+          ) : (
+            <>
+              {scanState === "loading" && (
+                <View style={styles.statusOverlay}>
+                  <ActivityIndicator size="small" color="#ffffff" />
+                  <Text style={styles.statusText}>Pairing device...</Text>
+                </View>
+              )}
+              {scanState === "success" && (
+                <View style={styles.statusOverlay}>
+                  <CheckCircle size={20} color="#22c55e" />
+                  <Text style={styles.statusText}>Device paired!</Text>
+                </View>
+              )}
+              {scanState === "error" && (
+                <View style={styles.statusOverlay}>
+                  <XCircle size={20} color="#ef4444" />
+                  <Text style={styles.statusText}>{errorMessage}</Text>
+                </View>
+              )}
+              <TouchableOpacity
+                style={[styles.flashlightButton, scanState === "success" && styles.successButton]}
+                onPress={scanState === "success" ? () => router.back() : resetScan}
+                disabled={scanState === "loading"}
+              >
+                <Text style={styles.flashlightText}>
+                  {scanState === "loading" ? "Please wait..." : scanState === "success" ? "Done" : "Try Again"}
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       </SafeAreaView>
     </CameraView>
   );
 }
+
+const CORNER_SIZE = 24;
+const CORNER_THICKNESS = 3;
 
 const styles = StyleSheet.create({
   camera: {
@@ -141,6 +264,60 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  viewfinderContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  viewfinder: {
+    width: 240,
+    height: 240,
+    position: "relative",
+  },
+  corner: {
+    position: "absolute",
+    width: CORNER_SIZE,
+    height: CORNER_SIZE,
+    borderColor: "#ffffff",
+  },
+  topLeft: {
+    top: 0,
+    left: 0,
+    borderTopWidth: CORNER_THICKNESS,
+    borderLeftWidth: CORNER_THICKNESS,
+  },
+  topRight: {
+    top: 0,
+    right: 0,
+    borderTopWidth: CORNER_THICKNESS,
+    borderRightWidth: CORNER_THICKNESS,
+  },
+  bottomLeft: {
+    bottom: 0,
+    left: 0,
+    borderBottomWidth: CORNER_THICKNESS,
+    borderLeftWidth: CORNER_THICKNESS,
+  },
+  bottomRight: {
+    bottom: 0,
+    right: 0,
+    borderBottomWidth: CORNER_THICKNESS,
+    borderRightWidth: CORNER_THICKNESS,
+  },
+  statusOverlay: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "rgba(0,0,0,0.75)",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 24,
+  },
+  statusText: {
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
   controls: {
     alignItems: "center",
     paddingBottom: 16,
@@ -166,6 +343,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 30,
     gap: 8,
+  },
+  successButton: {
+    backgroundColor: "#22c55e",
   },
   flashlightText: {
     color: "#ffffff",
