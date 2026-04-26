@@ -140,6 +140,27 @@ export const patientService = {
     }
   },
 
+  async linkPatientToDoctor(
+    patientId: string,
+    doctorId: string,
+  ): Promise<{ success: boolean; data?: PatientRecord; error?: string }> {
+    try {
+      const updated = await pb
+        .collection("patients")
+        .update<PatientRecord>(patientId, { doctor: doctorId });
+      return { success: true, data: updated };
+    } catch (error: any) {
+      console.error("[PatientService] Link Patient To Doctor Error:", error.message);
+      if (error.status === 404) {
+        return { success: false, error: "Patient not found." };
+      }
+      return {
+        success: false,
+        error: error.message || "An error occurred while linking the patient.",
+      };
+    }
+  },
+
   async uploadAvatar(
     patientId: string,
     avatarFile: File | Blob,
