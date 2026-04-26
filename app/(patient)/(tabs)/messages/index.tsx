@@ -13,6 +13,7 @@ import {
   Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   SquarePen,
   Search,
@@ -137,7 +138,10 @@ export default function MessagesScreen() {
         setUpcomingConsultations(
           r.data
             .filter(
-              (c) => c.status === "scheduled" && new Date(c.scheduled_at) > now,
+              (c) =>
+                (c.status === "scheduled" ||
+                  (c.status === "pending" && !!c.scheduled_at)) &&
+                new Date(c.scheduled_at) > now,
             )
             .sort(
               (a, b) =>
@@ -167,9 +171,11 @@ export default function MessagesScreen() {
     });
   }, [conversations]);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [loadData])
+  );
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -453,11 +459,22 @@ export default function MessagesScreen() {
                       </View>
                     </View>
                     <View style={styles.consultActions}>
-                      <TouchableOpacity
-                        style={[styles.actionButton, styles.secondaryActionButton]}
-                      >
-                        <Text style={styles.secondaryActionText}>Reschedule</Text>
-                      </TouchableOpacity>
+                      {consult.status === "pending" ? (
+                        <View style={styles.reschedulePendingBadge}>
+                          <Text style={styles.reschedulePendingText}>Reschedule pending</Text>
+                        </View>
+                      ) : (
+                        <TouchableOpacity
+                          style={[styles.actionButton, styles.secondaryActionButton]}
+                          onPress={() =>
+                            router.push(
+                              `/messages/consultation/${consult.id}` as any
+                            )
+                          }
+                        >
+                          <Text style={styles.secondaryActionText}>Reschedule</Text>
+                        </TouchableOpacity>
+                      )}
                     </View>
                   </View>
                 );
@@ -704,6 +721,21 @@ const styles = StyleSheet.create({
     color: Colors.typography["300"],
     fontSize: 14,
     fontWeight: "500",
+  },
+  reschedulePendingBadge: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: Radius.extraSmall,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: Colors.background["900"],
+    borderWidth: 1,
+    borderColor: Colors.outline["800"],
+  },
+  reschedulePendingText: {
+    color: Colors.info["400"],
+    fontSize: 14,
+    fontWeight: "600",
   },
   messagesList: {
     marginBottom: Gap.small,

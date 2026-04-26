@@ -16,6 +16,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import {
   SquarePen,
   Search,
+  Plus,
 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 import { Gap } from "@/constants/gap";
@@ -201,6 +202,7 @@ export default function DoctorMessagesScreen() {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
+    <View style={styles.wrapper}>
     <ScrollView
       style={styles.container}
       showsVerticalScrollIndicator={false}
@@ -463,19 +465,47 @@ export default function DoctorMessagesScreen() {
         </>
       )}
 
-      <View style={{ height: 40 }} />
+      <View style={{ height: 80 }} />
     </ScrollView>
+
+    {activeTab === "consultation" && (
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => router.push("/(doctor)/(tabs)/messages/consultation/new" as any)}
+      >
+        <Plus size={24} color="#fff" />
+      </TouchableOpacity>
+    )}
+    </View>
   );
 }
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    backgroundColor: Colors.background.light,
+  },
   container: {
     paddingHorizontal: Gap.mediumSmall,
     flex: 1,
-    backgroundColor: Colors.background.light,
     paddingTop: Gap.medium,
+  },
+  fab: {
+    position: "absolute",
+    bottom: Gap.large,
+    right: Gap.mediumSmall,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#1961F0",
+    alignItems: "center",
+    justifyContent: "center",
+    ...Platform.select({
+      ios: { shadowColor: "#1961F0", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 },
+      android: { elevation: 6 },
+    }),
   },
   header: {
     flexDirection: "row",

@@ -12,25 +12,20 @@ import {
   Platform,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft, ChevronLeft, ChevronRight, Clock, MapPin, ChevronDown } from "lucide-react-native";
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  ChevronDown,
+} from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 import { Gap } from "@/constants/gap";
 import { Radius } from "@/constants/radius";
-import { authService } from "@/services/authService";
-import { doctorService, DoctorRecord } from "@/services/doctorService";
 import { consultationService, ConsultationRecord } from "@/services/consultationService";
 import { notificationService } from "@/services/notificationService";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function getInitials(name: string): string {
-  return (name || "?")
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
 
 function generateTimeSlots(): string[] {
   const slots: string[] = [];
@@ -57,10 +52,6 @@ function parseTimeSlot(date: Date, timeSlot: string): Date {
   return result;
 }
 
-function formatDateLabel(date: Date): string {
-  return date.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
-}
-
 function isoToDate(isoString: string): Date | null {
   if (!isoString) return null;
   const d = new Date(isoString);
@@ -85,10 +76,14 @@ function isoToTimeSlot(isoString: string): string | null {
   return `${hour12}:${slotM === 0 ? "00" : "30"} ${ampm}`;
 }
 
+function formatDateLabel(date: Date): string {
+  return date.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
+}
+
 const WEEKDAY_LABELS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 const MONTH_NAMES = [
-  "January","February","March","April","May","June",
-  "July","August","September","October","November","December",
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
 ];
 const TIME_SLOTS = generateTimeSlots();
 
@@ -131,7 +126,6 @@ function CalendarPicker({
 
   return (
     <View style={calStyles.container}>
-      {/* Month navigation */}
       <View style={calStyles.nav}>
         <TouchableOpacity onPress={prevMonth} style={calStyles.navBtn}>
           <ChevronLeft size={20} color={Colors.typography["0"]} />
@@ -143,20 +137,15 @@ function CalendarPicker({
           <ChevronRight size={20} color={Colors.typography["0"]} />
         </TouchableOpacity>
       </View>
-
-      {/* Weekday headers */}
       <View style={calStyles.row}>
         {WEEKDAY_LABELS.map((d) => (
           <Text key={d} style={calStyles.weekdayLabel}>{d}</Text>
         ))}
       </View>
-
-      {/* Day cells */}
       {Array.from({ length: cells.length / 7 }, (_, rowIdx) => (
         <View key={rowIdx} style={calStyles.row}>
           {cells.slice(rowIdx * 7, rowIdx * 7 + 7).map((day, colIdx) => {
             if (!day) return <View key={colIdx} style={calStyles.cell} />;
-
             const cellDate = new Date(viewYear, viewMonth, day);
             cellDate.setHours(0, 0, 0, 0);
             const isPast = cellDate <= today;
@@ -165,25 +154,14 @@ function CalendarPicker({
               selected.getFullYear() === viewYear &&
               selected.getMonth() === viewMonth &&
               selected.getDate() === day;
-
             return (
               <TouchableOpacity
                 key={colIdx}
-                style={[
-                  calStyles.cell,
-                  isSelected && calStyles.cellSelected,
-                  isPast && calStyles.cellDisabled,
-                ]}
+                style={[calStyles.cell, isSelected && calStyles.cellSelected, isPast && calStyles.cellDisabled]}
                 onPress={() => !isPast && onSelect(cellDate)}
                 disabled={isPast}
               >
-                <Text
-                  style={[
-                    calStyles.cellText,
-                    isSelected && calStyles.cellTextSelected,
-                    isPast && calStyles.cellTextDisabled,
-                  ]}
-                >
+                <Text style={[calStyles.cellText, isSelected && calStyles.cellTextSelected, isPast && calStyles.cellTextDisabled]}>
                   {day}
                 </Text>
               </TouchableOpacity>
@@ -195,48 +173,41 @@ function CalendarPicker({
   );
 }
 
-// ─── Time / Address Picker Modal ──────────────────────────────────────────────
+// ─── Time Picker Modal ────────────────────────────────────────────────────────
 
-function PickerModal<T>({
+function TimePickerModal({
   visible,
-  title,
-  items,
   selected,
   onSelect,
   onClose,
-  labelFn,
 }: {
   visible: boolean;
-  title: string;
-  items: T[];
-  selected: T | null;
-  onSelect: (item: T) => void;
+  selected: string | null;
+  onSelect: (item: string) => void;
   onClose: () => void;
-  labelFn: (item: T) => string;
 }) {
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={onClose} />
       <View style={styles.modalSheet}>
         <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>{title}</Text>
+          <Text style={styles.modalTitle}>Select Time</Text>
           <TouchableOpacity onPress={onClose}>
             <Text style={styles.modalDone}>Done</Text>
           </TouchableOpacity>
         </View>
         <FlatList
-          data={items}
+          data={TIME_SLOTS}
           keyExtractor={(_, i) => String(i)}
           renderItem={({ item }) => {
-            const label = labelFn(item);
-            const isSelected = selected !== null && labelFn(selected as T) === label;
+            const isSelected = item === selected;
             return (
               <TouchableOpacity
                 style={[styles.modalItem, isSelected && styles.modalItemSelected]}
                 onPress={() => { onSelect(item); onClose(); }}
               >
                 <Text style={[styles.modalItemText, isSelected && styles.modalItemTextSelected]}>
-                  {label}
+                  {item}
                 </Text>
               </TouchableOpacity>
             );
@@ -249,49 +220,38 @@ function PickerModal<T>({
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
-export default function ConsultationDetailScreen() {
+export default function PatientRescheduleScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
 
   const [consultation, setConsultation] = useState<ConsultationRecord | null>(null);
-  const [doctor, setDoctor] = useState<DoctorRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
-
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [showAddressPicker, setShowAddressPicker] = useState(false);
 
-  const loadData = useCallback(async () => {
-    setIsLoading(true);
-    const currentUser = authService.getCurrentUser();
-    const [consultResult, doctorResult] = await Promise.all([
-      consultationService.getConsultationById(id, "patient"),
-      currentUser ? doctorService.getDoctorByUserId(currentUser.id) : Promise.resolve({ success: false, data: undefined }),
-    ]);
-    if (consultResult.success && consultResult.data) {
-      const c = consultResult.data;
-      setConsultation(c);
-      if (c.scheduled_at) {
-        const d = isoToDate(c.scheduled_at);
-        const t = isoToTimeSlot(c.scheduled_at);
-        if (d) setSelectedDate(d);
-        if (t) setSelectedTime(t);
+  useEffect(() => {
+    (async () => {
+      const result = await consultationService.getConsultationById(id, "doctor");
+      if (result.success && result.data) {
+        const c = result.data;
+        setConsultation(c);
+        if (c.scheduled_at) {
+          const d = isoToDate(c.scheduled_at);
+          const t = isoToTimeSlot(c.scheduled_at);
+          if (d) setSelectedDate(d);
+          if (t) setSelectedTime(t);
+        }
       }
-      if (c.address) setSelectedAddress(c.address);
-    }
-    if (doctorResult.success && doctorResult.data) setDoctor(doctorResult.data as DoctorRecord);
-    setIsLoading(false);
+      setIsLoading(false);
+    })();
   }, [id]);
 
-  useEffect(() => { loadData(); }, []);
-
-  const handleConfirm = async () => {
-    if (!selectedDate || !selectedTime || !selectedAddress) {
-      Alert.alert("Missing Info", "Please select a date, time, and address.");
+  const handleSave = async () => {
+    if (!selectedDate || !selectedTime) {
+      Alert.alert("Missing Info", "Please select a date and time.");
       return;
     }
     if (!consultation) return;
@@ -300,28 +260,27 @@ export default function ConsultationDetailScreen() {
     setIsSubmitting(true);
 
     const result = await consultationService.updateConsultation(consultation.id, {
-      status: "scheduled",
+      status: "pending",
       scheduled_at: scheduledAt.toISOString(),
-      address: selectedAddress,
     });
 
     if (result.success) {
-      const patientUserId = consultation.expand?.patient?.user;
-      if (patientUserId) {
+      const doctorUserId = consultation.expand?.doctor?.user;
+      if (doctorUserId) {
         await notificationService.createNotification({
-          user: patientUserId,
+          user: doctorUserId,
           type: "consultation",
-          title: "Consultation Scheduled",
-          body: `Your consultation has been scheduled for ${formatDateLabel(selectedDate)} at ${selectedTime}.`,
+          title: "Reschedule Request",
+          body: `Your patient has requested to reschedule the consultation to ${formatDateLabel(selectedDate)} at ${selectedTime}.`,
         });
       }
       setIsSubmitting(false);
-      Alert.alert("Scheduled", "The consultation has been confirmed.", [
+      Alert.alert("Request Sent", "Your reschedule request has been sent to your doctor.", [
         { text: "OK", onPress: () => router.back() },
       ]);
     } else {
       setIsSubmitting(false);
-      Alert.alert("Error", result.error || "Failed to schedule consultation.");
+      Alert.alert("Error", result.error || "Failed to send reschedule request.");
     }
   };
 
@@ -344,11 +303,8 @@ export default function ConsultationDetailScreen() {
     );
   }
 
-  const patient = consultation.expand?.patient;
-  const patientName: string = patient?.full_name ?? "Patient";
-  const addresses: string[] = doctor?.addresses && typeof doctor.addresses === "object"
-    ? Object.values(doctor.addresses as Record<string, string>)
-    : [];
+  const doctor = consultation.expand?.doctor;
+  const doctorName: string = doctor?.full_name ?? "Doctor";
 
   return (
     <View style={styles.container}>
@@ -357,29 +313,24 @@ export default function ConsultationDetailScreen() {
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <ArrowLeft size={22} color={Colors.typography["0"]} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Consultation Request</Text>
+        <Text style={styles.headerTitle}>Reschedule</Text>
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Patient card */}
-        <View style={styles.patientCard}>
-          <View style={styles.patientAvatar}>
-            <Text style={styles.patientAvatarText}>{getInitials(patientName)}</Text>
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+
+        {/* Doctor info card */}
+        <View style={styles.infoCard}>
+          <View style={styles.infoCardContent}>
+            <Text style={styles.infoCardName}>{doctorName}</Text>
+            <Text style={styles.infoCardSub}>{consultation.title || "Consultation"}</Text>
           </View>
-          <View style={styles.patientInfo}>
-            <Text style={styles.patientName}>{patientName}</Text>
-            <Text style={styles.consultationTitle}>{consultation.title || "Consultation Request"}</Text>
-          </View>
-          <View style={styles.pendingBadge}>
-            <Text style={styles.pendingBadgeText}>Pending</Text>
+          <View style={styles.rescheduleBadge}>
+            <Text style={styles.rescheduleBadgeText}>Reschedule</Text>
           </View>
         </View>
 
-        {/* Date — calendar */}
+        {/* Date */}
         <Text style={styles.sectionLabel}>Select Date</Text>
         <View style={styles.card}>
           <CalendarPicker selected={selectedDate} onSelect={setSelectedDate} />
@@ -398,52 +349,25 @@ export default function ConsultationDetailScreen() {
           <ChevronDown size={16} color={Colors.typography["300"]} />
         </TouchableOpacity>
 
-        {/* Address */}
-        <Text style={styles.sectionLabel}>Location</Text>
-        {addresses.length === 0 ? (
-          <View style={styles.emptyBox}>
-            <Text style={styles.emptyText}>No addresses saved in your profile.</Text>
-          </View>
-        ) : (
-          <TouchableOpacity style={styles.pickerRow} onPress={() => setShowAddressPicker(true)}>
-            <MapPin size={18} color="#1961F0" />
-            <Text style={[styles.pickerText, !selectedAddress && styles.pickerPlaceholder]}>
-              {selectedAddress ?? "Select address"}
-            </Text>
-            <ChevronDown size={16} color={Colors.typography["300"]} />
-          </TouchableOpacity>
-        )}
-
-        {/* Confirm */}
+        {/* Save */}
         <TouchableOpacity
-          style={[styles.confirmButton, isSubmitting && styles.confirmButtonDisabled]}
-          onPress={handleConfirm}
+          style={[styles.saveButton, isSubmitting && styles.saveButtonDisabled]}
+          onPress={handleSave}
           disabled={isSubmitting}
         >
           {isSubmitting
             ? <ActivityIndicator color="#fff" size="small" />
-            : <Text style={styles.confirmButtonText}>Confirm & Schedule</Text>
+            : <Text style={styles.saveButtonText}>Send Reschedule Request</Text>
           }
         </TouchableOpacity>
+
       </ScrollView>
 
-      <PickerModal
+      <TimePickerModal
         visible={showTimePicker}
-        title="Select Time"
-        items={TIME_SLOTS}
         selected={selectedTime}
         onSelect={setSelectedTime}
         onClose={() => setShowTimePicker(false)}
-        labelFn={(t) => t}
-      />
-      <PickerModal
-        visible={showAddressPicker}
-        title="Select Address"
-        items={addresses}
-        selected={selectedAddress}
-        onSelect={setSelectedAddress}
-        onClose={() => setShowAddressPicker(false)}
-        labelFn={(a) => a}
       />
     </View>
   );
@@ -452,58 +376,18 @@ export default function ConsultationDetailScreen() {
 // ─── Calendar Styles ──────────────────────────────────────────────────────────
 
 const calStyles = StyleSheet.create({
-  container: {
-    paddingVertical: Gap.extraSmall,
-  },
-  nav: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: Gap.small,
-  },
-  navBtn: {
-    padding: 4,
-  },
-  monthLabel: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: Colors.typography["0"],
-  },
-  row: {
-    flexDirection: "row",
-  },
-  weekdayLabel: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 12,
-    fontWeight: "600",
-    color: Colors.typography["300"],
-    paddingBottom: 6,
-  },
-  cell: {
-    flex: 1,
-    aspectRatio: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 100,
-  },
-  cellSelected: {
-    backgroundColor: "#1961F0",
-  },
-  cellDisabled: {
-    opacity: 0.3,
-  },
-  cellText: {
-    fontSize: 14,
-    color: Colors.typography["0"],
-  },
-  cellTextSelected: {
-    color: "#fff",
-    fontWeight: "700",
-  },
-  cellTextDisabled: {
-    color: Colors.typography["400"],
-  },
+  container: { paddingVertical: Gap.extraSmall },
+  nav: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: Gap.small },
+  navBtn: { padding: 4 },
+  monthLabel: { fontSize: 15, fontWeight: "700", color: Colors.typography["0"] },
+  row: { flexDirection: "row" },
+  weekdayLabel: { flex: 1, textAlign: "center", fontSize: 12, fontWeight: "600", color: Colors.typography["300"], paddingBottom: 6 },
+  cell: { flex: 1, aspectRatio: 1, alignItems: "center", justifyContent: "center", borderRadius: 100 },
+  cellSelected: { backgroundColor: "#1961F0" },
+  cellDisabled: { opacity: 0.3 },
+  cellText: { fontSize: 14, color: Colors.typography["0"] },
+  cellTextSelected: { color: "#fff", fontWeight: "700" },
+  cellTextDisabled: { color: Colors.typography["400"] },
 });
 
 // ─── Screen Styles ────────────────────────────────────────────────────────────
@@ -547,7 +431,7 @@ const styles = StyleSheet.create({
     paddingBottom: Gap.large,
     gap: Gap.extraSmall,
   },
-  patientCard: {
+  infoCard: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: Colors.background["950"],
@@ -558,40 +442,27 @@ const styles = StyleSheet.create({
     gap: Gap.small,
     marginBottom: Gap.small,
   },
-  patientAvatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: "#DBEAFE",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  patientAvatarText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#1961F0",
-  },
-  patientInfo: {
+  infoCardContent: {
     flex: 1,
     gap: 3,
   },
-  patientName: {
+  infoCardName: {
     fontSize: 16,
     fontWeight: "700",
     color: Colors.typography["0"],
   },
-  consultationTitle: {
+  infoCardSub: {
     fontSize: 13,
     color: Colors.typography["300"],
   },
-  pendingBadge: {
-    backgroundColor: "#FEF3C7",
+  rescheduleBadge: {
+    backgroundColor: "#EFF6FF",
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
   },
-  pendingBadgeText: {
-    color: "#D97706",
+  rescheduleBadgeText: {
+    color: "#1961F0",
     fontSize: 12,
     fontWeight: "600",
   },
@@ -636,35 +507,28 @@ const styles = StyleSheet.create({
   pickerPlaceholder: {
     color: Colors.typography["400"],
   },
-  emptyBox: {
-    backgroundColor: Colors.background["900"],
-    borderRadius: Radius.small,
-    padding: Gap.small,
-    alignItems: "center",
-  },
-  emptyText: {
-    fontSize: 14,
-    color: Colors.typography["400"],
-  },
-  backLink: {
-    fontSize: 14,
-    color: "#1961F0",
-    fontWeight: "600",
-  },
-  confirmButton: {
+  saveButton: {
     backgroundColor: "#1961F0",
     borderRadius: Radius.small,
     paddingVertical: 16,
     alignItems: "center",
     marginTop: Gap.medium,
   },
-  confirmButtonDisabled: {
-    opacity: 0.6,
-  },
-  confirmButtonText: {
+  saveButtonDisabled: { opacity: 0.6 },
+  saveButtonText: {
     color: "#fff",
     fontSize: 15,
     fontWeight: "700",
+  },
+  emptyText: {
+    fontSize: 14,
+    color: Colors.typography["400"],
+    textAlign: "center",
+  },
+  backLink: {
+    fontSize: 14,
+    color: "#1961F0",
+    fontWeight: "600",
   },
   modalBackdrop: {
     flex: 1,
@@ -702,9 +566,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.outline["900"],
   },
-  modalItemSelected: {
-    backgroundColor: "#EFF6FF",
-  },
+  modalItemSelected: { backgroundColor: "#EFF6FF" },
   modalItemText: {
     fontSize: 15,
     color: Colors.typography["0"],

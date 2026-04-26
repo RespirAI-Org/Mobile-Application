@@ -10,15 +10,25 @@ import {
   ActivityIndicator,
   Alert,
   Platform,
+  TextInput,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft, ChevronLeft, ChevronRight, Clock, MapPin, ChevronDown } from "lucide-react-native";
+import { useRouter } from "expo-router";
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  MapPin,
+  ChevronDown,
+  User,
+} from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 import { Gap } from "@/constants/gap";
 import { Radius } from "@/constants/radius";
 import { authService } from "@/services/authService";
 import { doctorService, DoctorRecord } from "@/services/doctorService";
-import { consultationService, ConsultationRecord } from "@/services/consultationService";
+import { patientService, PatientRecord } from "@/services/patientService";
+import { consultationService } from "@/services/consultationService";
 import { notificationService } from "@/services/notificationService";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -30,6 +40,19 @@ function getInitials(name: string): string {
     .join("")
     .toUpperCase()
     .slice(0, 2);
+}
+
+const AVATAR_PALETTE = [
+  { bg: "#DBEAFE", text: "#1961F0" },
+  { bg: "#F3E8FF", text: "#9333EA" },
+  { bg: "#DCFCE7", text: "#15803D" },
+  { bg: "#FEF3C7", text: "#D97706" },
+  { bg: "#FCE7F3", text: "#DB2777" },
+];
+
+function avatarColors(name: string) {
+  const idx = (name || " ").charCodeAt(0) % AVATAR_PALETTE.length;
+  return AVATAR_PALETTE[idx];
 }
 
 function generateTimeSlots(): string[] {
@@ -61,30 +84,6 @@ function formatDateLabel(date: Date): string {
   return date.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
 }
 
-function isoToDate(isoString: string): Date | null {
-  if (!isoString) return null;
-  const d = new Date(isoString);
-  if (isNaN(d.getTime())) return null;
-  const result = new Date(d);
-  result.setHours(0, 0, 0, 0);
-  return result;
-}
-
-function isoToTimeSlot(isoString: string): string | null {
-  if (!isoString) return null;
-  const d = new Date(isoString);
-  if (isNaN(d.getTime())) return null;
-  const h = d.getHours();
-  const m = d.getMinutes();
-  const slotM = m < 15 ? 0 : m < 45 ? 30 : 0;
-  const slotH = m >= 45 ? h + 1 : h;
-  if (slotH < 8 || slotH > 20) return null;
-  if (slotH === 20 && slotM === 30) return null;
-  const hour12 = slotH % 12 === 0 ? 12 : slotH % 12;
-  const ampm = slotH < 12 ? "AM" : "PM";
-  return `${hour12}:${slotM === 0 ? "00" : "30"} ${ampm}`;
-}
-
 const WEEKDAY_LABELS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 const MONTH_NAMES = [
   "January","February","March","April","May","June",
@@ -104,12 +103,8 @@ function CalendarPicker({
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const [viewYear, setViewYear] = useState(
-    () => selected?.getFullYear() ?? today.getFullYear()
-  );
-  const [viewMonth, setViewMonth] = useState(
-    () => selected?.getMonth() ?? today.getMonth()
-  );
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
 
   const firstDay = new Date(viewYear, viewMonth, 1).getDay();
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
@@ -131,7 +126,6 @@ function CalendarPicker({
 
   return (
     <View style={calStyles.container}>
-      {/* Month navigation */}
       <View style={calStyles.nav}>
         <TouchableOpacity onPress={prevMonth} style={calStyles.navBtn}>
           <ChevronLeft size={20} color={Colors.typography["0"]} />
@@ -143,20 +137,15 @@ function CalendarPicker({
           <ChevronRight size={20} color={Colors.typography["0"]} />
         </TouchableOpacity>
       </View>
-
-      {/* Weekday headers */}
       <View style={calStyles.row}>
         {WEEKDAY_LABELS.map((d) => (
           <Text key={d} style={calStyles.weekdayLabel}>{d}</Text>
         ))}
       </View>
-
-      {/* Day cells */}
       {Array.from({ length: cells.length / 7 }, (_, rowIdx) => (
         <View key={rowIdx} style={calStyles.row}>
           {cells.slice(rowIdx * 7, rowIdx * 7 + 7).map((day, colIdx) => {
             if (!day) return <View key={colIdx} style={calStyles.cell} />;
-
             const cellDate = new Date(viewYear, viewMonth, day);
             cellDate.setHours(0, 0, 0, 0);
             const isPast = cellDate <= today;
@@ -165,25 +154,14 @@ function CalendarPicker({
               selected.getFullYear() === viewYear &&
               selected.getMonth() === viewMonth &&
               selected.getDate() === day;
-
             return (
               <TouchableOpacity
                 key={colIdx}
-                style={[
-                  calStyles.cell,
-                  isSelected && calStyles.cellSelected,
-                  isPast && calStyles.cellDisabled,
-                ]}
+                style={[calStyles.cell, isSelected && calStyles.cellSelected, isPast && calStyles.cellDisabled]}
                 onPress={() => !isPast && onSelect(cellDate)}
                 disabled={isPast}
               >
-                <Text
-                  style={[
-                    calStyles.cellText,
-                    isSelected && calStyles.cellTextSelected,
-                    isPast && calStyles.cellTextDisabled,
-                  ]}
-                >
+                <Text style={[calStyles.cellText, isSelected && calStyles.cellTextSelected, isPast && calStyles.cellTextDisabled]}>
                   {day}
                 </Text>
               </TouchableOpacity>
@@ -195,16 +173,10 @@ function CalendarPicker({
   );
 }
 
-// ─── Time / Address Picker Modal ──────────────────────────────────────────────
+// ─── Generic Picker Modal ─────────────────────────────────────────────────────
 
 function PickerModal<T>({
-  visible,
-  title,
-  items,
-  selected,
-  onSelect,
-  onClose,
-  labelFn,
+  visible, title, items, selected, onSelect, onClose, labelFn,
 }: {
   visible: boolean;
   title: string;
@@ -249,79 +221,81 @@ function PickerModal<T>({
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
-export default function ConsultationDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+export default function NewConsultationScreen() {
   const router = useRouter();
 
-  const [consultation, setConsultation] = useState<ConsultationRecord | null>(null);
   const [doctor, setDoctor] = useState<DoctorRecord | null>(null);
+  const [patients, setPatients] = useState<PatientRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [selectedPatient, setSelectedPatient] = useState<PatientRecord | null>(null);
+  const [title, setTitle] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
 
+  const [showPatientPicker, setShowPatientPicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showAddressPicker, setShowAddressPicker] = useState(false);
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
     const currentUser = authService.getCurrentUser();
-    const [consultResult, doctorResult] = await Promise.all([
-      consultationService.getConsultationById(id, "patient"),
-      currentUser ? doctorService.getDoctorByUserId(currentUser.id) : Promise.resolve({ success: false, data: undefined }),
-    ]);
-    if (consultResult.success && consultResult.data) {
-      const c = consultResult.data;
-      setConsultation(c);
-      if (c.scheduled_at) {
-        const d = isoToDate(c.scheduled_at);
-        const t = isoToTimeSlot(c.scheduled_at);
-        if (d) setSelectedDate(d);
-        if (t) setSelectedTime(t);
-      }
-      if (c.address) setSelectedAddress(c.address);
+    if (!currentUser) { setIsLoading(false); return; }
+
+    const doctorResult = await doctorService.getDoctorByUserId(currentUser.id);
+    if (!doctorResult.success || !doctorResult.data) { setIsLoading(false); return; }
+
+    const doc = doctorResult.data;
+    setDoctor(doc);
+
+    const patientsResult = await patientService.getPatientsByDoctor(doc.id);
+    if (patientsResult.success && patientsResult.data) {
+      setPatients(patientsResult.data);
     }
-    if (doctorResult.success && doctorResult.data) setDoctor(doctorResult.data as DoctorRecord);
     setIsLoading(false);
-  }, [id]);
+  }, []);
 
   useEffect(() => { loadData(); }, []);
 
   const handleConfirm = async () => {
-    if (!selectedDate || !selectedTime || !selectedAddress) {
-      Alert.alert("Missing Info", "Please select a date, time, and address.");
+    if (!selectedPatient || !selectedDate || !selectedTime || !selectedAddress) {
+      Alert.alert("Missing Info", "Please fill in all fields.");
       return;
     }
-    if (!consultation) return;
+    if (!doctor) return;
 
     const scheduledAt = parseTimeSlot(selectedDate, selectedTime);
     setIsSubmitting(true);
 
-    const result = await consultationService.updateConsultation(consultation.id, {
+    const result = await consultationService.createConsultation({
+      patient: selectedPatient.id,
+      doctor: doctor.id,
+      title: title.trim() || "Consultation",
       status: "scheduled",
+      type: "in_person",
       scheduled_at: scheduledAt.toISOString(),
       address: selectedAddress,
     });
 
     if (result.success) {
-      const patientUserId = consultation.expand?.patient?.user;
+      const patientUserId = selectedPatient.user;
       if (patientUserId) {
         await notificationService.createNotification({
           user: patientUserId,
           type: "consultation",
-          title: "Consultation Scheduled",
-          body: `Your consultation has been scheduled for ${formatDateLabel(selectedDate)} at ${selectedTime}.`,
+          title: "New Consultation Scheduled",
+          body: `A consultation has been scheduled for you on ${formatDateLabel(selectedDate)} at ${selectedTime}.`,
         });
       }
       setIsSubmitting(false);
-      Alert.alert("Scheduled", "The consultation has been confirmed.", [
+      Alert.alert("Created", "Consultation has been scheduled.", [
         { text: "OK", onPress: () => router.back() },
       ]);
     } else {
       setIsSubmitting(false);
-      Alert.alert("Error", result.error || "Failed to schedule consultation.");
+      Alert.alert("Error", result.error || "Failed to create consultation.");
     }
   };
 
@@ -333,19 +307,6 @@ export default function ConsultationDetailScreen() {
     );
   }
 
-  if (!consultation) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.emptyText}>Consultation not found.</Text>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.backLink}>Go back</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
-  const patient = consultation.expand?.patient;
-  const patientName: string = patient?.full_name ?? "Patient";
   const addresses: string[] = doctor?.addresses && typeof doctor.addresses === "object"
     ? Object.values(doctor.addresses as Record<string, string>)
     : [];
@@ -357,29 +318,44 @@ export default function ConsultationDetailScreen() {
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <ArrowLeft size={22} color={Colors.typography["0"]} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Consultation Request</Text>
+        <Text style={styles.headerTitle}>New Consultation</Text>
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Patient card */}
-        <View style={styles.patientCard}>
-          <View style={styles.patientAvatar}>
-            <Text style={styles.patientAvatarText}>{getInitials(patientName)}</Text>
-          </View>
-          <View style={styles.patientInfo}>
-            <Text style={styles.patientName}>{patientName}</Text>
-            <Text style={styles.consultationTitle}>{consultation.title || "Consultation Request"}</Text>
-          </View>
-          <View style={styles.pendingBadge}>
-            <Text style={styles.pendingBadgeText}>Pending</Text>
-          </View>
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+
+        {/* Patient */}
+        <Text style={styles.sectionLabel}>Patient</Text>
+        <TouchableOpacity style={styles.pickerRow} onPress={() => setShowPatientPicker(true)}>
+          <User size={18} color="#1961F0" />
+          {selectedPatient ? (
+            <View style={styles.patientPickerContent}>
+              <View style={[styles.patientPickerAvatar, { backgroundColor: avatarColors(selectedPatient.full_name).bg }]}>
+                <Text style={[styles.patientPickerAvatarText, { color: avatarColors(selectedPatient.full_name).text }]}>
+                  {getInitials(selectedPatient.full_name)}
+                </Text>
+              </View>
+              <Text style={styles.pickerText}>{selectedPatient.full_name}</Text>
+            </View>
+          ) : (
+            <Text style={[styles.pickerText, styles.pickerPlaceholder]}>Select patient</Text>
+          )}
+          <ChevronDown size={16} color={Colors.typography["300"]} />
+        </TouchableOpacity>
+
+        {/* Title */}
+        <Text style={styles.sectionLabel}>Title (optional)</Text>
+        <View style={styles.inputRow}>
+          <TextInput
+            style={styles.textInput}
+            placeholder="e.g. Follow-up visit"
+            placeholderTextColor={Colors.typography["400"]}
+            value={title}
+            onChangeText={setTitle}
+          />
         </View>
 
-        {/* Date — calendar */}
+        {/* Date */}
         <Text style={styles.sectionLabel}>Select Date</Text>
         <View style={styles.card}>
           <CalendarPicker selected={selectedDate} onSelect={setSelectedDate} />
@@ -422,11 +398,20 @@ export default function ConsultationDetailScreen() {
         >
           {isSubmitting
             ? <ActivityIndicator color="#fff" size="small" />
-            : <Text style={styles.confirmButtonText}>Confirm & Schedule</Text>
+            : <Text style={styles.confirmButtonText}>Schedule Consultation</Text>
           }
         </TouchableOpacity>
       </ScrollView>
 
+      <PickerModal
+        visible={showPatientPicker}
+        title="Select Patient"
+        items={patients}
+        selected={selectedPatient}
+        onSelect={setSelectedPatient}
+        onClose={() => setShowPatientPicker(false)}
+        labelFn={(p) => p.full_name}
+      />
       <PickerModal
         visible={showTimePicker}
         title="Select Time"
@@ -452,58 +437,18 @@ export default function ConsultationDetailScreen() {
 // ─── Calendar Styles ──────────────────────────────────────────────────────────
 
 const calStyles = StyleSheet.create({
-  container: {
-    paddingVertical: Gap.extraSmall,
-  },
-  nav: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: Gap.small,
-  },
-  navBtn: {
-    padding: 4,
-  },
-  monthLabel: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: Colors.typography["0"],
-  },
-  row: {
-    flexDirection: "row",
-  },
-  weekdayLabel: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 12,
-    fontWeight: "600",
-    color: Colors.typography["300"],
-    paddingBottom: 6,
-  },
-  cell: {
-    flex: 1,
-    aspectRatio: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 100,
-  },
-  cellSelected: {
-    backgroundColor: "#1961F0",
-  },
-  cellDisabled: {
-    opacity: 0.3,
-  },
-  cellText: {
-    fontSize: 14,
-    color: Colors.typography["0"],
-  },
-  cellTextSelected: {
-    color: "#fff",
-    fontWeight: "700",
-  },
-  cellTextDisabled: {
-    color: Colors.typography["400"],
-  },
+  container: { paddingVertical: Gap.extraSmall },
+  nav: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: Gap.small },
+  navBtn: { padding: 4 },
+  monthLabel: { fontSize: 15, fontWeight: "700", color: Colors.typography["0"] },
+  row: { flexDirection: "row" },
+  weekdayLabel: { flex: 1, textAlign: "center", fontSize: 12, fontWeight: "600", color: Colors.typography["300"], paddingBottom: 6 },
+  cell: { flex: 1, aspectRatio: 1, alignItems: "center", justifyContent: "center", borderRadius: 100 },
+  cellSelected: { backgroundColor: "#1961F0" },
+  cellDisabled: { opacity: 0.3 },
+  cellText: { fontSize: 14, color: Colors.typography["0"] },
+  cellTextSelected: { color: "#fff", fontWeight: "700" },
+  cellTextDisabled: { color: Colors.typography["400"] },
 });
 
 // ─── Screen Styles ────────────────────────────────────────────────────────────
@@ -518,8 +463,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    gap: Gap.small,
-    paddingHorizontal: Gap.mediumSmall,
   },
   header: {
     flexDirection: "row",
@@ -547,54 +490,6 @@ const styles = StyleSheet.create({
     paddingBottom: Gap.large,
     gap: Gap.extraSmall,
   },
-  patientCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.background["950"],
-    borderRadius: Radius.small,
-    padding: Gap.small,
-    borderWidth: 1,
-    borderColor: Colors.outline["800"],
-    gap: Gap.small,
-    marginBottom: Gap.small,
-  },
-  patientAvatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: "#DBEAFE",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  patientAvatarText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#1961F0",
-  },
-  patientInfo: {
-    flex: 1,
-    gap: 3,
-  },
-  patientName: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: Colors.typography["0"],
-  },
-  consultationTitle: {
-    fontSize: 13,
-    color: Colors.typography["300"],
-  },
-  pendingBadge: {
-    backgroundColor: "#FEF3C7",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  pendingBadgeText: {
-    color: "#D97706",
-    fontSize: 12,
-    fontWeight: "600",
-  },
   sectionLabel: {
     fontSize: 13,
     fontWeight: "600",
@@ -602,6 +497,54 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.5,
     marginTop: Gap.small,
+  },
+  pickerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.background["950"],
+    borderRadius: Radius.small,
+    borderWidth: 1,
+    borderColor: Colors.outline["800"],
+    paddingHorizontal: Gap.small,
+    paddingVertical: 14,
+    gap: Gap.extraSmall,
+  },
+  patientPickerContent: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Gap.extraSmall,
+  },
+  patientPickerAvatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  patientPickerAvatarText: {
+    fontSize: 11,
+    fontWeight: "700",
+  },
+  pickerText: {
+    flex: 1,
+    fontSize: 15,
+    color: Colors.typography["0"],
+  },
+  pickerPlaceholder: {
+    color: Colors.typography["400"],
+  },
+  inputRow: {
+    backgroundColor: Colors.background["950"],
+    borderRadius: Radius.small,
+    borderWidth: 1,
+    borderColor: Colors.outline["800"],
+    paddingHorizontal: Gap.small,
+    paddingVertical: 12,
+  },
+  textInput: {
+    fontSize: 15,
+    color: Colors.typography["0"],
   },
   card: {
     backgroundColor: Colors.background["950"],
@@ -617,25 +560,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     textAlign: "center",
   },
-  pickerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.background["950"],
-    borderRadius: Radius.small,
-    borderWidth: 1,
-    borderColor: Colors.outline["800"],
-    paddingHorizontal: Gap.small,
-    paddingVertical: 14,
-    gap: Gap.extraSmall,
-  },
-  pickerText: {
-    flex: 1,
-    fontSize: 15,
-    color: Colors.typography["0"],
-  },
-  pickerPlaceholder: {
-    color: Colors.typography["400"],
-  },
   emptyBox: {
     backgroundColor: Colors.background["900"],
     borderRadius: Radius.small,
@@ -646,11 +570,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.typography["400"],
   },
-  backLink: {
-    fontSize: 14,
-    color: "#1961F0",
-    fontWeight: "600",
-  },
   confirmButton: {
     backgroundColor: "#1961F0",
     borderRadius: Radius.small,
@@ -658,9 +577,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: Gap.medium,
   },
-  confirmButtonDisabled: {
-    opacity: 0.6,
-  },
+  confirmButtonDisabled: { opacity: 0.6 },
   confirmButtonText: {
     color: "#fff",
     fontSize: 15,
@@ -702,9 +619,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.outline["900"],
   },
-  modalItemSelected: {
-    backgroundColor: "#EFF6FF",
-  },
+  modalItemSelected: { backgroundColor: "#EFF6FF" },
   modalItemText: {
     fontSize: 15,
     color: Colors.typography["0"],
