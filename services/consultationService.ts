@@ -11,7 +11,7 @@ export interface ConsultationRecord {
   title: string;
   scheduled_at: string;
   type: "video_call" | "voice_call" | "in_person" | "follow_up";
-  status: "scheduled" | "completed" | "cancelled";
+  status: "pending" | "scheduled" | "completed" | "cancelled";
   notes: string;
   expand?: {
     patient?: any;
@@ -23,7 +23,7 @@ export type ConsultationCreateData = {
   patient: string;
   doctor: string;
   title?: string;
-  scheduled_at: string;
+  scheduled_at?: string;
   type: ConsultationRecord["type"];
   status?: ConsultationRecord["status"];
   notes?: string;

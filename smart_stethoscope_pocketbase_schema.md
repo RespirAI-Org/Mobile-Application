@@ -77,7 +77,7 @@
 - `title` — text
 - `scheduled_at` — date, required
 - `type` — select single: `video_call`, `voice_call`, `in_person`, `follow_up`
-- `status` — select single: `scheduled`, `completed`, `cancelled`
+- `status` — select single: `pending`, `scheduled`, `completed`, `cancelled`
 - `notes` — editor
 - `created`, `updated` — autodate
 

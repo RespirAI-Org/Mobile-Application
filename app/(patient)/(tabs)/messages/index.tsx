@@ -29,6 +29,7 @@ import { notificationService } from "@/services/notificationService";
 import {
   consultationService,
   ConsultationRecord,
+  ConsultationCreateData,
 } from "@/services/consultationService";
 import { pb } from "@/lib/pocketbase";
 
@@ -180,9 +181,10 @@ export default function MessagesScreen() {
 
   const handleRequestConsultation = async () => {
     const profile = patientProfile;
+    const doctorId: string | undefined = profile?.doctor;
     const doctorUserId: string | undefined = profile?.expand?.doctor?.user;
 
-    if (!doctorUserId) {
+    if (!profile?.id || !doctorId) {
       Alert.alert("Error", "Could not find your assigned doctor.");
       return;
     }
@@ -190,15 +192,32 @@ export default function MessagesScreen() {
     const patientName = profile?.full_name || "Your patient";
 
     setIsRequestingConsultation(true);
-    const result = await notificationService.createNotification({
-      user: doctorUserId,
-      type: "consultation",
-      title: "Consultation Request",
-      body: `${patientName} is requesting an urgent consultation.`,
-    });
+
+    const consultationData: ConsultationCreateData = {
+      patient: profile.id,
+      doctor: doctorId,
+      title: "Immediate Help Request",
+      status: "pending",
+      type: "in_person",
+      scheduled_at: "",
+      notes: "",
+    };
+
+    const [consultResult, notifResult] = await Promise.all([
+      consultationService.createConsultation(consultationData),
+      doctorUserId
+        ? notificationService.createNotification({
+            user: doctorUserId,
+            type: "consultation",
+            title: "Immediate Help Request",
+            body: `${patientName} is requesting an urgent consultation.`,
+          })
+        : Promise.resolve({ success: true }),
+    ]);
+
     setIsRequestingConsultation(false);
 
-    if (result.success) {
+    if (consultResult.success) {
       Alert.alert("Request Sent", "Your doctor has been notified.");
     } else {
       Alert.alert("Error", "Failed to send request. Please try again.");
