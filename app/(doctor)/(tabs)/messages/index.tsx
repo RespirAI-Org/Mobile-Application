@@ -15,8 +15,6 @@ import { useRouter } from "expo-router";
 import {
   SquarePen,
   Search,
-  Video,
-  Stethoscope,
 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 import { Gap } from "@/constants/gap";
@@ -103,12 +101,15 @@ const CONSULTATION_TYPE_LABELS: Record<ConsultationRecord["type"], string> = {
   follow_up: "Follow-up",
 };
 
+type ActiveTab = "messages" | "consultant";
+
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function DoctorMessagesScreen() {
   const router = useRouter();
   const { conversations, isLoading, fetchConversations } = useMessaging();
 
+  const [activeTab, setActiveTab] = useState<ActiveTab>("messages");
   const [searchQuery, setSearchQuery] = useState("");
   const [upcomingConsultations, setUpcomingConsultations] = useState<
     ConsultationRecord[]
@@ -210,207 +211,209 @@ export default function DoctorMessagesScreen() {
 
       {/* Tabs */}
       <View style={styles.tabsContainer}>
-        <TouchableOpacity style={[styles.tab, styles.activeTab]}>
-          <Text style={styles.activeTabText}>Messages</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tab}>
-          <Text style={styles.inactiveTabText}>Video Call</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Search */}
-      <View style={styles.searchContainer}>
-        <Search
-          color={Colors.typography["400"]}
-          size={18}
-          style={styles.searchIcon}
-        />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search conversations"
-          placeholderTextColor={Colors.typography["400"]}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-      </View>
-
-      {/* Scheduled Consultations */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Scheduled Consultations</Text>
-        <TouchableOpacity>
-          <Text style={styles.sectionAction}>See Calendar</Text>
-        </TouchableOpacity>
-      </View>
-
-      {upcomingConsultations.length === 0 ? (
-        <View style={styles.emptyConsultations}>
-          <Text style={styles.emptyConsultationsText}>
-            No upcoming consultations
+        <TouchableOpacity
+          style={[styles.tab, activeTab === "messages" && styles.activeTab]}
+          onPress={() => setActiveTab("messages")}
+        >
+          <Text style={activeTab === "messages" ? styles.activeTabText : styles.inactiveTabText}>
+            Messages
           </Text>
-        </View>
-      ) : (
-        <View style={styles.consultationList}>
-          {upcomingConsultations.map((consult) => {
-            const patient = consult.expand?.patient;
-            const patientName: string = patient?.full_name ?? "Patient";
-            const { day, time } = formatConsultationDate(consult.scheduled_at);
-            const colors = avatarColors(patientName);
-            const isVideo =
-              consult.type === "video_call" || consult.type === "follow_up";
-            return (
-              <TouchableOpacity
-                key={consult.id}
-                style={styles.consultationCard}
-                activeOpacity={0.7}
-              >
-                <View
-                  style={[
-                    styles.consultAvatar,
-                    { backgroundColor: colors.bg },
-                  ]}
-                >
-                  <Text
-                    style={[styles.consultAvatarText, { color: colors.text }]}
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === "consultant" && styles.activeTab]}
+          onPress={() => setActiveTab("consultant")}
+        >
+          <Text style={activeTab === "consultant" ? styles.activeTabText : styles.inactiveTabText}>
+            Consultant
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {activeTab === "messages" ? (
+        <>
+          {/* Search */}
+          <View style={styles.searchContainer}>
+            <Search
+              color={Colors.typography["400"]}
+              size={18}
+              style={styles.searchIcon}
+            />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search conversations"
+              placeholderTextColor={Colors.typography["400"]}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+
+          {/* Patient Messages */}
+          <Text style={styles.patientMessagesTitle}>Patient Messages</Text>
+
+          {isLoading && conversations.length === 0 ? (
+            <ActivityIndicator
+              color="#1961F0"
+              style={{ marginVertical: Gap.large }}
+            />
+          ) : filteredConversations.length === 0 ? (
+            <Text style={styles.emptyText}>
+              {searchQuery
+                ? "No conversations match your search."
+                : "No conversations yet."}
+            </Text>
+          ) : (
+            <View style={styles.messagesList}>
+              {filteredConversations.map((conv) => {
+                const others =
+                  conv.expand?.participants?.filter(
+                    (p: any) => p.id !== currentUser?.id,
+                  ) || [];
+                const other = others[0];
+                const name: string =
+                  (other?.id && patientNameMap[other.id]) ||
+                  other?.name ||
+                  "Unknown";
+                const avatarUrl = other?.avatar
+                  ? pb.files.getUrl(other, other.avatar)
+                  : null;
+                const colors = avatarColors(name);
+                const timeStr = formatMessageTime(
+                  conv.last_message_at || conv.updated,
+                );
+                const unread = unreadCounts[conv.id] ?? 0;
+
+                return (
+                  <TouchableOpacity
+                    key={conv.id}
+                    style={styles.messageRow}
+                    activeOpacity={0.7}
+                    onPress={() =>
+                      router.push({
+                        pathname: `/(doctor)/(tabs)/messages/${conv.id}` as any,
+                        params: { displayName: name },
+                      })
+                    }
                   >
-                    {getInitials(patientName)}
-                  </Text>
-                </View>
-                <View style={styles.consultationInfo}>
-                  <Text style={styles.consultationName}>{patientName}</Text>
-                  <Text style={styles.consultationType}>
-                    {consult.title ||
-                      CONSULTATION_TYPE_LABELS[consult.type] ||
-                      "Consultation"}
-                  </Text>
-                </View>
-                <View style={styles.consultationTime}>
-                  {isVideo ? (
-                    <Video size={14} color={Colors.info["400"]} />
-                  ) : (
-                    <Stethoscope size={14} color={Colors.info["200"]} />
-                  )}
-                  <View style={styles.consultTimeBlock}>
-                    <Text style={styles.consultTimeDay}>{day}</Text>
-                    <Text
-                      style={[
-                        styles.consultTimeHour,
-                        { color: isVideo ? Colors.info["400"] : Colors.info["200"] },
-                      ]}
-                    >
-                      {time}
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      )}
+                    <View style={styles.avatarContainer}>
+                      {avatarUrl ? (
+                        <Image
+                          source={{ uri: avatarUrl }}
+                          style={styles.avatarImage}
+                        />
+                      ) : (
+                        <View
+                          style={[
+                            styles.avatarPlaceholder,
+                            { backgroundColor: colors.bg },
+                          ]}
+                        >
+                          <Text
+                            style={[styles.avatarInitials, { color: colors.text }]}
+                          >
+                            {getInitials(name)}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
 
-      {/* Patient Messages */}
-      <Text style={styles.patientMessagesTitle}>Patient Messages</Text>
-
-      {isLoading && conversations.length === 0 ? (
-        <ActivityIndicator
-          color="#1961F0"
-          style={{ marginVertical: Gap.large }}
-        />
-      ) : filteredConversations.length === 0 ? (
-        <Text style={styles.emptyText}>
-          {searchQuery
-            ? "No conversations match your search."
-            : "No conversations yet."}
-        </Text>
+                    <View style={styles.messageContent}>
+                      <View style={styles.messageHeaderRow}>
+                        <Text style={styles.messageName}>{name}</Text>
+                        <Text
+                          style={[
+                            styles.messageTime,
+                            unread > 0 && styles.messageTimeUnread,
+                          ]}
+                        >
+                          {timeStr}
+                        </Text>
+                      </View>
+                      <View style={styles.messageFooterRow}>
+                        <Text
+                          style={[
+                            styles.messagePreview,
+                            unread > 0 && styles.messagePreviewUnread,
+                          ]}
+                          numberOfLines={1}
+                        >
+                          {conv.last_message_preview || "No messages yet"}
+                        </Text>
+                        {unread > 0 && (
+                          <View style={styles.unreadBadge}>
+                            <Text style={styles.unreadBadgeText}>{unread}</Text>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
+        </>
       ) : (
-        <View style={styles.messagesList}>
-          {filteredConversations.map((conv) => {
-            const others =
-              conv.expand?.participants?.filter(
-                (p: any) => p.id !== currentUser?.id,
-              ) || [];
-            const other = others[0];
-            const name: string =
-              (other?.id && patientNameMap[other.id]) ||
-              other?.name ||
-              "Unknown";
-            const avatarUrl = other?.avatar
-              ? pb.files.getUrl(other, other.avatar)
-              : null;
-            const colors = avatarColors(name);
-            const timeStr = formatMessageTime(
-              conv.last_message_at || conv.updated,
-            );
-            const unread = unreadCounts[conv.id] ?? 0;
+        <>
+          {/* Scheduled Consultations */}
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Scheduled Consultations</Text>
+            <TouchableOpacity>
+              <Text style={styles.sectionAction}>See Calendar</Text>
+            </TouchableOpacity>
+          </View>
 
-            return (
-              <TouchableOpacity
-                key={conv.id}
-                style={styles.messageRow}
-                activeOpacity={0.7}
-                onPress={() =>
-                  router.push({
-                    pathname: `/(doctor)/(tabs)/messages/${conv.id}` as any,
-                    params: { displayName: name },
-                  })
-                }
-              >
-                {/* Avatar */}
-                <View style={styles.avatarContainer}>
-                  {avatarUrl ? (
-                    <Image
-                      source={{ uri: avatarUrl }}
-                      style={styles.avatarImage}
-                    />
-                  ) : (
+          {upcomingConsultations.length === 0 ? (
+            <View style={styles.emptyConsultations}>
+              <Text style={styles.emptyConsultationsText}>
+                No upcoming consultations
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.consultationList}>
+              {upcomingConsultations.map((consult) => {
+                const patient = consult.expand?.patient;
+                const patientName: string = patient?.full_name ?? "Patient";
+                const { day, time } = formatConsultationDate(consult.scheduled_at);
+                const colors = avatarColors(patientName);
+                return (
+                  <TouchableOpacity
+                    key={consult.id}
+                    style={styles.consultationCard}
+                    activeOpacity={0.7}
+                  >
                     <View
                       style={[
-                        styles.avatarPlaceholder,
+                        styles.consultAvatar,
                         { backgroundColor: colors.bg },
                       ]}
                     >
                       <Text
-                        style={[styles.avatarInitials, { color: colors.text }]}
+                        style={[styles.consultAvatarText, { color: colors.text }]}
                       >
-                        {getInitials(name)}
+                        {getInitials(patientName)}
                       </Text>
                     </View>
-                  )}
-                </View>
-
-                {/* Content */}
-                <View style={styles.messageContent}>
-                  <View style={styles.messageHeaderRow}>
-                    <Text style={styles.messageName}>{name}</Text>
-                    <Text
-                      style={[
-                        styles.messageTime,
-                        unread > 0 && styles.messageTimeUnread,
-                      ]}
-                    >
-                      {timeStr}
-                    </Text>
-                  </View>
-                  <View style={styles.messageFooterRow}>
-                    <Text
-                      style={[
-                        styles.messagePreview,
-                        unread > 0 && styles.messagePreviewUnread,
-                      ]}
-                      numberOfLines={1}
-                    >
-                      {conv.last_message_preview || "No messages yet"}
-                    </Text>
-                    {unread > 0 && (
-                      <View style={styles.unreadBadge}>
-                        <Text style={styles.unreadBadgeText}>{unread}</Text>
+                    <View style={styles.consultationInfo}>
+                      <Text style={styles.consultationName}>{patientName}</Text>
+                      <Text style={styles.consultationType}>
+                        {consult.title ||
+                          CONSULTATION_TYPE_LABELS[consult.type] ||
+                          "Consultation"}
+                      </Text>
+                    </View>
+                    <View style={styles.consultationTime}>
+                      <View style={styles.consultTimeBlock}>
+                        <Text style={styles.consultTimeDay}>{day}</Text>
+                        <Text style={[styles.consultTimeHour, { color: Colors.info["200"] }]}>
+                          {time}
+                        </Text>
                       </View>
-                    )}
-                  </View>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
+        </>
       )}
 
       <View style={{ height: 40 }} />
