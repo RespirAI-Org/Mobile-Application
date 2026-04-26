@@ -114,6 +114,27 @@ export const notificationService = {
     }
   },
 
+  async createNotification(data: {
+    user: string;
+    type: NotificationRecord["type"];
+    title: string;
+    body: string;
+    link?: string;
+  }): Promise<{ success: boolean; data?: NotificationRecord; error?: string }> {
+    try {
+      const record = await pb
+        .collection("notifications")
+        .create<NotificationRecord>({ read: false, link: "", ...data });
+      return { success: true, data: record };
+    } catch (error: any) {
+      console.error("[NotificationService] Create Error:", error.message);
+      return {
+        success: false,
+        error: error.message || "An error occurred while creating the notification.",
+      };
+    }
+  },
+
   async deleteNotification(
     id: string,
   ): Promise<{ success: boolean; error?: string }> {

@@ -101,7 +101,7 @@ const CONSULTATION_TYPE_LABELS: Record<ConsultationRecord["type"], string> = {
   follow_up: "Follow-up",
 };
 
-type ActiveTab = "messages" | "consultant";
+type ActiveTab = "messages" | "consultation";
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
@@ -220,11 +220,11 @@ export default function DoctorMessagesScreen() {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === "consultant" && styles.activeTab]}
-          onPress={() => setActiveTab("consultant")}
+          style={[styles.tab, activeTab === "consultation" && styles.activeTab]}
+          onPress={() => setActiveTab("consultation")}
         >
-          <Text style={activeTab === "consultant" ? styles.activeTabText : styles.inactiveTabText}>
-            Consultant
+          <Text style={activeTab === "consultation" ? styles.activeTabText : styles.inactiveTabText}>
+            Consultation
           </Text>
         </TouchableOpacity>
       </View>
